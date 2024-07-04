@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin
+@CrossOrigin("*")
 public class RegistrationController {
 
      private RegistrationService registrationService;
