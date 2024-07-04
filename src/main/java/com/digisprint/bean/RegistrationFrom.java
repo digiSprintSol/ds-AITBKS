@@ -22,7 +22,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "registration_from")
+@Document(collection = "user_details")
 public class RegistrationFrom {
 
 	@Id
@@ -66,19 +66,21 @@ public class RegistrationFrom {
 	@NotNull(message="Requried")
 	private String spouseName;
 	
+	private String password;
+	
+	private String confrimPassowrd;
+	
 	private List<Childern> childern;
 
 	private List<Address> address;
 
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	@Size(min=16, max=16, message="aadharCard")
 	private String aadharCard;
 
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	@Size(min=10, max=10, message="voterIdCard")
 	private String voterIdCard;
+	
+	private String casteCeritificate;
+	
+	private String profilePic;
 
 	private boolean isMemberOfOtherCommunity;
 
@@ -106,6 +108,8 @@ public class RegistrationFrom {
 	private boolean stageOneApproved;
 	
 	private boolean stageTwoApproved;
+	
+	private boolean userRegistered;
 
 	
 	
