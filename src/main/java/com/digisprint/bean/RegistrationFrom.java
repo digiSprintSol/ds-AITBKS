@@ -13,105 +13,96 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 @Document(collection = "user_details")
 public class RegistrationFrom {
 
 	@Id
 	private String userId;
+	
+	private String profilePic;  //*
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String name;
+	private String fullName; //*
 
-	private LocalDateTime dob;
+	private LocalDateTime dateOfBirth; //*
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String gender;
+	private String gender; //(it should be dropdrown)
+
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String category; //(it should be dropdrown nameOfCommunity) //*
+
+	private List<Address> address; //*
 
 	@Email
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String emailAddress;
+	private String emailAddress; //*
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
 	@Size(min=10, max=10, message="PhoneNumber")
-	private String mobileNumber;
+	private String mobileNumber; //*
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String education;
-
+	private String education;//(it should be dropdrown) //*
+ 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String profession;
+	private String profession; //(it should be dropdrown) if others -user should type  //*
 
-	private boolean isMarried;
-	
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	private String parentName;
-	
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	private String spouseName;
-	
-	private String password;
-	
-	private String confrimPassowrd;
-	
-	private List<Childern> childern;
+	private FamilyDetails familyDetails; //*
 
-	private List<Address> address;
-
-	private String aadharCard;
+	private String aadharCard; //*
 
 	private String voterIdCard;
-	
-	private String casteCeritificate;
-	
-	private String profilePic;
 
-	private boolean isMemberOfOtherCommunity;
+	private String occupation; //*
 
+	private String password;
+
+	private String confrimPassowrd; //(forgot password)
+
+	private String brieflyTellAboutYourself; 
+	
+	private String reasonToJoinAITBKS; 
+	
+	private String reference1; //store member id //*
+	
+	private String reference2; //*
+	
+	private boolean requestForMembershipApplicationFromDeclaration;
+	
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String nameOfCommunity;
-
-	private Category category;
-	
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	private String categoryOfMembership;
+	private String categoryOfMembership; //it should be button trustee/patron/life member 
 
 	@CreatedDate
 	private LocalDateTime createdDate;	
 
 	private LocalDateTime lastModifiedDate;
 	
-	private PaymentInfo paymentInfo;
+	private String nativePlace; //R3
 	
-	private boolean stageOneApproval;
+	private String status; //from R1
 	
-	private boolean stageTwoApproval;
+	private boolean isApplicationForMembershipDeclaration; //R3
 	
-	private boolean stageOneApproved;
-	
-	private boolean stageTwoApproved;
-	
-	private boolean userRegistered;
+	private boolean isMemberOfOtherCommunity; //R3
+
+	private PaymentInfo paymentInfo; //R3
 
 	
-	
+
 
 }

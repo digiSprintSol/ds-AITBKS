@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,16 +15,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.service.RegistrationService;
 
 @Service
 public class RegistrationServiceImpl  implements RegistrationService{
 
-	
 	private RegistrationFromRepository registrationFromRepository;
-	
+
 	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
@@ -73,7 +75,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 //	            return originalFileName + " This file type is invalid, Only PDF files are allowed.";
 //	        }
 
-	        String newFileName = user_from.getName()+ "_" + fileType
+	        String newFileName = user_from.getFullName() + "_" + fileType
 	                + "_"
 	                + formattedDate.replace(",", "-") + extension;
 
@@ -87,9 +89,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	            break;
 	        case "VOTERIDCARD":
 	        	user_from.setVoterIdCard(newFileName);
-	            break;
-	        case "CASTECERTIFICATE":
-	        	user_from.setCasteCeritificate(newFileName);
 	            break;
 	        case "PROFILEPIC":
 	        	user_from.setProfilePic(newFileName);
@@ -140,5 +139,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		    return "Vendor not found with ID: " + userRegister;
 	}
 
+
+	
 
 }

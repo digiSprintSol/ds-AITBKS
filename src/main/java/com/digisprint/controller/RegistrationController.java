@@ -38,10 +38,10 @@ public class RegistrationController {
 
 	@Operation(summary = "This method is used to upload files for user, aadhar, voter id and caste certificate and profile")
 	@PostMapping(value = "/uploadByUserId/{userId}", consumes = { "multipart/form-data" })
-	public String uploadFile(@PathVariable String userId, @RequestParam("aadharCard") MultipartFile aadharCard,
-			@RequestParam("voterIdCard") MultipartFile voterIdCard,
-			@RequestParam("profilePic") MultipartFile profilePic,
-			@RequestParam("casteCertificate") MultipartFile casteCertificate ) throws Exception {
+	public String uploadFile(@PathVariable String userId, @RequestParam(name="aadharCard",required =false) MultipartFile aadharCard,
+			@RequestParam(name="voterIdCard",required =false) MultipartFile voterIdCard,
+			@RequestParam(name="profilePic",required =false) MultipartFile profilePic,
+			@RequestParam(name="casteCertificate",required =false) MultipartFile casteCertificate ) throws Exception {
 		return registrationService.upload(userId, aadharCard, voterIdCard, profilePic , casteCertificate);
 	} 
 	
@@ -50,4 +50,11 @@ public class RegistrationController {
 	public ResponseEntity getAllRegisteredUsers() {
 		return registrationService.getAllRegisteredUsers();
 	}
+	
+	@PostMapping()
+	public String login(@RequestParam String userName, @RequestParam String password) {
+		
+		return "logging";
+	}
+	
 }

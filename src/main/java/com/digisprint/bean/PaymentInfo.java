@@ -13,12 +13,10 @@ import lombok.Data;
 public class PaymentInfo {
 
 	@Id
-	private Long paymentId;
+	private String trasactionId;
 	
 	private String amountPaid;
-	
-	private String chequeNumber;
-	
+		
 	private Date transactionDate;
 	
 	private String paymentDetailDocument;

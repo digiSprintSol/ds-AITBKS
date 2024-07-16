@@ -36,6 +36,9 @@ public class Address {
 	private LocalDateTime lastModifiedDate;
 
 	private boolean defaultAddress;
+	
+	private String addressType; //office current permanent
+	
 
 
 }

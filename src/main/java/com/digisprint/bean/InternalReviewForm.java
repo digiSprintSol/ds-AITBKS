@@ -13,22 +13,13 @@ import lombok.Data;
 @Document(collection= "internal_review_from")
 public class InternalReviewForm {
 	
-	@Id
-	private Long id;
+	private String userId; //after approval from committe user id should set to this table.
 
-	private boolean isTrustee;
+	private String categoryOfMemberShip; // should look like recommend
 
-	private boolean isPatron;
+	private String committeeRemarks;
 	
-	private boolean isLifeMember;
-	
-	private boolean approvedByPersident;
-	
-	private boolean approvedBySecretary;
-	
-	private boolean approvedByChairman;
-	
-	private boolean approvedByMembers;
+	private String internalReviewForMemberAdmissionStatus;
 	
 	private LocalDateTime approvedOn;
 	

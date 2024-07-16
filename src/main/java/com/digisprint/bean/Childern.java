@@ -7,9 +7,6 @@ import lombok.Data;
 
 @Data
 public class Childern {
-	
-	@Id
-	private Long id;
 
 	private String name;
 
@@ -18,6 +15,8 @@ public class Childern {
 	private String profession;
 	
 	private String isMarried;
+	
+	private String childAge;
 	
 	
 }
