@@ -14,11 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.service.RegistrationService;
+import com.digisprint.utils.ApplicationConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping(ApplicationConstants.USER_API)
 @CrossOrigin("*")
 public class RegistrationController {
 
@@ -38,7 +39,7 @@ public class RegistrationController {
 
 	@Operation(summary = "This method is used to upload files for user, aadhar, voter id and caste certificate and profile")
 	@PostMapping(value = "/uploadByUserId/{userId}", consumes = { "multipart/form-data" })
-	public String uploadFile(@PathVariable String userId, @RequestParam(name="aadharCard",required =false) MultipartFile aadharCard,
+	public ResponseEntity uploadFile(@PathVariable String userId, @RequestParam(name="aadharCard",required =false) MultipartFile aadharCard,
 			@RequestParam(name="voterIdCard",required =false) MultipartFile voterIdCard,
 			@RequestParam(name="profilePic",required =false) MultipartFile profilePic,
 			@RequestParam(name="casteCertificate",required =false) MultipartFile casteCertificate ) throws Exception {

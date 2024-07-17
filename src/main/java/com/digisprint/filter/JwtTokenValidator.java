@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.repository.AccessBeanRepository;
+import com.digisprint.utils.ApplicationConstants;
+import com.digisprint.utils.ErrorResponseConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
@@ -60,21 +62,21 @@ public class JwtTokenValidator implements Filter {
 	        log.debug("Custom Filter - doFilter");
 	        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 	        HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-	        httpServletResponse.setHeader("Access-Control-Allow-Origin", "*");
+	        httpServletResponse.setHeader(ApplicationConstants.ALLOW_CROS_ORIGIN, ApplicationConstants.ALLOW_ORIGINS);
 
-	        String token = httpServletRequest.getHeader("token");
+	        String token = httpServletRequest.getHeader(ApplicationConstants.TOKEN);
 	        if (token != null && !isExcludedPath(httpServletRequest.getRequestURI())) {
 	            try {
 	            	jwtTokenUtil.decodeUserToken(token);
 
 	                chain.doFilter(request, response);
 	            } catch (Exception e) {
-	                handleUnauthorized(httpServletResponse, "Invalid token: " + e.getMessage());
+	                handleUnauthorized(httpServletResponse, ErrorResponseConstants.INVALID_TOKEN+ e.getMessage());
 	            }
 	        } else if (isExcludedPath(httpServletRequest.getRequestURI())) {
 	            chain.doFilter(request, response);
 	        } else {
-	            handleUnauthorized(httpServletResponse, "Token is missing");
+	            handleUnauthorized(httpServletResponse, ErrorResponseConstants.TOKEN_IS_MISSING);
 	        }
 	    }
 

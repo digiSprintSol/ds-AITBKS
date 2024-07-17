@@ -20,8 +20,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.digisprint.ApplicationConstants;
 import com.digisprint.service.JwtUserDetailsService;
+import com.digisprint.utils.ApplicationConstants;
 
 
 @Component
@@ -33,20 +33,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
-	
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
-System.out.println("hitting filter class");
-		final String requestTokenHeader = request.getHeader("token");
-System.out.println("token"+requestTokenHeader);
+		final String requestTokenHeader = request.getHeader(ApplicationConstants.TOKEN);
 		String username = null;
 		String jwtToken = null;
 		if (requestTokenHeader != null ) {
 			jwtToken =requestTokenHeader;
 			try {
 				username = jwtTokenUtil.getUserName(jwtToken);
-				System.out.println("username------ "+username);
 			} catch (Exception e) {
 			} 
 		}
@@ -58,7 +55,7 @@ System.out.println("token"+requestTokenHeader);
 
 			List<Object> accessList = jwtTokenUtil.getAccessList(jwtToken);
 			List<GrantedAuthority> authoritiesList = new ArrayList<GrantedAuthority>();
-			
+
 			for(Object access: accessList)
 			{
 				GrantedAuthority authority = null;
@@ -76,21 +73,20 @@ System.out.println("token"+requestTokenHeader);
 				{
 					authority = new SimpleGrantedAuthority(ApplicationConstants.COMMITEE);
 				}
-				
+
 				authoritiesList.add(authority);	
 			}
-			
+
 			// if token is valid configure Spring Security to manually set
 			// authentication
 
 			UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
 					userDetails, null, authoritiesList);
 			usernamePasswordAuthenticationToken
-					.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			// After setting the Authentication in the context, we specify
 			// that the current user is authenticated. So it passes the
 			// Spring Security Configurations successfully.
-			System.out.println("came to end of the request filter class");
 			SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 		}
 		chain.doFilter(request, response);

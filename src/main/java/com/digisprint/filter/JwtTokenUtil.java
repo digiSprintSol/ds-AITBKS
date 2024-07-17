@@ -26,7 +26,6 @@ public class JwtTokenUtil {
 		Base64.Decoder decoder = Base64.getUrlDecoder();
 		String body = new String(decoder.decode(chunks[1]));
 		JSONObject jsonObject = new JSONObject(body);
-		System.out.println("======================jsonObject===============      29   "+jsonObject);
 		return jsonObject;
 	}
 	

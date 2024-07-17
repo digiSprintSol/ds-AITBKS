@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.service.AccessBeanService;
+import com.digisprint.utils.ApplicationConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/internalUsers")
+@RequestMapping(ApplicationConstants.INTERNAL_USERS)
+@Tag(name= ApplicationConstants.ROLE_MANAGEMENT)
 @CrossOrigin("*")
 public class AccessBeanController {
 

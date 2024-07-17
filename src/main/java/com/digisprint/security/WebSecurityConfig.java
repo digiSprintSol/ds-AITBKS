@@ -14,8 +14,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.digisprint.ApplicationConstants;
 import com.digisprint.filter.JwtRequestFilter;
+import com.digisprint.utils.ApplicationConstants;
 
 
 @Configuration

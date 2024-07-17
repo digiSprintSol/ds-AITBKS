@@ -12,6 +12,6 @@ import com.digisprint.bean.RegistrationFrom;
 public interface RegistrationService {
 
 	RegistrationFrom registerUser(RegistrationFrom from);
-	String upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic, MultipartFile casteCertificate)throws Exception;
+	ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic, MultipartFile casteCertificate)throws Exception;
 	ResponseEntity getAllRegisteredUsers();
 }
