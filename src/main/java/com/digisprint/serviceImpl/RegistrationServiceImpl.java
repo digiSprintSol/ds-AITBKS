@@ -15,12 +15,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.digisprint.EmailUtils.EmailService;
+import com.digisprint.EmailUtils.EmailTemplates;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
+import com.digisprint.utils.EmailConstants;
 import com.digisprint.utils.ErrorResponseConstants;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,31 +33,44 @@ import lombok.extern.slf4j.Slf4j;
 public class RegistrationServiceImpl  implements RegistrationService{
 
 	private RegistrationFromRepository registrationFromRepository;
+	
+	private EmailService email;
+	
+	private EmailTemplates emailTemplates;
 
-	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository) {
+	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,EmailService email,
+			EmailTemplates emailTemplates) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
+		this.email = email;
+		this.emailTemplates = emailTemplates;
 	}
 
 	@Value("${spring.wrapper.uploadFiles}")
 	public String UPLOAD_DIR;
 
 	@Override
-	public RegistrationFrom registerUser(RegistrationFrom from) {
+	public RegistrationFrom registerUser(RegistrationFrom registrationForm) {
 		File vendorsFolder = new File(UPLOAD_DIR);
 
 		if (!vendorsFolder.exists()) {
 			vendorsFolder.mkdir();
 		}
 
-		String vendorFolderPath = UPLOAD_DIR + ApplicationConstants.DOUBLE_SLASH + from.getUserId();
+		String vendorFolderPath = UPLOAD_DIR + ApplicationConstants.DOUBLE_SLASH + registrationForm.getUserId();
 		File vendorFolder = new File(vendorFolderPath);
 
 		if (!vendorFolder.exists()) {
 			vendorFolder.mkdir();
 		}
-		registrationFromRepository.save(from);
-		return from;
+		
+		String body = emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom()
+				.replaceAll("[NAME]", registrationForm.getFullName());
+		
+		email.MailSendingService("allindiatelagabalijakapusangam@gmail.com", "sriramsphere@gmail.com", body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+		
+		registrationFromRepository.save(registrationForm);
+		return registrationForm;
 	}
 
 	@Override

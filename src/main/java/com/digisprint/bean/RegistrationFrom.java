@@ -3,9 +3,11 @@ package com.digisprint.bean;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -25,67 +27,97 @@ public class RegistrationFrom {
 	@Id
 	private String userId;
 	
-	private String profilePic;  //*
+	/**
+	 * PERSONAL DETAILS
+	 */
+	@NotEmpty(message="Please, do give your profile photo")
+	@NotNull(message="Requried")
+	private String profilePic;
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String fullName; //*
+	private String fullName;
 
-	private LocalDateTime dateOfBirth; //*
-
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	private String gender; //(it should be dropdrown)
+	@NotNull(message="Required")
+    @Past(message="Date of birth must be in the past")
+	private LocalDateTime dateOfBirth;
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String category; //(it should be dropdrown nameOfCommunity) //*
+	private String gender; //{DROPDOWN}
 
-	private List<Address> address; //*
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String category; //{DROPDOWN}
+
+	/**
+	 * PRESENT ADDRESS
+	 */
+	private List<Address> address;
 
 	@Email
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String emailAddress; //*
+	private String emailAddress;
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
 	@Size(min=10, max=10, message="PhoneNumber")
-	private String mobileNumber; //*
+	private String mobileNumber;
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String education;//(it should be dropdrown) //*
- 
+	private String education;//{DROPDOWN}
+
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String profession; //(it should be dropdrown) if others -user should type  //*
+	private String profession; //{DROPDOWN}
 
-	private FamilyDetails familyDetails; //*
+	/**
+	 * FAMILY DETAILS
+	 */
+	private FamilyDetails familyDetails;
 
-	private String aadharCard; //*
+	/**
+	 * IDENTITY DETAILS
+	 */
+	private String aadharCard;
 
 	private String voterIdCard;
 
-	private String occupation; //*
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String occupation;
 
-	private String password;
-
-	private String confrimPassowrd; //(forgot password)
-
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
 	private String brieflyTellAboutYourself; 
-	
+
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
 	private String reasonToJoinAITBKS; 
-	
-	private String reference1; //store member id //*
-	
-	private String reference2; //*
-	
-	private boolean requestForMembershipApplicationFromDeclaration;
+
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String reference1;
+
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String reference2;
 	
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String categoryOfMembership; //it should be button trustee/patron/life member 
+	private String categoryOfMembership;
+
+	/**
+	 * DECLERATION
+	 */
+	@AssertTrue(message="Membership application must be requested")
+	private boolean requestForMembershipApplicationFromDeclaration;	
+
+	private String password;
+
+	private String confrimPassowrd;
 
 	@CreatedDate
 	private LocalDateTime createdDate;	
