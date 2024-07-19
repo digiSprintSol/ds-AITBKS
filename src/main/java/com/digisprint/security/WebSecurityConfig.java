@@ -37,6 +37,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		auth.userDetailsService(jwtUserDetailsService);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -51,35 +52,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		 * legitimate website.Setting the SameSite attribute for cookies to restrict their usage to same-site requests 
 		 * only. We don't need this as of now, that's the reason this is setup to disable.
 		 */
-//		httpSecurity.csrf().disable();
-		System.out.println("fromweb security+hitting this class");
+		httpSecurity.csrf().disable();
 		httpSecurity
 				.authorizeRequests()
-//				.antMatchers("/login","/loginWithToken").permitAll()
+				.antMatchers("/login","/loginWithToken").permitAll()
 				.antMatchers("/actuator/**").permitAll()
-				.antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//				.antMatchers(HttpMethod.GET, "/admins").permitAll()
-//				.antMatchers(HttpMethod.GET, "/superAdmins").permitAll()
-				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").permitAll()
-//				.antMatchers(HttpMethod.GET,"/user/[A-Za-z0-9-]+$").permitAll()
 				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT,ApplicationConstants.USER)
 				.antMatchers(HttpMethod.GET,"/user/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT, ApplicationConstants.USER)
-//				.antMatchers(HttpMethod.GET,"/project/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.AUTHORITY_SUPER_ADMIN,ApplicationConstants.AUTHORITY_ADMIN, ApplicationConstants.AUTHORITY_HR, ApplicationConstants.AUTHORITY_MANAGER)
-//				.antMatchers(HttpMethod.GET,"/superAdmin/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.AUTHORITY_SUPER_ADMIN)
-//				.antMatchers(HttpMethod.GET,"/graphDashboard/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.AUTHORITY_SUPER_ADMIN,ApplicationConstants.AUTHORITY_ADMIN, ApplicationConstants.AUTHORITY_HR, ApplicationConstants.AUTHORITY_MANAGER)
-//				.antMatchers(HttpMethod.GET,"/leaveManagement/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.AUTHORITY_SUPER_ADMIN,ApplicationConstants.AUTHORITY_ADMIN, ApplicationConstants.AUTHORITY_HR, ApplicationConstants.AUTHORITY_MANAGER)
-//				.antMatchers(HttpMethod.GET,"/hrLetters/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.AUTHORITY_SUPER_ADMIN,ApplicationConstants.AUTHORITY_ADMIN, ApplicationConstants.AUTHORITY_HR, ApplicationConstants.AUTHORITY_MANAGER)
 				/**
 				 * All other requests will be authenticated here
 				 */
 				.anyRequest() .authenticated()
 				.and().
-
 				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		/* Adding a filter to validate the tokens with every request */
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		System.out.println("Added filter");
 	}
 	
 }

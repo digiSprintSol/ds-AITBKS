@@ -47,6 +47,8 @@ public class ApplicationConstants {
 	public static final String NONE = "none";
 
 	public static final String TOKEN = "token";
+	
+	public static final String AUTH_TOKEN = "Auth token";
 
 	public static final String USER_NOT_FOUND_WITH_USERNAME =  "User not found with username: ";
 
@@ -55,5 +57,15 @@ public class ApplicationConstants {
 	public static final String ALLOW_CROS_ORIGIN = "Access-Control-Allow-Origin";
 	
 	public static final String ALLOW_ORIGINS = "*";
+	
+	public static final String ACCESS = "access";
+	
+	public static final String LOGIN = "login";
+	
+	public static final String SWAGGER = "swagger";
+	
+	public static final String API_DOCS	= "api-docs";
+	
+	public static final String ACTUATOR = "actuator";
 
 }

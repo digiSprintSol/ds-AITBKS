@@ -52,10 +52,4 @@ public class RegistrationController {
 		return registrationService.getAllRegisteredUsers();
 	}
 	
-	@PostMapping()
-	public String login(@RequestParam String userName, @RequestParam String password) {
-		
-		return "logging";
-	}
-	
 }

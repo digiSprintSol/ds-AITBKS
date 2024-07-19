@@ -20,5 +20,7 @@ public class ErrorResponseConstants {
 	
 	public static final String TOKEN_IS_MISSING = "Token is missing";
 	
+	public static final String NOT_AUTHORISED = "Not Authorised to use the request";
 	
+	public static final String USER_ALREADY_LOGGEDIN = "User is already loggedIn";
 }

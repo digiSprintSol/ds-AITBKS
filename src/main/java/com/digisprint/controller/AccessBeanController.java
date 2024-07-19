@@ -1,5 +1,7 @@
 package com.digisprint.controller;
 
+import java.util.concurrent.CompletableFuture;
+
 import javax.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
@@ -21,21 +24,20 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping(ApplicationConstants.INTERNAL_USERS)
+//@RequestMapping(ApplicationConstants.INTERNAL_USERS)
 @Tag(name= ApplicationConstants.ROLE_MANAGEMENT)
 @CrossOrigin("*")
 public class AccessBeanController {
 
 	private AccessBeanService accessBeanService;
-
+	
 	public AccessBeanController(AccessBeanService accessBeanService) {
 		super();
 		this.accessBeanService = accessBeanService;
 	}
-	
-	
+
 	@Operation(summary = "Method Used for LogIn")
-	@PostMapping(value = "/login")
+	@PostMapping("/login")
 	String login(@RequestParam String userName, @RequestParam String password) {
 		return accessBeanService.login(userName, password);
 	}
@@ -70,5 +72,4 @@ public class AccessBeanController {
 		return accessBeanService.softDeleteInternalUsers(id);
 	}
 	
-
 }

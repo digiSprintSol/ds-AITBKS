@@ -40,6 +40,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		final String requestTokenHeader = request.getHeader(ApplicationConstants.TOKEN);
 		String username = null;
 		String jwtToken = null;
+		
 		if (requestTokenHeader != null ) {
 			jwtToken =requestTokenHeader;
 			try {
