@@ -9,4 +9,6 @@ import com.digisprint.bean.RegistrationFrom;
 
 public interface RegistrationFromRepository extends MongoRepository<RegistrationFrom, String> {
 
+	RegistrationFrom findByPhoneNumber(String phoneNumber);
+	
 }

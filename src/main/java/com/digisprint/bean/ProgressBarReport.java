@@ -14,6 +14,8 @@ public class ProgressBarReport {
 	
 	private boolean committeeApproval;
 	
+	private boolean presidentFillingRegistrationTwoForm;
+	
 	private boolean presidentApproval;
 	
 	private boolean registrationThreeFormCompleted;

@@ -8,7 +8,10 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +26,8 @@ import com.digisprint.EmailUtils.EmailTemplates;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.exception.UserNotFoundException;
+import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
@@ -134,6 +139,10 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 		return null;
 	}
+	
+	public JSONObject decodeToken(String jwtToken) {
+		return JwtTokenUtil.decodeUserToken(jwtToken);
+	}
 
 	@Override
 	public ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic,MultipartFile casteCertificate) throws Exception {
@@ -167,6 +176,70 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 
 		return new ResponseEntity(ErrorResponseConstants.USER_NOT_FOUND + userRegister,HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@Override
+	public void committeePresidentAccountantApproval(String token, String phoneNumber, String statusOfApproval) throws Exception {
+	    try {
+	        JSONObject jsonObject = decodeToken(token);
+	        String identityNumber = jsonObject.getString("id");
+	        String userType = jsonObject.getString("type");
+
+	        RegistrationFrom specificUserDetails = registrationFromRepository.findByPhoneNumber(phoneNumber);
+	        if (specificUserDetails == null) {
+	            throw new UserNotFoundException("User with phone number " + phoneNumber + " not found.");
+	        }
+
+	        Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
+	        if (!optionalProgressBarReport.isPresent()) {
+	            throw new Exception("Progress bar report for user id " + specificUserDetails.getUserId() + " not found.");
+	        }
+
+	        ProgressBarReport progressBarReport = optionalProgressBarReport.get();
+
+	        if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
+	            if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
+	                if (statusOfApproval.equals("APPROVAL")) {
+	                    progressBarReport.setCommitteeApproval(true);
+	                    // send approval mail
+	                } else {
+	                    progressBarReport.setCommitteeApproval(false);
+	                    // send disapproval mail
+	                }
+	            } else {
+	                throw new Exception("Registration form one is not completed.");
+	            }
+	        } else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+	            if (progressBarReport.isCommitteeApproval() && progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
+	                progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+	                // send approval mail
+	            } else {
+	                progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+	                // send disapproval mail
+	            }
+	        } else if (userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
+	            if (progressBarReport.isCommitteeApproval() && progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+	                && progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
+	                && progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
+	                progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
+	                // generate member id --> utils.generate member id
+	                // send congratulations mail
+	            } else {
+	                throw new Exception("All required conditions are not met for accountant acknowledgment.");
+	            }
+	        } else {
+	            throw new Exception("User type " + userType + " is not authorized for this operation.");
+	        }
+	        
+	        progressBarRepository.save(progressBarReport);
+
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	        throw new Exception("Error parsing token: " + e.getMessage());
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new Exception("Error in approval process: " + e.getMessage());
+	    }
 	}
 
 	
