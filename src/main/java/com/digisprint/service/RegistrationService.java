@@ -2,6 +2,7 @@ package com.digisprint.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,5 +16,5 @@ public interface RegistrationService {
 	
 	ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic, MultipartFile casteCertificate)throws Exception;
 		
-	ResponseEntity getAllRegisteredUsers();
+	Page<RegistrationFrom> getAllRegisteredUsers(int page, int size);
 }

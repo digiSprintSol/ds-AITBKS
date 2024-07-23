@@ -104,9 +104,7 @@ public class RegistrationFrom {
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
 	private String reference2;
-	
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
+
 	private String categoryOfMembership;
 
 	/**
@@ -133,8 +131,6 @@ public class RegistrationFrom {
 	private boolean isMemberOfOtherCommunity; //R3
 
 	private PaymentInfo paymentInfo; //R3
-
-	
 
 
 }

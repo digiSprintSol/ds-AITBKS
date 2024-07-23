@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,13 +21,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
 import com.digisprint.bean.AccessBean;
+import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.repository.AccessBeanRepository;
+import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
 import com.digisprint.utils.ErrorResponseConstants;
+import com.digisprint.utils.RegistrationFormConstants;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,20 +40,26 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	private RegistrationFromRepository registrationFromRepository;
 	
+	private ProgressBarRepository progressBarRepository;
+	
 	private EmailService email;
 	
 	private EmailTemplates emailTemplates;
 
 	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,EmailService email,
-			EmailTemplates emailTemplates) {
+			EmailTemplates emailTemplates, ProgressBarRepository progressBarRepository) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
 		this.email = email;
 		this.emailTemplates = emailTemplates;
+		this.progressBarRepository = progressBarRepository;
 	}
 
 	@Value("${spring.wrapper.uploadFiles}")
 	public String UPLOAD_DIR;
+	
+	@Value("${spring.mail.username}")
+	public String ADMIN_USERNAME;
 
 	@Override
 	public RegistrationFrom registerUser(RegistrationFrom registrationForm) {
@@ -67,21 +79,21 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		String body = emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom()
 				.replaceAll("[NAME]", registrationForm.getFullName());
 		
-		email.MailSendingService("allindiatelagabalijakapusangam@gmail.com", "sriramsphere@gmail.com", body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+		email.MailSendingService(ADMIN_USERNAME, registrationForm.getEmailAddress() , body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+		
+		ProgressBarReport progressBarReport = new ProgressBarReport();
+		progressBarReport.setUserId(registrationForm.getUserId());
+		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
+		progressBarRepository.save(progressBarReport);
 		
 		registrationFromRepository.save(registrationForm);
 		return registrationForm;
 	}
 
 	@Override
-	public ResponseEntity getAllRegisteredUsers() {
-		List<RegistrationFrom> registrationFromList= registrationFromRepository.findAll();
-		if(registrationFromList ==null) {
-			return new ResponseEntity(ErrorResponseConstants.NO_USERS_FOUND,HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		else {
-			return new ResponseEntity(registrationFromList,HttpStatus.OK);
-		}
+	public Page<RegistrationFrom> getAllRegisteredUsers(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		return registrationFromRepository.findAll(pageable);
 	}
 
 
@@ -157,7 +169,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		return new ResponseEntity(ErrorResponseConstants.USER_NOT_FOUND + userRegister,HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-
-
+	
 
 }

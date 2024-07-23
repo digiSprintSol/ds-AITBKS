@@ -1,5 +1,6 @@
 package com.digisprint.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -48,8 +49,9 @@ public class RegistrationController {
 	
 	@Operation(summary= "This method is used to get all users ")
 	@GetMapping(value="/getAllUsers")
-	public ResponseEntity getAllRegisteredUsers() {
-		return registrationService.getAllRegisteredUsers();
+	public Page<RegistrationFrom> getAllRegisteredUsers( @RequestParam(defaultValue = "0") int page,
+			 @RequestParam(defaultValue = "10") int size) {
+		return registrationService.getAllRegisteredUsers(page,size);
 	}
 	
 }
