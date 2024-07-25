@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
@@ -52,6 +53,27 @@ public class RegistrationController {
 	public Page<RegistrationFrom> getAllRegisteredUsers( @RequestParam(defaultValue = "0") int page,
 			 @RequestParam(defaultValue = "10") int size) {
 		return registrationService.getAllRegisteredUsers(page,size);
+	}
+	
+	@Operation(summary="")
+	@PostMapping(value="/approval/{token}/{phoneNumber}/{statusOfApproval}")
+	public void committeePresidentAccountantApproval(@RequestParam(value="token") String token,
+			@RequestParam(value="phoneNumber") String phoneNumber,@RequestParam(value="statusOfApproval") String statusOfApproval) throws Exception {
+		 registrationService.committeePresidentAccountantApproval(token, phoneNumber, statusOfApproval);
+	}
+	
+	@Operation(summary="")
+	@PostMapping(value="/progressBar/{id}")
+	public ProgressBarReport progressBarForAUser(@RequestParam(value="id") String id) {
+		return registrationService.progressBarForAUser(id);
+	}
+	
+	@Operation(summary="")
+	@PostMapping(value="/registrationThreeForm/{applicantId}/{isMemberOfOtherCommunity}/{isDecleration}/{nativePlace}")
+	public RegistrationFrom userFillingRegistrationThreeForm(@RequestParam(value="applicantId") String applicantId,
+			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
+			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
+		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
 	}
 	
 }

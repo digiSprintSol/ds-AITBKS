@@ -131,6 +131,19 @@ public class RegistrationFrom {
 	private boolean isMemberOfOtherCommunity; //R3
 
 	private PaymentInfo paymentInfo; //R3
-
+	
+	/**
+	 * MEMBERSHIP INFO
+	 */
+	
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String applicantChoosenMembership;
+	
+	private String committeeChoosenMembershipForApplicant;
+	
+	private String presidentChoosenMembershipForApplicant; //R2
+	
+	private String presidentRemarksForApplicant; //R2
 
 }

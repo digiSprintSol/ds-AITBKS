@@ -6,9 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,18 +24,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
-import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
-import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
 import com.digisprint.utils.ErrorResponseConstants;
+import com.digisprint.utils.GeneratingCredentials;
 import com.digisprint.utils.RegistrationFormConstants;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,25 +44,29 @@ import lombok.extern.slf4j.Slf4j;
 public class RegistrationServiceImpl  implements RegistrationService{
 
 	private RegistrationFromRepository registrationFromRepository;
-	
+
 	private ProgressBarRepository progressBarRepository;
-	
+
 	private EmailService email;
-	
+
 	private EmailTemplates emailTemplates;
 
+	private GeneratingCredentials generatingCredentials;
+
 	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,EmailService email,
-			EmailTemplates emailTemplates, ProgressBarRepository progressBarRepository) {
+			EmailTemplates emailTemplates, ProgressBarRepository progressBarRepository,
+			GeneratingCredentials generatingCredentials) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
 		this.email = email;
 		this.emailTemplates = emailTemplates;
 		this.progressBarRepository = progressBarRepository;
+		this.generatingCredentials = generatingCredentials;
 	}
 
 	@Value("${spring.wrapper.uploadFiles}")
 	public String UPLOAD_DIR;
-	
+
 	@Value("${spring.mail.username}")
 	public String ADMIN_USERNAME;
 
@@ -80,17 +84,17 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		if (!vendorFolder.exists()) {
 			vendorFolder.mkdir();
 		}
-		
+
 		String body = emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom()
 				.replaceAll("[NAME]", registrationForm.getFullName());
-		
+
 		email.MailSendingService(ADMIN_USERNAME, registrationForm.getEmailAddress() , body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
-		
+
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(registrationForm.getUserId());
 		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
 		progressBarRepository.save(progressBarReport);
-		
+
 		registrationFromRepository.save(registrationForm);
 		return registrationForm;
 	}
@@ -139,11 +143,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 		return null;
 	}
-	
+
 	public JSONObject decodeToken(String jwtToken) {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic,MultipartFile casteCertificate) throws Exception {
 		RegistrationFrom userRegister = registrationFromRepository.findById(userId).orElseThrow(()-> new Exception(ErrorResponseConstants.USER_NOT_FOUND));
@@ -180,66 +185,186 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	@Override
 	public void committeePresidentAccountantApproval(String token, String phoneNumber, String statusOfApproval) throws Exception {
-	    try {
-	        JSONObject jsonObject = decodeToken(token);
-	        String identityNumber = jsonObject.getString("id");
-	        String userType = jsonObject.getString("type");
 
-	        RegistrationFrom specificUserDetails = registrationFromRepository.findByPhoneNumber(phoneNumber);
-	        if (specificUserDetails == null) {
-	            throw new UserNotFoundException("User with phone number " + phoneNumber + " not found.");
-	        }
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty");
+		}
+		if (phoneNumber == null || phoneNumber.isEmpty()) {
+			throw new IllegalArgumentException("Phone number cannot be null or empty");
+		}
+		if (statusOfApproval == null || statusOfApproval.isEmpty()) {
+			throw new IllegalArgumentException("Status of approval cannot be null or empty");
+		}
 
-	        Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
-	        if (!optionalProgressBarReport.isPresent()) {
-	            throw new Exception("Progress bar report for user id " + specificUserDetails.getUserId() + " not found.");
-	        }
+		JSONObject jsonObject = decodeToken(token);
+		if (!jsonObject.has("id") || !jsonObject.has("type")) {
+			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
+		}
 
-	        ProgressBarReport progressBarReport = optionalProgressBarReport.get();
+		String identityNumber = jsonObject.getString("id");
+		String userType = jsonObject.getString("type");
 
-	        if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
-	            if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
-	                if (statusOfApproval.equals("APPROVAL")) {
-	                    progressBarReport.setCommitteeApproval(true);
-	                    // send approval mail
-	                } else {
-	                    progressBarReport.setCommitteeApproval(false);
-	                    // send disapproval mail
-	                }
-	            } else {
-	                throw new Exception("Registration form one is not completed.");
-	            }
-	        } else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
-	            if (progressBarReport.isCommitteeApproval() && progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
-	                progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
-	                // send approval mail
-	            } else {
-	                progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
-	                // send disapproval mail
-	            }
-	        } else if (userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
-	            if (progressBarReport.isCommitteeApproval() && progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-	                && progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
-	                && progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
-	                progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
-	                // generate member id --> utils.generate member id
-	                // send congratulations mail
-	            } else {
-	                throw new Exception("All required conditions are not met for accountant acknowledgment.");
-	            }
-	        } else {
-	            throw new Exception("User type " + userType + " is not authorized for this operation.");
-	        }
-	        
-	        progressBarRepository.save(progressBarReport);
+		RegistrationFrom specificUserDetails = registrationFromRepository.findByPhoneNumber(phoneNumber);
+		if (specificUserDetails == null) {
+			throw new IllegalArgumentException("No user found with the provided phone number");
+		}
 
-	    } catch (JSONException e) {
-	        e.printStackTrace();
-	        throw new Exception("Error parsing token: " + e.getMessage());
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        throw new Exception("Error in approval process: " + e.getMessage());
-	    }
+		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
+		if (!optionalProgressBarReport.isPresent()) {
+			throw new IllegalArgumentException("No progress bar report found for the user");
+		}
+
+		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
+
+		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
+			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE &&
+					statusOfApproval.equals(RegistrationFormConstants.APPROVAL)) {
+				progressBarReport.setCommitteeApproval(true);
+
+				// Sending credentials to the Applicant as Committee approved.
+				String username = specificUserDetails.getEmailAddress();
+				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(), specificUserDetails.getMobileNumber());
+
+				// paste these username and passcode in the Email to be sent.
+
+			} else if (statusOfApproval.equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+				progressBarReport.setCommitteeApproval(false);
+
+				// rejection email, and inform that can get lucky when president approves
+
+			} else {
+				progressBarReport.setCommitteeApproval(false);
+
+				// waiting email
+			}
+		} else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+			if (specificUserDetails != null && progressBarReport != null && !progressBarReport.isCommitteeApproval()
+					&& !progressBarReport.isPresidentApproval()
+					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+					&& statusOfApproval.equals(RegistrationFormConstants.APPROVAL)
+					&& progressBarReport.isPresidentFillingRegistrationTwoForm() == true) {
+
+				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+				// mail regarding success
+
+			} else if (statusOfApproval.equals(RegistrationFormConstants.REJECTED)) {
+				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+				// rejection mail from president
+
+			} else {
+				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+				// waiting mail from president
+			}
+
+		} else if (userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
+			if (progressBarReport.isCommitteeApproval() && progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+					&& progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
+					&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
+
+				progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
+
+				String memberIdentityNumber = generatingCredentials.generateMemberId();
+				// send congratulations mail with generated memberID 
+
+			} else {
+				throw new IllegalArgumentException("All conditions for accountant approval are not met");
+			}
+
+		} else {
+			throw new Exception("You don't have access !!");
+		}
+
+		progressBarRepository.save(progressBarReport);
+
+	}
+
+	@Override
+	public ProgressBarReport progressBarForAUser(String id) {
+	
+		return progressBarRepository.findById(id).get();
+	}
+
+	@Override
+	public List<RegistrationFrom> committeePresidentAccountantViewListOfApplicants(String token) {
+		
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty");
+		}
+		
+		JSONObject jsonObject = decodeToken(token);
+		if (!jsonObject.has("id") || !jsonObject.has("type")) {
+			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
+		}
+		
+		String userType = jsonObject.getString("type");
+		
+		if(userType.equalsIgnoreCase(ApplicationConstants.COMMITEE) || userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+			return registrationFromRepository.findAll();
+		}else if(userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
+			return registrationFromRepository.findAll().stream()
+		            .filter(registrationForm -> registrationForm.getPaymentInfo() != null)
+		            .collect(Collectors.toList());
+		}else {
+			throw new IllegalArgumentException("Invalid user type");
+		}
+		
+	}
+
+	@Override
+	public RegistrationFrom presidentFillingRegistrationThreeForm(String token, String appicantId, String categoryOfMemberShipRecomendedByPresident, String remarks) {
+		
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty");
+		}
+		
+		JSONObject jsonObject = decodeToken(token);
+		if (!jsonObject.has("id") || !jsonObject.has("type")) {
+			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
+		}
+		
+		String userType = jsonObject.getString("type");
+		
+		if(userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+			RegistrationFrom form = registrationFromRepository.findById(appicantId).get();
+			
+			form.setPresidentChoosenMembershipForApplicant(categoryOfMemberShipRecomendedByPresident);
+			form.setPresidentRemarksForApplicant(remarks);
+			
+			registrationFromRepository.save(form);
+			
+		}else {
+			throw new IllegalArgumentException("Invalid access");
+		}
+		
+		return null;
+	}
+
+	@Override
+	public RegistrationFrom userFillingRegistrationThreeForm(String applicantId, boolean isMemberOfOtherCommunity
+			, boolean isDecleration, String nativePlace) {
+		
+		RegistrationFrom specificUserDetails = registrationFromRepository.findById(applicantId).get();
+		if (specificUserDetails == null) {
+			throw new IllegalArgumentException("No user found with the provided phone number");
+		}
+
+		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(applicantId);
+		if (!optionalProgressBarReport.isPresent()) {
+			throw new IllegalArgumentException("No progress bar report found for the user");
+		}
+
+		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
+		
+		specificUserDetails.setNativePlace(nativePlace);
+		specificUserDetails.setMemberOfOtherCommunity(isMemberOfOtherCommunity);
+		specificUserDetails.setApplicationForMembershipDeclaration(isDecleration);
+		
+		registrationFromRepository.save(specificUserDetails);
+		
+		progressBarReport.setRegistrationThreeFormCompleted(RegistrationFormConstants.TRUE);
+		progressBarRepository.save(progressBarReport);
+		
+		return specificUserDetails;
 	}
 
 	

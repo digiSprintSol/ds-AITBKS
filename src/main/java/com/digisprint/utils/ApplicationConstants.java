@@ -67,5 +67,6 @@ public class ApplicationConstants {
 	public static final String API_DOCS	= "api-docs";
 	
 	public static final String ACTUATOR = "actuator";
+	
 
 }
