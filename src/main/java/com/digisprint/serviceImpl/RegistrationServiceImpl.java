@@ -24,10 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
+import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
+import com.digisprint.repository.PaymentRepository;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.service.RegistrationService;
@@ -52,16 +54,19 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	private EmailTemplates emailTemplates;
 
 	private GeneratingCredentials generatingCredentials;
+	
+	private PaymentRepository paymentRepository;
 
 	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,EmailService email,
 			EmailTemplates emailTemplates, ProgressBarRepository progressBarRepository,
-			GeneratingCredentials generatingCredentials) {
+			GeneratingCredentials generatingCredentials,PaymentRepository paymentRepository) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
 		this.email = email;
 		this.emailTemplates = emailTemplates;
 		this.progressBarRepository = progressBarRepository;
 		this.generatingCredentials = generatingCredentials;
+		this.paymentRepository = paymentRepository;
 	}
 
 	@Value("${spring.wrapper.uploadFiles}")
@@ -104,8 +109,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		Pageable pageable = PageRequest.of(page, size);
 		return registrationFromRepository.findAll(pageable);
 	}
-
-
 
 	private String saveFileIfValid(MultipartFile file, String folderPath, RegistrationFrom user_from, String fileType,
 			String formattedDate) throws IOException {
@@ -184,7 +187,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public void committeePresidentAccountantApproval(String token, String phoneNumber, String statusOfApproval) throws Exception {
+	public void committeePresidentAccountantApproval(String token, String phoneNumber, String statusOfApproval, String remarks, String membership) throws Exception {
 
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
@@ -220,6 +223,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE &&
 					statusOfApproval.equals(RegistrationFormConstants.APPROVAL)) {
 				progressBarReport.setCommitteeApproval(true);
+				specificUserDetails.setCommitteeChoosenMembershipForApplicant(membership);
+				specificUserDetails.setCommitteeRemarksForApplicant(remarks);
 
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
@@ -245,6 +250,9 @@ public class RegistrationServiceImpl  implements RegistrationService{
 					&& progressBarReport.isPresidentFillingRegistrationTwoForm() == true) {
 
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+				// R2 --> set membership for user , remarks
+				specificUserDetails.setPresidentRemarksForApplicant(remarks);
+				specificUserDetails.setPresidentChoosenMembershipForApplicant(membership);
 				// mail regarding success
 
 			} else if (statusOfApproval.equals(RegistrationFormConstants.REJECTED)) {
@@ -274,6 +282,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			throw new Exception("You don't have access !!");
 		}
 
+		registrationFromRepository.save(specificUserDetails);
 		progressBarRepository.save(progressBarReport);
 
 	}
@@ -365,6 +374,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		progressBarRepository.save(progressBarReport);
 		
 		return specificUserDetails;
+	}
+
+	@Override
+	public Page<PaymentInfo> accountFirstView(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		return paymentRepository.findAll(pageable);
 	}
 
 	

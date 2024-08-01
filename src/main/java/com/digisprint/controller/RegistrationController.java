@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.service.RegistrationService;
@@ -58,8 +59,8 @@ public class RegistrationController {
 	@Operation(summary="")
 	@PostMapping(value="/approval/{token}/{phoneNumber}/{statusOfApproval}")
 	public void committeePresidentAccountantApproval(@RequestParam(value="token") String token,
-			@RequestParam(value="phoneNumber") String phoneNumber,@RequestParam(value="statusOfApproval") String statusOfApproval) throws Exception {
-		 registrationService.committeePresidentAccountantApproval(token, phoneNumber, statusOfApproval);
+			@RequestParam(value="phoneNumber") String phoneNumber,@RequestParam(value="statusOfApproval") String statusOfApproval, String remarks, String membership) throws Exception {
+		 registrationService.committeePresidentAccountantApproval(token, phoneNumber, statusOfApproval, remarks, membership);
 	}
 	
 	@Operation(summary="")
@@ -74,6 +75,13 @@ public class RegistrationController {
 			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
 			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
 		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
+	}
+	
+	@Operation(summary="")
+	@GetMapping(value="/accountantFirstView")
+	public Page<PaymentInfo> accountFirstView( @RequestParam(defaultValue = "0") int page,
+			 @RequestParam(defaultValue = "10") int size) {
+		return registrationService.accountFirstView(page, size);
 	}
 	
 }
