@@ -74,7 +74,7 @@ public class JwtTokenValidator implements Filter {
 				((HttpServletResponse) response).setStatus(HttpStatus.UNAUTHORIZED.value());
 				((HttpServletResponse) response).sendError(HttpStatus.UNAUTHORIZED.value(),ErrorResponseConstants.NOT_AUTHORISED);
 			} else {
-				String tokenWithoutSignature = chunks[0] + ApplicationConstants.FULL_STOP + chunks[1];
+				String tokenWithoutSignature = chunks[0] + "." + chunks[1];
 				String signature = chunks[2];
 				if (!validator.isValid(tokenWithoutSignature, signature)) {
 					Exception e = new Exception(ErrorResponseConstants.USER_ALREADY_LOGGEDIN);

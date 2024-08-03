@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,7 @@ import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.PaymentRepository;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
+import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
@@ -56,6 +58,10 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	private GeneratingCredentials generatingCredentials;
 	
 	private PaymentRepository paymentRepository;
+	
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
+	
 
 	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,EmailService email,
 			EmailTemplates emailTemplates, ProgressBarRepository progressBarRepository,
@@ -153,7 +159,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic,MultipartFile casteCertificate) throws Exception {
+	public ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic) throws Exception {
 		RegistrationFrom userRegister = registrationFromRepository.findById(userId).orElseThrow(()-> new Exception(ErrorResponseConstants.USER_NOT_FOUND));
 
 		if (userRegister != null) {
@@ -187,27 +193,35 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public void committeePresidentAccountantApproval(String token, String phoneNumber, String statusOfApproval, String remarks, String membership) throws Exception {
+	public void committeePresidentAccountantApproval(String token, String userId,ApprovalFrom from  ) throws Exception {
 
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
 		}
-		if (phoneNumber == null || phoneNumber.isEmpty()) {
-			throw new IllegalArgumentException("Phone number cannot be null or empty");
-		}
-		if (statusOfApproval == null || statusOfApproval.isEmpty()) {
-			throw new IllegalArgumentException("Status of approval cannot be null or empty");
-		}
 
 		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("id") || !jsonObject.has("type")) {
-			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
+		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
+			throw new IllegalArgumentException("Token must contain userId and access fields");
 		}
 
-		String identityNumber = jsonObject.getString("id");
-		String userType = jsonObject.getString("type");
+		String identityNumber = jsonObject.getString("userId");
+		List accessList = jwtTokenUtil.getAccessList(token);
+		System.out.println("accesslist::"+accessList);
+		String userType = null;
+		
+		if(accessList.contains(ApplicationConstants.PRESIDENT) && accessList.contains(ApplicationConstants.COMMITEE)
+				&& accessList.contains(ApplicationConstants.ACCOUNTANT)) {
+			userType = ApplicationConstants.PRESIDENT;
+		}
 
-		RegistrationFrom specificUserDetails = registrationFromRepository.findByPhoneNumber(phoneNumber);
+		else if(accessList.contains(ApplicationConstants.COMMITEE)) {
+			userType = ApplicationConstants.COMMITEE;	
+		}
+		else {
+			userType = ApplicationConstants.ACCOUNTANT;
+		}
+		
+		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
 			throw new IllegalArgumentException("No user found with the provided phone number");
 		}
@@ -221,18 +235,18 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
 			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE &&
-					statusOfApproval.equals(RegistrationFormConstants.APPROVAL)) {
+					from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
 				progressBarReport.setCommitteeApproval(true);
-				specificUserDetails.setCommitteeChoosenMembershipForApplicant(membership);
-				specificUserDetails.setCommitteeRemarksForApplicant(remarks);
+				specificUserDetails.setCommitteeChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setCommitteeRemarksForApplicant(from.getRemarks());
 
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
-				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(), specificUserDetails.getMobileNumber());
+				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(), specificUserDetails.getPhoneNumber());
 
 				// paste these username and passcode in the Email to be sent.
 
-			} else if (statusOfApproval.equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setCommitteeApproval(false);
 
 				// rejection email, and inform that can get lucky when president approves
@@ -246,16 +260,16 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			if (specificUserDetails != null && progressBarReport != null && !progressBarReport.isCommitteeApproval()
 					&& !progressBarReport.isPresidentApproval()
 					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& statusOfApproval.equals(RegistrationFormConstants.APPROVAL)
+					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 					&& progressBarReport.isPresidentFillingRegistrationTwoForm() == true) {
 
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
 				// R2 --> set membership for user , remarks
-				specificUserDetails.setPresidentRemarksForApplicant(remarks);
-				specificUserDetails.setPresidentChoosenMembershipForApplicant(membership);
+				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
+				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
 				// mail regarding success
 
-			} else if (statusOfApproval.equals(RegistrationFormConstants.REJECTED)) {
+			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				// rejection mail from president
 
@@ -380,6 +394,15 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	public Page<PaymentInfo> accountFirstView(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		return paymentRepository.findAll(pageable);
+	}
+
+	@Override
+	public ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile announcements,
+			MultipartFile imagesForHomePage) {
+		
+		
+		
+		return null;
 	}
 
 	

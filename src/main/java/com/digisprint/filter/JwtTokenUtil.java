@@ -49,9 +49,7 @@ public class JwtTokenUtil {
 	}
 	
 	public String generateToken(String userName, String userId,List<String> access, String type) {
-		Calendar currentTimeNow = Calendar.getInstance();
-		currentTimeNow.add(Calendar.MINUTE, 30);
-		Date expireTime = currentTimeNow.getTime();
+	
 		JwtBuilder token = Jwts.builder()
 				          .setSubject("access")
 				          .setHeaderParam("typ", "JWT")
@@ -59,9 +57,9 @@ public class JwtTokenUtil {
 				          .claim("userId", userId)
 				          .claim("type", type)
 				          .claim("access",access)				
-				          .setIssuedAt(currentTimeNow.getTime())
-				          .setExpiration(expireTime)
-				          .signWith(SignatureAlgorithm.HS256, secretKey);
+				          .setIssuedAt(new Date(System.currentTimeMillis()))
+							.setExpiration(new Date(System.currentTimeMillis() + 3600 * 1000))
+				          .signWith(SignatureAlgorithm.HS256, secretKey.getBytes());
 		return token.compact();
 	}
 }

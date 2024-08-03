@@ -63,7 +63,7 @@ public class RegistrationFrom {
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
 	@Size(min=10, max=10, message="PhoneNumber")
-	private String mobileNumber;
+	private String phoneNumber;
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")

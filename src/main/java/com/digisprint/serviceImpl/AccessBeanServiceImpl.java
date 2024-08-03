@@ -128,7 +128,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	public  Claims decodeAndValidateToken(String token) {
 		try {
 			return Jwts.parser()
-					.setSigningKey(secretKey)
+					.setSigningKey(secretKey.getBytes())
 					.parseClaimsJws(token)
 					.getBody();
 		} catch (Exception e) {

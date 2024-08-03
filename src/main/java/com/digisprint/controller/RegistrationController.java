@@ -1,5 +1,8 @@
 package com.digisprint.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -33,6 +37,13 @@ public class RegistrationController {
 		this.registrationService = registrationService;
 	}
 
+	@Autowired
+	private HttpServletRequest request;
+	
+	 public String getToken() {
+	        return request.getHeader("token");	        
+	    }
+	
 	@Operation(summary="This method is used for 1st level of Registration")
 	@PostMapping("/register")
 	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from) {
@@ -44,9 +55,8 @@ public class RegistrationController {
 	@PostMapping(value = "/uploadByUserId/{userId}", consumes = { "multipart/form-data" })
 	public ResponseEntity uploadFile(@PathVariable String userId, @RequestParam(name="aadharCard",required =false) MultipartFile aadharCard,
 			@RequestParam(name="voterIdCard",required =false) MultipartFile voterIdCard,
-			@RequestParam(name="profilePic",required =false) MultipartFile profilePic,
-			@RequestParam(name="casteCertificate",required =false) MultipartFile casteCertificate ) throws Exception {
-		return registrationService.upload(userId, aadharCard, voterIdCard, profilePic , casteCertificate);
+			@RequestParam(name="profilePic",required =false) MultipartFile profilePic) throws Exception {
+		return registrationService.upload(userId, aadharCard, voterIdCard, profilePic);
 	} 
 	
 	@Operation(summary= "This method is used to get all users ")
@@ -57,16 +67,16 @@ public class RegistrationController {
 	}
 	
 	@Operation(summary="")
-	@PostMapping(value="/approval/{token}/{phoneNumber}/{statusOfApproval}")
-	public void committeePresidentAccountantApproval(@RequestParam(value="token") String token,
-			@RequestParam(value="phoneNumber") String phoneNumber,@RequestParam(value="statusOfApproval") String statusOfApproval, String remarks, String membership) throws Exception {
-		 registrationService.committeePresidentAccountantApproval(token, phoneNumber, statusOfApproval, remarks, membership);
+	@PostMapping(value="/approval/{userId}")
+	public void committeePresidentAccountantApproval(@PathVariable(value="userId") String userId,
+			@RequestBody ApprovalFrom approvalFrom) throws Exception {
+		 registrationService.committeePresidentAccountantApproval(getToken(),userId,approvalFrom );
 	}
 	
 	@Operation(summary="")
-	@PostMapping(value="/progressBar/{id}")
-	public ProgressBarReport progressBarForAUser(@RequestParam(value="id") String id) {
-		return registrationService.progressBarForAUser(id);
+	@PostMapping(value="/progressBar/{userId}")
+	public ProgressBarReport progressBarForAUser(@RequestParam(value="userId") String userId) {
+		return registrationService.progressBarForAUser(userId);
 	}
 	
 	@Operation(summary="")
@@ -84,4 +94,10 @@ public class RegistrationController {
 		return registrationService.accountFirstView(page, size);
 	}
 	
+	@PostMapping(value="/uploadEventsAnnouncementImages",consumes = { "multipart/form-data" })
+	public ResponseEntity uploadEventsAnnocementsImages(@RequestParam(name="events",required =false) MultipartFile events,
+			@RequestParam(name="announcements",required =false) MultipartFile announcements,
+			@RequestParam(name="imagesForHomePage",required =false) MultipartFile imagesForHomePage) {
+		return registrationService.uploadEventsAnnocementsImages(events, announcements, imagesForHomePage);
+	}
 }

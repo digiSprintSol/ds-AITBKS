@@ -10,16 +10,17 @@ import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
+import com.digisprint.requestBean.ApprovalFrom;
 
 public interface RegistrationService {
 
 	RegistrationFrom registerUser(RegistrationFrom registrationForm);
 	
-	ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic, MultipartFile casteCertificate)throws Exception;
+	ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic)throws Exception;
 		
 	Page<RegistrationFrom> getAllRegisteredUsers(int page, int size);
 	
-	void committeePresidentAccountantApproval(String token, String phoneNumber, String statusOfApproval, String remarks, String membership) throws UserNotFoundException, Exception;
+	void committeePresidentAccountantApproval(String token, String userId,ApprovalFrom approvalFrom) throws UserNotFoundException, Exception;
 	
 	ProgressBarReport progressBarForAUser(String id);
 	
@@ -31,4 +32,6 @@ public interface RegistrationService {
 	
 	Page<PaymentInfo> accountFirstView(int page, int size);
 	
+	ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile announcements, MultipartFile imagesForHomePage);
+
 }
