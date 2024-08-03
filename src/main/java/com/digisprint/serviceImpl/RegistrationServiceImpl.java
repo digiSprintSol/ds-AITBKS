@@ -2,6 +2,7 @@ package com.digisprint.serviceImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,21 +16,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
+import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
+import com.digisprint.repository.EventsImagesAnnouncementsRepo;
 import com.digisprint.repository.PaymentRepository;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
@@ -56,46 +63,34 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	private EmailTemplates emailTemplates;
 
 	private GeneratingCredentials generatingCredentials;
-	
-	private PaymentRepository paymentRepository;
-	
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
-	
 
-	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,EmailService email,
-			EmailTemplates emailTemplates, ProgressBarRepository progressBarRepository,
-			GeneratingCredentials generatingCredentials,PaymentRepository paymentRepository) {
+	private PaymentRepository paymentRepository;
+
+	private JwtTokenUtil jwtTokenUtil;
+
+	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,
+			ProgressBarRepository progressBarRepository, EmailService email, EmailTemplates emailTemplates,
+			GeneratingCredentials generatingCredentials, PaymentRepository paymentRepository, JwtTokenUtil jwtTokenUtil) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
+		this.progressBarRepository = progressBarRepository;
 		this.email = email;
 		this.emailTemplates = emailTemplates;
-		this.progressBarRepository = progressBarRepository;
 		this.generatingCredentials = generatingCredentials;
 		this.paymentRepository = paymentRepository;
+		this.jwtTokenUtil = jwtTokenUtil;
 	}
 
 	@Value("${spring.wrapper.uploadFiles}")
-	public String UPLOAD_DIR;
+	private String UPLOAD_DIR;
 
 	@Value("${spring.mail.username}")
-	public String ADMIN_USERNAME;
+	private String ADMIN_USERNAME;
+
 
 	@Override
 	public RegistrationFrom registerUser(RegistrationFrom registrationForm) {
-		File vendorsFolder = new File(UPLOAD_DIR);
-
-		if (!vendorsFolder.exists()) {
-			vendorsFolder.mkdir();
-		}
-
-		String vendorFolderPath = UPLOAD_DIR + ApplicationConstants.DOUBLE_SLASH + registrationForm.getUserId();
-		File vendorFolder = new File(vendorFolderPath);
-
-		if (!vendorFolder.exists()) {
-			vendorFolder.mkdir();
-		}
-
+		
 		String body = emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom()
 				.replaceAll("[NAME]", registrationForm.getFullName());
 
@@ -122,14 +117,14 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			String originalFileName = file.getOriginalFilename();
 			String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
 
-			if (!extension.equalsIgnoreCase(ApplicationConstants.PDF)) {
-				return originalFileName + ErrorResponseConstants.INVALID_FILE_TYPE;
-			}
+			//			if (!extension.equalsIgnoreCase(ApplicationConstants.PDF)) {
+			//				return originalFileName + ErrorResponseConstants.INVALID_FILE_TYPE;
+			//			}
 
-			String newFileName = user_from.getFullName() + ApplicationConstants.UNDERSCORE + fileType
+			String newFileName = user_from.getUserId() + ApplicationConstants.UNDERSCORE + fileType
 					+ ApplicationConstants.UNDERSCORE
 					+ formattedDate.replace(ApplicationConstants.COMMA, ApplicationConstants.HYPHEN) + extension;
-
+			System.out.println(newFileName);
 			String filePath = folderPath + ApplicationConstants.DOUBLE_SLASH + newFileName;
 			Path path = Paths.get(filePath);
 			Files.write(path, file.getBytes());
@@ -143,7 +138,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				break;
 			case ApplicationConstants.PROFILE_PIC:
 				user_from.setProfilePic(newFileName);
-				break;
+				break;	
+
 			default:
 				return ErrorResponseConstants.UNSUPPORTED_FILE_TYPE + fileType;
 			}
@@ -163,21 +159,27 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		RegistrationFrom userRegister = registrationFromRepository.findById(userId).orElseThrow(()-> new Exception(ErrorResponseConstants.USER_NOT_FOUND));
 
 		if (userRegister != null) {
-			String folderPath = UPLOAD_DIR + ApplicationConstants.REPLACE_WITH_BACKSLASH + userId;
-			File folder = new File(folderPath);
-
+			String folderPath = UPLOAD_DIR ;
+			File folder = new File(UPLOAD_DIR);
+			String fileType = null;
 			if (folder.exists()) {
 				try {
 					String strinFormateLocalDate = LocalDate.now().toString();
+					if(aadharCard!=null) {
+						fileType = ApplicationConstants.AADHAR_CARD;
+						saveFileIfValid(aadharCard, folderPath, userRegister,fileType,strinFormateLocalDate);
 
-					String result;
+					}
+					if(voterIdCard!=null){
+						fileType = ApplicationConstants.VOTERID_CARD;
+						saveFileIfValid(voterIdCard, folderPath, userRegister,fileType,strinFormateLocalDate);
 
-					if ((result = saveFileIfValid(aadharCard, folderPath, userRegister, ApplicationConstants.AADHAR_CARD,strinFormateLocalDate)) != null)
-						return new ResponseEntity(result,HttpStatus.OK);
-					if ((result = saveFileIfValid(voterIdCard, folderPath, userRegister, ApplicationConstants.VOTERID_CARD,strinFormateLocalDate)) != null)
-						return new ResponseEntity(result,HttpStatus.OK);
-					if ((result = saveFileIfValid(profilePic, folderPath, userRegister, ApplicationConstants.PROFILE_PIC, strinFormateLocalDate)) != null)
-						return new ResponseEntity(result,HttpStatus.OK);
+					}
+					if(profilePic!=null) {
+						fileType = ApplicationConstants.PROFILE_PIC;
+						saveFileIfValid(profilePic, folderPath, userRegister,fileType,strinFormateLocalDate);
+
+					}
 					return new ResponseEntity(ApplicationConstants.FILE_UPLOADED_SUCCESSFULLY,HttpStatus.OK);
 				} catch (IOException e) {
 					log.error(ErrorResponseConstants.FAILED_TO_UPLOAD_FILE + e.getMessage());
@@ -206,9 +208,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
-		System.out.println("accesslist::"+accessList);
 		String userType = null;
-		
+
 		if(accessList.contains(ApplicationConstants.PRESIDENT) && accessList.contains(ApplicationConstants.COMMITEE)
 				&& accessList.contains(ApplicationConstants.ACCOUNTANT)) {
 			userType = ApplicationConstants.PRESIDENT;
@@ -220,7 +221,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		else {
 			userType = ApplicationConstants.ACCOUNTANT;
 		}
-		
+
 		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
 			throw new IllegalArgumentException("No user found with the provided phone number");
@@ -303,69 +304,69 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	@Override
 	public ProgressBarReport progressBarForAUser(String id) {
-	
+
 		return progressBarRepository.findById(id).get();
 	}
 
 	@Override
 	public List<RegistrationFrom> committeePresidentAccountantViewListOfApplicants(String token) {
-		
+
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
 		}
-		
+
 		JSONObject jsonObject = decodeToken(token);
 		if (!jsonObject.has("id") || !jsonObject.has("type")) {
 			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
 		}
-		
+
 		String userType = jsonObject.getString("type");
-		
+
 		if(userType.equalsIgnoreCase(ApplicationConstants.COMMITEE) || userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
 			return registrationFromRepository.findAll();
 		}else if(userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
 			return registrationFromRepository.findAll().stream()
-		            .filter(registrationForm -> registrationForm.getPaymentInfo() != null)
-		            .collect(Collectors.toList());
+					.filter(registrationForm -> registrationForm.getPaymentInfo() != null)
+					.collect(Collectors.toList());
 		}else {
 			throw new IllegalArgumentException("Invalid user type");
 		}
-		
+
 	}
 
 	@Override
 	public RegistrationFrom presidentFillingRegistrationThreeForm(String token, String appicantId, String categoryOfMemberShipRecomendedByPresident, String remarks) {
-		
+
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
 		}
-		
+
 		JSONObject jsonObject = decodeToken(token);
 		if (!jsonObject.has("id") || !jsonObject.has("type")) {
 			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
 		}
-		
+
 		String userType = jsonObject.getString("type");
-		
+
 		if(userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
 			RegistrationFrom form = registrationFromRepository.findById(appicantId).get();
-			
+
 			form.setPresidentChoosenMembershipForApplicant(categoryOfMemberShipRecomendedByPresident);
 			form.setPresidentRemarksForApplicant(remarks);
-			
+
 			registrationFromRepository.save(form);
-			
+
 		}else {
 			throw new IllegalArgumentException("Invalid access");
 		}
-		
+
 		return null;
 	}
 
 	@Override
 	public RegistrationFrom userFillingRegistrationThreeForm(String applicantId, boolean isMemberOfOtherCommunity
 			, boolean isDecleration, String nativePlace) {
-		
+
 		RegistrationFrom specificUserDetails = registrationFromRepository.findById(applicantId).get();
 		if (specificUserDetails == null) {
 			throw new IllegalArgumentException("No user found with the provided phone number");
@@ -377,16 +378,16 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
-		
+
 		specificUserDetails.setNativePlace(nativePlace);
 		specificUserDetails.setMemberOfOtherCommunity(isMemberOfOtherCommunity);
 		specificUserDetails.setApplicationForMembershipDeclaration(isDecleration);
-		
+
 		registrationFromRepository.save(specificUserDetails);
-		
+
 		progressBarReport.setRegistrationThreeFormCompleted(RegistrationFormConstants.TRUE);
 		progressBarRepository.save(progressBarReport);
-		
+
 		return specificUserDetails;
 	}
 
@@ -397,14 +398,30 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile announcements,
-			MultipartFile imagesForHomePage) {
-		
-		
-		
-		return null;
+	public ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException {
+
+		RegistrationFrom user= registrationFromRepository.findById(userId).get();
+		String documentName=null;
+		if(user.getAadharCard()!=null) {
+			documentName =user.getAadharCard();
+			System.out.println(documentName);
+		}
+		else if(user.getVoterIdCard()!=null) {
+			documentName = user.getVoterIdCard();
+		}
+		else  {
+			documentName = user.getProfilePic();
+		}
+
+		Path filePath = Paths.get(UPLOAD_DIR +"\\"+documentName);
+		System.out.println(filePath);
+		Resource resource = new UrlResource(filePath.toUri());
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType("application/octet-stream"))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
 	}
 
-	
+
 
 }

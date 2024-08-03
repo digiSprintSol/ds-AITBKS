@@ -58,7 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/login","/loginWithToken").permitAll()
 				.antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 				.antMatchers("/actuator/**").permitAll()
-				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT,ApplicationConstants.USER)
+				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT)
 				.antMatchers(HttpMethod.GET,"/user/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT, ApplicationConstants.USER)
 				/**
 				 * All other requests will be authenticated here

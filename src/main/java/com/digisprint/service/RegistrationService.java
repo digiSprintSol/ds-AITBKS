@@ -1,5 +1,7 @@
 package com.digisprint.service;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -31,7 +33,8 @@ public interface RegistrationService {
 	RegistrationFrom userFillingRegistrationThreeForm(String applicantId, boolean isMemberOfOtherCommunity, boolean isDecleration, String nativePlace);
 	
 	Page<PaymentInfo> accountFirstView(int page, int size);
+
+	ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException;
 	
-	ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile announcements, MultipartFile imagesForHomePage);
 
 }

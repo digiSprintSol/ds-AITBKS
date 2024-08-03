@@ -28,4 +28,11 @@ public class InternalReviewForm {
 	private LocalDateTime modifiedOn;
 	
 	private String modifiedBy;
+	
+	private String events;
+	
+	private String announcements;
+	
+	private String homePageImages;
+	
 }

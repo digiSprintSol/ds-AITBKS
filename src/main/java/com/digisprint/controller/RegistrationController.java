@@ -1,9 +1,17 @@
 package com.digisprint.controller;
 
+import java.net.MalformedURLException;
+import java.net.http.HttpHeaders;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
@@ -94,10 +103,9 @@ public class RegistrationController {
 		return registrationService.accountFirstView(page, size);
 	}
 	
-	@PostMapping(value="/uploadEventsAnnouncementImages",consumes = { "multipart/form-data" })
-	public ResponseEntity uploadEventsAnnocementsImages(@RequestParam(name="events",required =false) MultipartFile events,
-			@RequestParam(name="announcements",required =false) MultipartFile announcements,
-			@RequestParam(name="imagesForHomePage",required =false) MultipartFile imagesForHomePage) {
-		return registrationService.uploadEventsAnnocementsImages(events, announcements, imagesForHomePage);
+	@GetMapping(value = "/download/{userId}")
+	public ResponseEntity getDocuments(@PathVariable String userId) throws UserNotFoundException, MalformedURLException {
+		return registrationService.getDocumentOfUser(userId);
+		
 	}
 }
