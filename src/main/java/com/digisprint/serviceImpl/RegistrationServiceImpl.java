@@ -3,20 +3,25 @@ package com.digisprint.serviceImpl;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.mail.MessagingException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,16 +31,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
+import com.digisprint.EmailUtils.LoadHtmlTemplates;
+import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
+import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
 import com.digisprint.repository.PaymentRepository;
 import com.digisprint.repository.ProgressBarRepository;
@@ -68,9 +77,14 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	private JwtTokenUtil jwtTokenUtil;
 
+	private LoadHtmlTemplates htmlTemplates;
+
+	private AccessBeanRepository accessBeanRepository;
+
 	public RegistrationServiceImpl(RegistrationFromRepository registrationFromRepository,
 			ProgressBarRepository progressBarRepository, EmailService email, EmailTemplates emailTemplates,
-			GeneratingCredentials generatingCredentials, PaymentRepository paymentRepository, JwtTokenUtil jwtTokenUtil) {
+			GeneratingCredentials generatingCredentials, PaymentRepository paymentRepository, JwtTokenUtil jwtTokenUtil,
+			LoadHtmlTemplates htmlTemplates, AccessBeanRepository accessBeanRepository) {
 		super();
 		this.registrationFromRepository = registrationFromRepository;
 		this.progressBarRepository = progressBarRepository;
@@ -79,27 +93,44 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		this.generatingCredentials = generatingCredentials;
 		this.paymentRepository = paymentRepository;
 		this.jwtTokenUtil = jwtTokenUtil;
+		this.htmlTemplates = htmlTemplates;
+		this.accessBeanRepository = accessBeanRepository;
 	}
 
-	@Value("${spring.wrapper.uploadFiles}")
+	@Value("${org.uploadFiles}")
 	private String UPLOAD_DIR;
 
 	@Value("${spring.mail.username}")
 	private String ADMIN_USERNAME;
-
+	
+	@Value("${org.transcation}")
+	private String UPLOAD_TRANSCATION;
 
 	@Override
-	public RegistrationFrom registerUser(RegistrationFrom registrationForm) {
-		
-		String body = emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom()
-				.replaceAll("[NAME]", registrationForm.getFullName());
-
-		email.MailSendingService(ADMIN_USERNAME, registrationForm.getEmailAddress() , body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
 
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(registrationForm.getUserId());
 		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
 		progressBarRepository.save(progressBarReport);
+		//Sending mail to user.
+		List<String> membersList = new ArrayList<>();
+		String body = htmlTemplates.loadTemplate(emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom());
+		body = body.replaceAll(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFullName());
+		membersList.add(registrationForm.getEmailAddress());
+		String[] newUser= new String[1];
+		newUser[0] = registrationForm.getEmailAddress();
+		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+		//Sending mail to committee members
+		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
+		List<AccessBean> committeList= accessBeanRepository.findByCommitee(true);
+		System.out.println(committeList);
+		List<String> emailOfCommittee= committeList.stream().map(object->object.getEmail()).collect(Collectors.toList());
+		String[] emailsForCommiteeArray = new String[emailOfCommittee.size()];
+		for(int i = 0 ; i<emailOfCommittee.size();i++) {
+			emailsForCommiteeArray[i] = emailOfCommittee.get(i);
+		}
+		email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body, EmailConstants.NEW_USER_REGISTERED_SUBJECT);
 
 		registrationFromRepository.save(registrationForm);
 		return registrationForm;
@@ -231,49 +262,54 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		if (!optionalProgressBarReport.isPresent()) {
 			throw new IllegalArgumentException("No progress bar report found for the user");
 		}
-
+		String[] user= new String[1];
+		user[0] = specificUserDetails.getEmailAddress();
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
-
+		
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
-			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE &&
-					from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
-				progressBarReport.setCommitteeApproval(true);
+			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
 				specificUserDetails.setCommitteeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeRemarksForApplicant(from.getRemarks());
-
+				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
 				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(), specificUserDetails.getPhoneNumber());
-
-				// paste these username and passcode in the Email to be sent.
-
+				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
+				body = body.replace("[]", username)
+						.replace("[]", passcode);
+				
+				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+				progressBarReport.setCommitteeApproval(true);
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setCommitteeApproval(false);
-
-				// rejection email, and inform that can get lucky when president approves
-
+				String body = null;
+				body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
+				
+				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
+				progressBarReport.setCommitteeApproval(false);
+				
 			} else {
 				progressBarReport.setCommitteeApproval(false);
 
 				// waiting email
 			}
 		} else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
-			if (specificUserDetails != null && progressBarReport != null && !progressBarReport.isCommitteeApproval()
-					&& !progressBarReport.isPresidentApproval()
+			if (specificUserDetails != null && progressBarReport != null 
 					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-					&& progressBarReport.isPresidentFillingRegistrationTwoForm() == true) {
-
+				) {
+				String body = null;
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
-				// R2 --> set membership for user , remarks
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
-				// mail regarding success
-
+				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
+				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+				String body = null;
 				// rejection mail from president
-
+				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
+				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_REJECTED_SUBJECT);
 			} else {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				// waiting mail from president
@@ -288,6 +324,9 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 				String memberIdentityNumber = generatingCredentials.generateMemberId();
 				// send congratulations mail with generated memberID 
+				String body = null;
+				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
+				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.MEMBERSHIP_APPROVED);
 
 			} else {
 				throw new IllegalArgumentException("All conditions for accountant approval are not met");
@@ -412,7 +451,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		else  {
 			documentName = user.getProfilePic();
 		}
-
 		Path filePath = Paths.get(UPLOAD_DIR +"\\"+documentName);
 		System.out.println(filePath);
 		Resource resource = new UrlResource(filePath.toUri());
@@ -420,6 +458,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				.contentType(MediaType.parseMediaType("application/octet-stream"))
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
 				.body(resource);
+	}
+
+	@Override
+	public ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit) {
+		return null;
 	}
 
 

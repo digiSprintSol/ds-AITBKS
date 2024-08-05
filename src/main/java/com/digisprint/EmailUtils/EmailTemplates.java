@@ -8,11 +8,30 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Configuration
-@Getter
-@Setter
+@Data
 public class EmailTemplates {
 
-	@Value("${portal.configuration.emailBody.welcome}")
+	@Value("${configuration.emailBody.welcome}")
 	private String welcomeMailAfterFillingFirstRegistrationFrom;
 	
+	@Value("${configuration.emailBody.loginCredentialsEmail}")
+	private String loginCredentialsEmail;
+	
+	@Value("${configuration.emailBody.committeeRejectEmail}")
+	private String committeeRejectEmail;
+	
+	@Value("${configuration.emailBody.membershipApproved}")
+	private String membershipApproved;
+	
+	@Value("${configuration.emailBody.paymentFormalEmail}")
+	private String paymentApprovalEmail;
+	
+	@Value("${configuration.emailBody.presidentApprovalEmail}")
+	private String presidentApprovalEmail;
+	
+	@Value("${configuration.emailBody.presidentRejectionEmail}")
+	private String presidentRejectionEmail;
+	
+	@Value("${configuration.emailBody.notifyCommitteeForNewRegisteration}")
+	private String newUserNotifyToCommittee;
 }

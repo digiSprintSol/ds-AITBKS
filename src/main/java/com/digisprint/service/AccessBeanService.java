@@ -1,6 +1,7 @@
 package com.digisprint.service;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,5 +19,7 @@ public interface AccessBeanService {
 	ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile imagesForHomePage,String title,String description) throws IOException;
 	ResponseEntity postingAnnouncements(String title, String description);
 	ResponseEntity getAllAnnouncement();
+	ResponseEntity getEvents() throws MalformedURLException;
+	ResponseEntity getImages() throws MalformedURLException;
 
 }

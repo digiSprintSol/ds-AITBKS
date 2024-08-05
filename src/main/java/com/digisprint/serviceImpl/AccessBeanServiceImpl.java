@@ -2,6 +2,7 @@ package com.digisprint.serviceImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,13 +13,18 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
@@ -211,11 +217,13 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 			switch (fileType) {
 			case ApplicationConstants.EVENTS :
+				object.setId("1");
 				object.setEventDescription(description);
 				object.setEventTitle(title);
 				object.setEventImageName(newFileName);
 				break;
 			case ApplicationConstants.IMAGES :
+				object.setId("2");
 				object.setImageTitle(title);
 				object.setImageDescription(description);
 				object.setImageName(newFileName);
@@ -277,6 +285,26 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	@Override
+	public ResponseEntity getEvents() throws MalformedURLException {
+		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
+		return getFile(event.getEventImageName());
+	}
+
+	@Override
+	public ResponseEntity getImages() throws MalformedURLException {
+		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
+		return getFile(event.getImageName());
+	}
+
+	private ResponseEntity getFile(String documentName) throws MalformedURLException {
+		Path filePath = Paths.get(pathForStorage +"\\"+documentName);
+		Resource resource = new UrlResource(filePath.toUri());
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType("application/octet-stream"))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
+	}
 
 }
 

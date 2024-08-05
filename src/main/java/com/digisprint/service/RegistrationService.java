@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +18,7 @@ import com.digisprint.requestBean.ApprovalFrom;
 
 public interface RegistrationService {
 
-	RegistrationFrom registerUser(RegistrationFrom registrationForm);
+	RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException;
 	
 	ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic)throws Exception;
 		
@@ -35,6 +37,8 @@ public interface RegistrationService {
 	Page<PaymentInfo> accountFirstView(int page, int size);
 
 	ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException;
+
+	ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit);
 	
 
 }

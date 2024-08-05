@@ -1,10 +1,12 @@
 package com.digisprint.controller;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.http.HttpHeaders;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +57,7 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used for 1st level of Registration")
 	@PostMapping("/register")
-	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from) {
+	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from) throws IOException, MessagingException {
 		
 		return this.registrationService.registerUser(from) ;
 	}

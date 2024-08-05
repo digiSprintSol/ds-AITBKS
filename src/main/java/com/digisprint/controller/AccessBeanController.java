@@ -1,6 +1,7 @@
 package com.digisprint.controller;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.validation.Valid;
 
@@ -86,6 +87,16 @@ public class AccessBeanController {
 	@GetMapping(value="/getAllAnnouncements")
 	public ResponseEntity getAllAnnouncement () {
 		return accessBeanService.getAllAnnouncement();
+	}
+	
+	@GetMapping(value="/getEvents")
+	public ResponseEntity getEvents() throws MalformedURLException {
+		return accessBeanService.getEvents();
+	}
+	
+	@GetMapping(value="/getImages")
+	public ResponseEntity getImages() throws MalformedURLException {
+		return accessBeanService.getImages();
 	}
 	
 }
