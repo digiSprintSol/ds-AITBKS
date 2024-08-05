@@ -1,6 +1,7 @@
 package com.digisprint.controller;
 
-import java.util.concurrent.CompletableFuture;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.validation.Valid;
 
@@ -11,11 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
@@ -70,6 +70,33 @@ public class AccessBeanController {
 	@DeleteMapping("/removeAccess/{id}")
 	ResponseEntity softDeleteInternalUsers(@PathVariable("id") String id) {
 		return accessBeanService.softDeleteInternalUsers(id);
+	}
+	@PostMapping(value="/uploadEventsImages",consumes = { "multipart/form-data" })
+	public ResponseEntity uploadEventsAnnocementsImages(@RequestParam(name="events",required =false) MultipartFile events,
+			@RequestParam(name="imagesForHomePage",required =false) MultipartFile imagesForHomePage ,
+		@RequestParam(name="title",required=false) String title,
+		@RequestParam(name="description",required=false) String description) throws IOException{
+		return accessBeanService.uploadEventsAnnocementsImages(events, imagesForHomePage, title, description);
+	}
+	
+	@PostMapping(value="/postingAnnouncements")
+	public ResponseEntity postingAnnouncements(@RequestParam String title, @RequestParam String description)	{
+		return accessBeanService.postingAnnouncements(title,description);
+	}
+	
+	@GetMapping(value="/getAllAnnouncements")
+	public ResponseEntity getAllAnnouncement () {
+		return accessBeanService.getAllAnnouncement();
+	}
+	
+	@GetMapping(value="/getEvents")
+	public ResponseEntity getEvents() throws MalformedURLException {
+		return accessBeanService.getEvents();
+	}
+	
+	@GetMapping(value="/getImages")
+	public ResponseEntity getImages() throws MalformedURLException {
+		return accessBeanService.getImages();
 	}
 	
 }

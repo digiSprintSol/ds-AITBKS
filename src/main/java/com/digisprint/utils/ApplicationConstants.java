@@ -67,5 +67,10 @@ public class ApplicationConstants {
 	public static final String API_DOCS	= "api-docs";
 	
 	public static final String ACTUATOR = "actuator";
+	
+	public static final String EVENTS = "EVENTS";
+	
+	public static final String IMAGES = "IMAGES";
+	
 
 }

@@ -1,20 +1,35 @@
 package com.digisprint.serviceImpl;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
+import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
+import com.digisprint.repository.EventsImagesAnnouncementsRepo;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.ErrorResponseConstants;
@@ -29,16 +44,23 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private AccessBeanRepository accessBeanRepository;
 
-	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository) {
+	private	EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo; 
+
+	private JwtTokenUtil jwtTokenUtil;
+
+	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository,
+			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil) {
 		super();
 		this.accessBeanRepository = accessBeanRepository;
+		this.eventsImagesAnnouncementsRepo = eventsImagesAnnouncementsRepo;
+		this.jwtTokenUtil = jwtTokenUtil;
 	}
-
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
 
 	@Value("${config.secretKey}")
 	private  String secretKey;
+
+	@Value("${org.home}")
+	private String pathForStorage;
 
 	@Override
 	public ResponseEntity saveInternalUsers(AccessBean accessBean) {
@@ -96,9 +118,9 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		return new ResponseEntity(internalUsers,HttpStatus.OK);
 	}		
 
-	
+
 	private List<String> getAccessList(AccessBean accessBean){
-		
+
 		List<String> accessList = new ArrayList();
 		if(accessBean.isPresident()){
 			accessList.add(ApplicationConstants.PRESIDENT);
@@ -113,7 +135,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			accessList.clear();
 			accessList.add(ApplicationConstants.USER);
 		}
-		
+
 		return accessList;
 
 	} 
@@ -121,14 +143,14 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public String  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-	
+
 		return jwtTokenUtil.generateToken(userName, userName, getAccessList(accessBean), password);
 	}
 
 	public  Claims decodeAndValidateToken(String token) {
 		try {
 			return Jwts.parser()
-					.setSigningKey(secretKey)
+					.setSigningKey(secretKey.getBytes())
 					.parseClaimsJws(token)
 					.getBody();
 		} catch (Exception e) {
@@ -171,6 +193,117 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			return new ResponseEntity(ErrorResponseConstants.USER_NOT_FOUND,HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+	}
+	private void saveFileForEventsOrImages(String title,String folderPath, String fileType , MultipartFile file,
+			String formattedDate,String description) throws IOException {
+		EventsImagesAnnouncements object = new EventsImagesAnnouncements();
+
+		if(!file.isEmpty()) {
+			String originalFileName = file.getOriginalFilename();
+			String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
+			System.out.println("dhfjsdhf::"+extension);
+			//		if (!extension.equalsIgnoreCase(ApplicationConstants.PDF)) {
+			//			return originalFileName + ErrorResponseConstants.INVALID_FILE_TYPE;
+			//		}
+
+			String newFileName = title+ ApplicationConstants.UNDERSCORE + fileType
+					+ ApplicationConstants.UNDERSCORE
+					+ formattedDate.replace(ApplicationConstants.COMMA, ApplicationConstants.HYPHEN) + extension;
+			System.out.println(newFileName);
+			String filePath = folderPath + ApplicationConstants.DOUBLE_SLASH + newFileName;
+			System.out.println(":::::::::::::::::::::"+filePath);
+			Path path = Paths.get(filePath);
+			Files.write(path, file.getBytes());
+
+			switch (fileType) {
+			case ApplicationConstants.EVENTS :
+				object.setId("1");
+				object.setEventDescription(description);
+				object.setEventTitle(title);
+				object.setEventImageName(newFileName);
+				break;
+			case ApplicationConstants.IMAGES :
+				object.setId("2");
+				object.setImageTitle(title);
+				object.setImageDescription(description);
+				object.setImageName(newFileName);
+				break;
+			default:
+				break;
+			}
+			eventsImagesAnnouncementsRepo.save(object);
+		}
+	}
+
+	@Override
+	public ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile imagesForHomePage,
+			String title, String description) throws IOException {
+		String folderPath = pathForStorage;
+		File folder = new File(folderPath);
+		ResponseEntity result = null;
+		String strinFormateLocalDate = LocalDate.now().toString();
+
+		if(folder.exists()) {
+			if(events!=null) {
+				saveFileForEventsOrImages(title, folderPath, ApplicationConstants.EVENTS, events,strinFormateLocalDate , description);
+			}
+			if(imagesForHomePage != null) {
+				saveFileForEventsOrImages(title, folderPath, ApplicationConstants.IMAGES, imagesForHomePage, strinFormateLocalDate, description);
+			}
+			return new ResponseEntity("Files Uploaded",HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity("Folder doesnot exsists",HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@Override
+	public ResponseEntity postingAnnouncements(String title, String description) {
+
+		if(title!=null && description !=null) {
+			EventsImagesAnnouncements announcement = new EventsImagesAnnouncements();
+			announcement.setAnnouncementTitle(title);
+			announcement.setAnnouncementDescription(description);
+			announcement.setAnnouncement(true);
+			eventsImagesAnnouncementsRepo.save(announcement);
+			return new ResponseEntity("Announcements created",HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity("Inputs are not proper",HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
+	}
+
+	@Override
+	public ResponseEntity getAllAnnouncement() {
+		List<EventsImagesAnnouncements>announcements =eventsImagesAnnouncementsRepo.findByAnnouncement(true);
+		if(announcements.size()==0) {
+			return new ResponseEntity("No Announcements found",HttpStatus.NOT_FOUND);
+		}
+		else {
+		return new ResponseEntity(announcements,HttpStatus.OK);
+		}
+	}
+
+	@Override
+	public ResponseEntity getEvents() throws MalformedURLException {
+		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
+		return getFile(event.getEventImageName());
+	}
+
+	@Override
+	public ResponseEntity getImages() throws MalformedURLException {
+		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
+		return getFile(event.getImageName());
+	}
+
+	private ResponseEntity getFile(String documentName) throws MalformedURLException {
+		Path filePath = Paths.get(pathForStorage +"\\"+documentName);
+		Resource resource = new UrlResource(filePath.toUri());
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType("application/octet-stream"))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
 	}
 
 }

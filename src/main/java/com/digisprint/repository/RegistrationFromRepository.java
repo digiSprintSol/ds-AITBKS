@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import com.digisprint.bean.RegistrationFrom;
 
-
+@Repository
 public interface RegistrationFromRepository extends MongoRepository<RegistrationFrom, String> {
 
+	RegistrationFrom findByPhoneNumber(String phoneNumber);
+	
 }
