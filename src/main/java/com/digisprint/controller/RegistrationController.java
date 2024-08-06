@@ -90,13 +90,13 @@ public class RegistrationController {
 		return registrationService.progressBarForAUser(userId);
 	}
 	
-	@Operation(summary="")
-	@PostMapping(value="/registrationThreeForm/{applicantId}/{isMemberOfOtherCommunity}/{isDecleration}/{nativePlace}")
-	public RegistrationFrom userFillingRegistrationThreeForm(@RequestParam(value="applicantId") String applicantId,
-			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
-			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
-		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
-	}
+//	@Operation(summary="")
+//	@PostMapping(value="/registrationThreeForm/{applicantId}/{isMemberOfOtherCommunity}/{isDecleration}/{nativePlace}")
+//	public RegistrationFrom userFillingRegistrationThreeForm(@RequestParam(value="applicantId") String applicantId,
+//			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
+//			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
+//		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
+//	}
 	
 	@Operation(summary="")
 	@GetMapping(value="/accountantFirstView")
@@ -109,5 +109,10 @@ public class RegistrationController {
 	public ResponseEntity getDocuments(@PathVariable String userId) throws UserNotFoundException, MalformedURLException {
 		return registrationService.getDocumentOfUser(userId);
 		
+	}
+	
+	@PostMapping(value="/uploadTranscationRecepit" ,  consumes = { "multipart/form-data" })
+	public ResponseEntity uploadTranscationRecepit(@RequestParam MultipartFile transcationRecepit) throws IOException, MessagingException {
+		return registrationService.uploadTranscationRecepit(getToken(), transcationRecepit);
 	}
 }

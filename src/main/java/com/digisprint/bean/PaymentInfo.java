@@ -1,5 +1,6 @@
 package com.digisprint.bean;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -17,7 +18,7 @@ public class PaymentInfo {
 	
 	private String amountPaid;
 		
-	private Date transactionDate;
+	private LocalDate transactionDate;
 	
 	private String paymentDetailDocument;
 }

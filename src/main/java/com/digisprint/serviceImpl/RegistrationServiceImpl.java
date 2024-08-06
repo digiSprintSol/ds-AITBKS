@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 
+import org.bson.json.JsonObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -355,15 +356,15 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 
 		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("id") || !jsonObject.has("type")) {
-			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
+		if (!jsonObject.has("id") || !jsonObject.has("access")) {
+			throw new IllegalArgumentException("Token must contain 'id' and 'access' fields");
 		}
 
-		String userType = jsonObject.getString("type");
+		List accessList = jwtTokenUtil.getAccessList(token);
 
-		if(userType.equalsIgnoreCase(ApplicationConstants.COMMITEE) || userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+		if(accessList.contains(ApplicationConstants.COMMITEE) || accessList.contains(ApplicationConstants.PRESIDENT)) {
 			return registrationFromRepository.findAll();
-		}else if(userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
+		}else if(accessList.contains(ApplicationConstants.ACCOUNTANT)) {
 			return registrationFromRepository.findAll().stream()
 					.filter(registrationForm -> registrationForm.getPaymentInfo() != null)
 					.collect(Collectors.toList());
@@ -381,13 +382,13 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 
 		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("id") || !jsonObject.has("type")) {
+		if (!jsonObject.has("id") || !jsonObject.has("access")) {
 			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
 		}
 
-		String userType = jsonObject.getString("type");
+		List accessList = jwtTokenUtil.getAccessList(token);
 
-		if(userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
 			RegistrationFrom form = registrationFromRepository.findById(appicantId).get();
 
 			form.setPresidentChoosenMembershipForApplicant(categoryOfMemberShipRecomendedByPresident);
@@ -403,15 +404,16 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public RegistrationFrom userFillingRegistrationThreeForm(String applicantId, boolean isMemberOfOtherCommunity
+	public RegistrationFrom userFillingRegistrationThreeForm(String token, boolean isMemberOfOtherCommunity
 			, boolean isDecleration, String nativePlace) {
-
-		RegistrationFrom specificUserDetails = registrationFromRepository.findById(applicantId).get();
+		JSONObject tokenObject = decodeToken(token);
+		String userId= tokenObject.getString("userId");
+		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
 			throw new IllegalArgumentException("No user found with the provided phone number");
 		}
 
-		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(applicantId);
+		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
 		if (!optionalProgressBarReport.isPresent()) {
 			throw new IllegalArgumentException("No progress bar report found for the user");
 		}
@@ -461,8 +463,32 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit) {
-		return null;
+	public ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit) throws IOException, MessagingException {
+		JSONObject tokenObject = decodeToken(token);
+		String userId= tokenObject.getString("userId");
+		RegistrationFrom user = registrationFromRepository.findById(userId).get();
+		PaymentInfo paymentInfo= user.getPaymentInfo();
+		paymentInfo.setTransactionDate(LocalDate.now());
+		String originalFileName = transcationRecepit.getOriginalFilename();
+		String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
+		String fileName = user.getUserId() + ApplicationConstants.HYPHEN+ ApplicationConstants.TRANSCATION + extension;
+		String filePath = UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + transcationRecepit;
+		Path path = Paths.get(filePath);
+		Files.write(path, transcationRecepit.getBytes());
+		paymentInfo.setPaymentDetailDocument(fileName);
+		user.setPaymentInfo(paymentInfo);
+		registrationFromRepository.save(user);
+		
+		ProgressBarReport progressBarReport = progressBarRepository.findById(userId).get();
+		progressBarReport.setPayment(true);
+		progressBarRepository.save(progressBarReport);
+		String[] sendEmail= new String[1];
+		sendEmail[0] = user.getEmailAddress();
+		String body = htmlTemplates.loadTemplate(emailTemplates.getPaymentApprovalEmail());
+		
+		email.MailSendingService(ADMIN_USERNAME, sendEmail,body ,EmailConstants.PAYMENT_RECIEVED_SUBJECT );
+		
+		return new ResponseEntity("Recepit Uploaded successfully",HttpStatus.OK);
 	}
 
 
