@@ -136,8 +136,6 @@ public class RegistrationFrom {
 	 * MEMBERSHIP INFO
 	 */
 	
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
 	private String applicantChoosenMembership;
 	
 	private String committeeChoosenMembershipForApplicant;

@@ -15,6 +15,7 @@ import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
+import com.digisprint.requestBean.RegistrationFrom2;
 
 public interface RegistrationService {
 
@@ -30,15 +31,15 @@ public interface RegistrationService {
 	
 	List<RegistrationFrom> committeePresidentAccountantViewListOfApplicants(String token);
 	
-	RegistrationFrom presidentFillingRegistrationThreeForm(String token, String appicantId, String categoryOfMemberShipRecomendedByPresident, String remarks);
-	
-	RegistrationFrom userFillingRegistrationThreeForm(String applicantId, boolean isMemberOfOtherCommunity, boolean isDecleration, String nativePlace);
-	
-	Page<PaymentInfo> accountFirstView(int page, int size);
+	List<RegistrationFrom> accountFirstView(int page, int size);
 
 	ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException;
 
 	ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit) throws IOException, MessagingException;
+
+	RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
+
+	ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException;
 	
 
 }
