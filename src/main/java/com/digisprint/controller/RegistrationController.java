@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.http.HttpHeaders;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +32,7 @@ import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
+import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -90,29 +92,32 @@ public class RegistrationController {
 		return registrationService.progressBarForAUser(userId);
 	}
 	
-//	@Operation(summary="")
-//	@PostMapping(value="/registrationThreeForm/{applicantId}/{isMemberOfOtherCommunity}/{isDecleration}/{nativePlace}")
-//	public RegistrationFrom userFillingRegistrationThreeForm(@RequestParam(value="applicantId") String applicantId,
-//			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
-//			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
-//		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
-//	}
+	@Operation(summary="")
+	@PostMapping(value="/registrationThreeForm")
+	public RegistrationFrom userFillingRegistrationThreeForm(@RequestBody RegistrationFrom2 registrationFrom2) {
+		return registrationService.userFillingRegistrationThreeForm(getToken(),registrationFrom2 );
+	}
 	
 	@Operation(summary="")
 	@GetMapping(value="/accountantFirstView")
-	public Page<PaymentInfo> accountFirstView( @RequestParam(defaultValue = "0") int page,
+	public List<RegistrationFrom> accountFirstView( @RequestParam(defaultValue = "0") int page,
 			 @RequestParam(defaultValue = "10") int size) {
 		return registrationService.accountFirstView(page, size);
 	}
 	
-	@GetMapping(value = "/download/{userId}")
+	@GetMapping(value = "/downloadUserDocuments/{userId}")
 	public ResponseEntity getDocuments(@PathVariable String userId) throws UserNotFoundException, MalformedURLException {
 		return registrationService.getDocumentOfUser(userId);
 		
 	}
 	
-	@PostMapping(value="/uploadTranscationRecepit" ,  consumes = { "multipart/form-data" })
+	@PostMapping(value="/uploadTranscationReceipt" ,  consumes = { "multipart/form-data" })
 	public ResponseEntity uploadTranscationRecepit(@RequestParam MultipartFile transcationRecepit) throws IOException, MessagingException {
 		return registrationService.uploadTranscationRecepit(getToken(), transcationRecepit);
+	}
+	
+	@GetMapping(value="/downloadPaymentReceipt/{userId}")
+	public ResponseEntity getPaymentReceipt(@PathVariable String userId) throws MalformedURLException {
+		return registrationService.getPaymentReceipt(userId);
 	}
 }

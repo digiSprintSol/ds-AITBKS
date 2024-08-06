@@ -143,8 +143,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public String  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-
-		return jwtTokenUtil.generateToken(userName, userName, getAccessList(accessBean), password);
+		return jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
 	}
 
 	public  Claims decodeAndValidateToken(String token) {

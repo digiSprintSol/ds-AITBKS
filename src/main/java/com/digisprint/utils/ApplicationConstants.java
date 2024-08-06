@@ -73,6 +73,8 @@ public class ApplicationConstants {
 	public static final String IMAGES = "IMAGES";
 	
 	public static final String TRANSCATION = "TRANSCATION RECEPIT";
+
+	public static final String APPROVED = "Approved";
 	
 
 }
