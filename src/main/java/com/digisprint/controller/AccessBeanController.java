@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 //@RequestMapping(ApplicationConstants.INTERNAL_USERS)
 @Tag(name= ApplicationConstants.ROLE_MANAGEMENT)
-@CrossOrigin
 public class AccessBeanController {
 
 	private AccessBeanService accessBeanService;
