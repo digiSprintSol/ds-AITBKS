@@ -40,7 +40,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping(ApplicationConstants.USER_API)
-@CrossOrigin("*")
+@CrossOrigin
 public class RegistrationController {
 
      private RegistrationService registrationService;
