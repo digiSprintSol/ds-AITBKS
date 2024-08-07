@@ -3,7 +3,7 @@ package com.digisprint.requestBean;
 import lombok.Data;
 
 @Data
-public class RegisterationFrom2 {
+public class RegistrationFrom2 {
 
 	private boolean isMemberOfOtherCommunity;
 	

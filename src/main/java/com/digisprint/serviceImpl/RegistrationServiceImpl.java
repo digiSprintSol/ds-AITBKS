@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +20,7 @@ import javax.mail.MessagingException;
 import org.bson.json.JsonObject;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -51,6 +53,7 @@ import com.digisprint.repository.PaymentRepository;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
+import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
@@ -103,7 +106,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	@Value("${spring.mail.username}")
 	private String ADMIN_USERNAME;
-	
+
 	@Value("${org.transcation}")
 	private String UPLOAD_TRANSCATION;
 
@@ -124,8 +127,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
 		//Sending mail to committee members
 		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
+		
 		List<AccessBean> committeList= accessBeanRepository.findByCommitee(true);
-		System.out.println(committeList);
 		List<String> emailOfCommittee= committeList.stream().map(object->object.getEmail()).collect(Collectors.toList());
 		String[] emailsForCommiteeArray = new String[emailOfCommittee.size()];
 		for(int i = 0 ; i<emailOfCommittee.size();i++) {
@@ -133,6 +136,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 		email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body, EmailConstants.NEW_USER_REGISTERED_SUBJECT);
 
+		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
+		registrationForm.setCreatedDate(LocalDateTime.now());
 		registrationFromRepository.save(registrationForm);
 		return registrationForm;
 	}
@@ -140,7 +145,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public Page<RegistrationFrom> getAllRegisteredUsers(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		return registrationFromRepository.findAll(pageable);
+		return registrationFromRepository.findAll(pageable); 
 	}
 
 	private String saveFileIfValid(MultipartFile file, String folderPath, RegistrationFrom user_from, String fileType,
@@ -266,7 +271,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		String[] user= new String[1];
 		user[0] = specificUserDetails.getEmailAddress();
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
-		
+	
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
 			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
 				specificUserDetails.setCommitteeChoosenMembershipForApplicant(from.getMembership());
@@ -278,17 +283,27 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 				body = body.replace("[]", username)
 						.replace("[]", passcode);
-				
+
 				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 				progressBarReport.setCommitteeApproval(true);
+				
+				AccessBean accessBean = new AccessBean();
+				accessBean.setAccessId(specificUserDetails.getUserId());
+				accessBean.setAccountant(false);
+				accessBean.setUser(true);
+				accessBean.setDeleted(false);
+				accessBean.setEmail(username);
+				accessBean.setPassword(passcode);
+				accessBeanRepository.save(accessBean);
+				
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setCommitteeApproval(false);
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
-				
+
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
 				progressBarReport.setCommitteeApproval(false);
-				
+
 			} else {
 				progressBarReport.setCommitteeApproval(false);
 
@@ -297,14 +312,15 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		} else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
 			if (specificUserDetails != null && progressBarReport != null 
 					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-				) {
+					) {
 				String body = null;
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
-				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+				
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				String body = null;
@@ -322,7 +338,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 					&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
 
 				progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
-
+				progressBarReport.setMember(RegistrationFormConstants.TRUE);
 				String memberIdentityNumber = generatingCredentials.generateMemberId();
 				// send congratulations mail with generated memberID 
 				String body = null;
@@ -336,16 +352,18 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		} else {
 			throw new Exception("You don't have access !!");
 		}
-
+		specificUserDetails.setStatus(from.getStatusOfApproval());
+		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
 		registrationFromRepository.save(specificUserDetails);
 		progressBarRepository.save(progressBarReport);
 
 	}
 
 	@Override
-	public ProgressBarReport progressBarForAUser(String id) {
-
-		return progressBarRepository.findById(id).get();
+	public ProgressBarReport progressBarForAUser(String token) {
+		JSONObject tokenObject = decodeToken(token);
+		String userId= tokenObject.getString("userId");
+		return progressBarRepository.findById(userId).get();
 	}
 
 	@Override
@@ -374,38 +392,37 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	}
 
+	//	@Override
+	//	public RegistrationFrom presidentFillingRegistrationThreeForm(String token, String appicantId, String categoryOfMemberShipRecomendedByPresident, String remarks) {
+	//
+	//		if (token == null || token.isEmpty()) {
+	//			throw new IllegalArgumentException("Token cannot be null or empty");
+	//		}
+	//
+	//		JSONObject jsonObject = decodeToken(token);
+	//		if (!jsonObject.has("id") || !jsonObject.has("access")) {
+	//			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
+	//		}
+	//
+	//		List accessList = jwtTokenUtil.getAccessList(token);
+	//
+	//		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
+	//			RegistrationFrom form = registrationFromRepository.findById(appicantId).get();
+	//
+	//			form.setPresidentChoosenMembershipForApplicant(categoryOfMemberShipRecomendedByPresident);
+	//			form.setPresidentRemarksForApplicant(remarks);
+	//
+	//			registrationFromRepository.save(form);
+	//
+	//		}else {
+	//			throw new IllegalArgumentException("Invalid access");
+	//		}
+	//
+	//		return null;
+	//	}
+
 	@Override
-	public RegistrationFrom presidentFillingRegistrationThreeForm(String token, String appicantId, String categoryOfMemberShipRecomendedByPresident, String remarks) {
-
-		if (token == null || token.isEmpty()) {
-			throw new IllegalArgumentException("Token cannot be null or empty");
-		}
-
-		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("id") || !jsonObject.has("access")) {
-			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
-		}
-
-		List accessList = jwtTokenUtil.getAccessList(token);
-
-		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
-			RegistrationFrom form = registrationFromRepository.findById(appicantId).get();
-
-			form.setPresidentChoosenMembershipForApplicant(categoryOfMemberShipRecomendedByPresident);
-			form.setPresidentRemarksForApplicant(remarks);
-
-			registrationFromRepository.save(form);
-
-		}else {
-			throw new IllegalArgumentException("Invalid access");
-		}
-
-		return null;
-	}
-
-	@Override
-	public RegistrationFrom userFillingRegistrationThreeForm(String token, boolean isMemberOfOtherCommunity
-			, boolean isDecleration, String nativePlace) {
+	public RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2 ) {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
@@ -418,14 +435,10 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			throw new IllegalArgumentException("No progress bar report found for the user");
 		}
 
-		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
-
-		specificUserDetails.setNativePlace(nativePlace);
-		specificUserDetails.setMemberOfOtherCommunity(isMemberOfOtherCommunity);
-		specificUserDetails.setApplicationForMembershipDeclaration(isDecleration);
-
+		BeanUtils.copyProperties(registrationFrom2, specificUserDetails);
 		registrationFromRepository.save(specificUserDetails);
-
+		
+		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
 		progressBarReport.setRegistrationThreeFormCompleted(RegistrationFormConstants.TRUE);
 		progressBarRepository.save(progressBarReport);
 
@@ -433,9 +446,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public Page<PaymentInfo> accountFirstView(int page, int size) {
+	public List<RegistrationFrom> accountFirstView(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		return paymentRepository.findAll(pageable);
+		return registrationFromRepository.findAll(pageable).stream()
+				.filter(p->p.getPaymentInfo().getPaymentDetailDocument()!=null)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -453,8 +468,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		else  {
 			documentName = user.getProfilePic();
 		}
-		Path filePath = Paths.get(UPLOAD_DIR +"\\"+documentName);
-		System.out.println(filePath);
+		Path filePath = Paths.get(UPLOAD_DIR + ApplicationConstants.DOUBLE_SLASH + documentName);
 		Resource resource = new UrlResource(filePath.toUri());
 		return ResponseEntity.ok()
 				.contentType(MediaType.parseMediaType("application/octet-stream"))
@@ -467,30 +481,43 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
-		PaymentInfo paymentInfo= user.getPaymentInfo();
-		paymentInfo.setTransactionDate(LocalDate.now());
+		
 		String originalFileName = transcationRecepit.getOriginalFilename();
 		String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
 		String fileName = user.getUserId() + ApplicationConstants.HYPHEN+ ApplicationConstants.TRANSCATION + extension;
 		String filePath = UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + transcationRecepit;
 		Path path = Paths.get(filePath);
 		Files.write(path, transcationRecepit.getBytes());
+		
+		PaymentInfo paymentInfo= user.getPaymentInfo();
+		paymentInfo.setTransactionDate(LocalDate.now());
 		paymentInfo.setPaymentDetailDocument(fileName);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
-		
+
 		ProgressBarReport progressBarReport = progressBarRepository.findById(userId).get();
 		progressBarReport.setPayment(true);
 		progressBarRepository.save(progressBarReport);
 		String[] sendEmail= new String[1];
 		sendEmail[0] = user.getEmailAddress();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getPaymentApprovalEmail());
-		
+
 		email.MailSendingService(ADMIN_USERNAME, sendEmail,body ,EmailConstants.PAYMENT_RECIEVED_SUBJECT );
-		
+
 		return new ResponseEntity("Recepit Uploaded successfully",HttpStatus.OK);
 	}
 
-
+	@Override
+	public ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException {
+		RegistrationFrom user = registrationFromRepository.findById(userId).get();
+		
+		Path filePath = Paths.get(UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + user.getPaymentInfo().getPaymentDetailDocument());
+		System.out.println(filePath);
+		Resource resource = new UrlResource(filePath.toUri());
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType("application/octet-stream"))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+				.body(resource);
+	}
 
 }
