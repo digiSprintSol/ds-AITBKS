@@ -2,18 +2,12 @@ package com.digisprint.controller;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.http.HttpHeaders;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -90,13 +84,13 @@ public class RegistrationController {
 		return registrationService.progressBarForAUser(userId);
 	}
 	
-//	@Operation(summary="")
-//	@PostMapping(value="/registrationThreeForm/{applicantId}/{isMemberOfOtherCommunity}/{isDecleration}/{nativePlace}")
-//	public RegistrationFrom userFillingRegistrationThreeForm(@RequestParam(value="applicantId") String applicantId,
-//			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
-//			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
-//		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
-//	}
+	@Operation(summary="")
+	@PostMapping(value="/registrationThreeForm/{applicantId}/{isMemberOfOtherCommunity}/{isDecleration}/{nativePlace}")
+	public RegistrationFrom userFillingRegistrationThreeForm(@RequestParam(value="applicantId") String applicantId,
+			@RequestParam(value="isMemberOfOtherCommunity") boolean isMemberOfOtherCommunity
+			,@RequestParam(value="isDecleration") boolean isDecleration,@RequestParam(value="nativePlace") String nativePlace) {
+		return registrationService.userFillingRegistrationThreeForm(applicantId, isMemberOfOtherCommunity, isDecleration, nativePlace);
+	}
 	
 	@Operation(summary="")
 	@GetMapping(value="/accountantFirstView")
