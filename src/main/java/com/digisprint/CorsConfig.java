@@ -1,23 +1,23 @@
 package com.digisprint;
-
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
-//
-////    @Override
-////    public void addCorsMappings(CorsRegistry registry) {
-////        registry.addMapping("/**").allowedHeaders("*").allowedMethods("HEAD","POST","GET","PUT","PATCH","DELETE").allowedOrigins("*");
-////    }
-//    
-	 @Override
-	    public void addCorsMappings(CorsRegistry registry) {
-	        registry.addMapping("/**")
-	        .allowedHeaders("*")
-	        .allowedMethods("HEAD","POST","GET","PUT","PATCH","DELETE","OPTIONS")
-	        .allowedOrigins("*")
-	        .maxAge(3600);
-	    }
+public class CorsConfig {
+
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("*"); // Replace with your frontend domain
+        corsConfiguration.addAllowedHeader("*");
+        corsConfiguration.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+
+        return new CorsFilter(source);
+    }
 }

@@ -59,11 +59,7 @@ public class JwtTokenValidator implements Filter {
 		System.out.println("inside token validator class");
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		HttpServletResponse httpServletResponse=(HttpServletResponse) response;
-//		httpServletResponse.setHeader(ApplicationConstants.ALLOW_CROS_ORIGIN, ApplicationConstants.ALLOW_ORIGINS);
-		httpServletResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-		httpServletResponse.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-		httpServletResponse.setHeader("Access-Control-Max-Age", "3600");
-		httpServletResponse.setHeader("Access-Control-Allow-Headers", "X-Requested-With, X-Auth-Token");
+		httpServletResponse.setHeader(ApplicationConstants.ALLOW_CROS_ORIGIN, ApplicationConstants.ALLOW_ORIGINS);
 		String token = httpServletRequest.getHeader(ApplicationConstants.TOKEN);
 		System.out.println(token);
 		if (token != null && !((HttpServletRequest) request).getRequestURI().contains(ApplicationConstants.LOGIN) 

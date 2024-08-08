@@ -1,5 +1,5 @@
 package com.digisprint.security;
-
+ 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,64 +13,53 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+ 
 import com.digisprint.filter.JwtRequestFilter;
 import com.digisprint.utils.ApplicationConstants;
-
-
+ 
+ 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
+ 
 	@Autowired
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
+ 
 	@Autowired
 	private UserDetailsService jwtUserDetailsService;
-
+ 
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
-
+ 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(jwtUserDetailsService);
 	}
-
+ 
 	@SuppressWarnings("deprecation")
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		return super.authenticationManagerBean();
 	}
-	
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		
 		/**
 		 * Generating and validating unique tokens for each user session to ensure that requests originate from the 
 		 * legitimate website.Setting the SameSite attribute for cookies to restrict their usage to same-site requests 
 		 * only. We don't need this as of now, that's the reason this is setup to disable.
 		 */
-		httpSecurity.csrf().disable();
-		httpSecurity
-				.authorizeRequests().antMatchers().permitAll().anyRequest().permitAll();
-//				.antMatchers("/login","/loginWithToken").permitAll()
-//				.antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//				.antMatchers("/actuator/**").permitAll()
-//				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT)
-//				.antMatchers(HttpMethod.GET,"/user/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT, ApplicationConstants.USER)
-				/**
-				 * All other requests will be authenticated here
-				 */
-//				.anyRequest() .authenticated()
-//				.and().
-//				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-//				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
+		httpSecurity.cors().and().csrf().disable()
+				.authorizeRequests().antMatchers("/**")
+				.permitAll()
+				.anyRequest() .authenticated()
+				.and().
+				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+ 
 		/* Adding a filter to validate the tokens with every request */
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 		System.out.println("Added filter");
 	}
-	
 }
