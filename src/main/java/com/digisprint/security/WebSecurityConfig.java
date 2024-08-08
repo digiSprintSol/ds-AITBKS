@@ -54,19 +54,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		 */
 		httpSecurity.csrf().disable();
 		httpSecurity
-				.authorizeRequests()
-				.antMatchers("/login","/loginWithToken").permitAll()
-				.antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-				.antMatchers("/actuator/**").permitAll()
-				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT)
-				.antMatchers(HttpMethod.GET,"/user/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT, ApplicationConstants.USER)
+				.authorizeRequests().antMatchers().permitAll().anyRequest().permitAll();
+//				.antMatchers("/login","/loginWithToken").permitAll()
+//				.antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+//				.antMatchers("/actuator/**").permitAll()
+//				.antMatchers(HttpMethod.GET,"/internalUsers/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT)
+//				.antMatchers(HttpMethod.GET,"/user/[A-Za-z0-9-]+$").hasAnyAuthority(ApplicationConstants.PRESIDENT,ApplicationConstants.COMMITEE, ApplicationConstants.ACCOUNTANT, ApplicationConstants.USER)
 				/**
 				 * All other requests will be authenticated here
 				 */
-				.anyRequest() .authenticated()
-				.and().
-				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//				.anyRequest() .authenticated()
+//				.and().
+//				exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+//				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		/* Adding a filter to validate the tokens with every request */
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

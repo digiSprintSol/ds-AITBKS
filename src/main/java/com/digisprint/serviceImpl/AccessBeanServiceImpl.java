@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -24,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
-import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
@@ -61,6 +63,9 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Value("${org.home}")
 	private String pathForStorage;
+	
+	@Autowired
+	HttpServletResponse response;
 
 	@Override
 	public ResponseEntity saveInternalUsers(AccessBean accessBean) {
@@ -143,7 +148,15 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public String  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-		return jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+		 String token = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+			Cookie cookie = new Cookie("token",token);
+			cookie.setHttpOnly(true); // Make the cookie HTTP-only
+			cookie.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
+			cookie.setMaxAge(60 * 60 * 24); // Set cookie expiration (in seconds)
+			response.addCookie(cookie);
+			cookie.setPath("/"); 
+			System.out.println("cookies get values::"+cookie.getValue());
+		 return token;
 	}
 
 	public  Claims decodeAndValidateToken(String token) {

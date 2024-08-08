@@ -46,7 +46,7 @@ public class ApplicationConstants {
 
 	public static final String NONE = "none";
 
-	public static final String TOKEN = "token";
+	public static final String TOKEN = "Token";
 	
 	public static final String AUTH_TOKEN = "Auth token";
 

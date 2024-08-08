@@ -40,7 +40,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping(ApplicationConstants.USER_API)
-@CrossOrigin
+@CrossOrigin(origins="*")
 public class RegistrationController {
 
      private RegistrationService registrationService;
@@ -54,7 +54,7 @@ public class RegistrationController {
 	private HttpServletRequest request;
 	
 	 public String getToken() {
-	        return request.getHeader("token");	        
+	        return request.getHeader("Token");	        
 	    }
 	
 	@Operation(summary="This method is used for 1st level of Registration")

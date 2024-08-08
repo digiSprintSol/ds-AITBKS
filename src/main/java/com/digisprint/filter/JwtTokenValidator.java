@@ -56,12 +56,16 @@ public class JwtTokenValidator implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		log.debug("Cutom Filter- doFilter");
+		System.out.println("inside token validator class");
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		HttpServletResponse httpServletResponse=(HttpServletResponse) response;
-		httpServletResponse.setHeader(ApplicationConstants.ALLOW_CROS_ORIGIN, ApplicationConstants.ALLOW_ORIGINS);
-
+//		httpServletResponse.setHeader(ApplicationConstants.ALLOW_CROS_ORIGIN, ApplicationConstants.ALLOW_ORIGINS);
+		httpServletResponse.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+		httpServletResponse.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
+		httpServletResponse.setHeader("Access-Control-Max-Age", "3600");
+		httpServletResponse.setHeader("Access-Control-Allow-Headers", "X-Requested-With, X-Auth-Token");
 		String token = httpServletRequest.getHeader(ApplicationConstants.TOKEN);
+		System.out.println(token);
 		if (token != null && !((HttpServletRequest) request).getRequestURI().contains(ApplicationConstants.LOGIN) 
 				&& !((HttpServletRequest) request).getRequestURI().contains(ApplicationConstants.SWAGGER)
 				&& !((HttpServletRequest) request).getRequestURI().contains(ApplicationConstants.API_DOCS)
@@ -73,6 +77,7 @@ public class JwtTokenValidator implements Filter {
 			if (chunks.length < 2) {
 				((HttpServletResponse) response).setStatus(HttpStatus.UNAUTHORIZED.value());
 				((HttpServletResponse) response).sendError(HttpStatus.UNAUTHORIZED.value(),ErrorResponseConstants.NOT_AUTHORISED);
+				System.out.println("chunks");
 			} else {
 				String tokenWithoutSignature = chunks[0] + "." + chunks[1];
 				String signature = chunks[2];
@@ -81,11 +86,12 @@ public class JwtTokenValidator implements Filter {
 					ObjectMapper mapper = new ObjectMapper();
 					response.getWriter().write(mapper.writeValueAsString(e));
 					((HttpServletResponse) response).sendError(HttpStatus.UNAUTHORIZED.value(),ErrorResponseConstants.NOT_AUTHORISED);
+				System.out.println("inside if and getting eror");
 				}else {
 					String body = new String(decoder.decode(chunks[1]));
 					JSONObject jsonObject = new JSONObject(body);
 					JSONArray array = (JSONArray) jsonObject.get(ApplicationConstants.ACCESS);
-
+					System.out.println("i am here");
 					chain.doFilter(request, response);
 				}
 			}
