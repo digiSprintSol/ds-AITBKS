@@ -113,6 +113,7 @@ public class JwtTokenValidator implements Filter {
 			AccessBean admin = new AccessBean();
 			admin.setAccessId("Admin");
 			admin.setEmail("admin@xyz.com");
+			admin.setName("Admin");
 			admin.setPassword("Admin123");
 			admin.setPresident(true);
 			admin.setCommitee(true);

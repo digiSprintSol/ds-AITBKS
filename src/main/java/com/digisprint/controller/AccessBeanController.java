@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -86,6 +87,8 @@ public class AccessBeanController {
 	ResponseEntity softDeleteInternalUsers(@PathVariable("id") String id) {
 		return accessBeanService.softDeleteInternalUsers(id);
 	}
+	
+	@Operation(summary = "This method is used to upload events or images")
 	@PostMapping(value="/uploadEventsImages",consumes = { "multipart/form-data" })
 	public ResponseEntity uploadEventsAnnocementsImages(@RequestParam(name="events",required =false) MultipartFile events,
 			@RequestParam(name="imagesForHomePage",required =false) MultipartFile imagesForHomePage ,
@@ -94,21 +97,25 @@ public class AccessBeanController {
 		return accessBeanService.uploadEventsAnnocementsImages(events, imagesForHomePage, title, description);
 	}
 
+	@Operation(summary = "This method is used to post announcement")
 	@PostMapping(value="/postingAnnouncements")
 	public ResponseEntity postingAnnouncements(@RequestBody UploadAnnouncement uploadAnnouncement)	{
 		return accessBeanService.postingAnnouncements(uploadAnnouncement.getTitle(),uploadAnnouncement.getDescription());
 	}
 
+	@Operation(summary = "This method is used to get all announcement")
 	@GetMapping(value="/getAllAnnouncements")
 	public ResponseEntity getAllAnnouncement () {
 		return accessBeanService.getAllAnnouncement();
 	}
 
+	@Operation(summary = "This method is used to get events")
 	@GetMapping(value="/getEvents")
 	public ResponseEntity getEvents() throws MalformedURLException {
 		return accessBeanService.getEvents();
 	}
 
+	@Operation(summary = "This method is used to get ")
 	@GetMapping(value="/getImages")
 	public ResponseEntity getImages() throws MalformedURLException {
 		return accessBeanService.getImages();

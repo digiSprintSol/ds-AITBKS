@@ -82,44 +82,46 @@ public class RegistrationController {
 		return registrationService.getAllRegisteredUsers(page,size);
 	}
 	
-	@Operation(summary="")
+	@Operation(summary="This method is used for approval from various roles")
 	@PostMapping(value="/approval/{userId}")
 	public void committeePresidentAccountantApproval(@PathVariable(value="userId") String userId,
 			@RequestBody ApprovalFrom approvalFrom) throws Exception {
 		 registrationService.committeePresidentAccountantApproval(getToken(),userId,approvalFrom );
 	} 
 	
-	@Operation(summary="")
-	@GetMapping(value="/progressBar/{userId}")
-	public ProgressBarReport progressBarForAUser(@RequestParam(value="userId") String userId) {
-		return registrationService.progressBarForAUser(userId); 
-		//implement with token 
+	@Operation(summary="This is used to see the progress bar")
+	@GetMapping(value="/progressBar")
+	public ProgressBarReport progressBarForAUser() {
+		return registrationService.progressBarForAUser(getToken()); 
 	}
 	
-	@Operation(summary="")
+	@Operation(summary="This method is used to save Registration from 3")
 	@PostMapping(value="/registrationThreeForm")
 	public RegistrationFrom userFillingRegistrationThreeForm(@RequestBody RegistrationFrom2 registrationFrom2) {
 		return registrationService.userFillingRegistrationThreeForm(getToken(),registrationFrom2 );
 	}
 	
-	@Operation(summary="")
+	@Operation(summary="This method is used to see account view for users")
 	@GetMapping(value="/accountantFirstView")
 	public List<RegistrationFrom> accountFirstView( @RequestParam(defaultValue = "0") int page,
 			 @RequestParam(defaultValue = "10") int size) {
 		return registrationService.accountFirstView(page, size);
 	}
 	
+	@Operation(summary="This method is used to download documents of the user")
 	@GetMapping(value = "/downloadUserDocuments/{userId}")
 	public ResponseEntity getDocuments(@PathVariable String userId) throws UserNotFoundException, MalformedURLException {
 		return registrationService.getDocumentOfUser(userId);
 		
 	}
 	
+	@Operation(summary="This method is used to upload the payment receipt")
 	@PostMapping(value="/uploadTranscationReceipt" ,  consumes = { "multipart/form-data" })
 	public ResponseEntity uploadTranscationRecepit(@RequestParam MultipartFile transcationRecepit) throws IOException, MessagingException {
 		return registrationService.uploadTranscationRecepit(getToken(), transcationRecepit);
 	}
 	
+	@Operation(summary="This method is used to get payment receipt")
 	@GetMapping(value="/downloadPaymentReceipt/{userId}")
 	public ResponseEntity getPaymentReceipt(@PathVariable String userId) throws MalformedURLException {
 		return registrationService.getPaymentReceipt(userId);
