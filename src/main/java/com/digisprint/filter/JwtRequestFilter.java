@@ -2,6 +2,7 @@ package com.digisprint.filter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.FilterChain;
@@ -37,8 +38,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
+		String token = null;
 		final String requestTokenHeader = request.getHeader(ApplicationConstants.TOKEN);
-		System.out.println("inside second filter class");
+		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+            token = requestTokenHeader.substring(7); // Remove "Bearer " prefix
+        } else {
+            System.out.println("No Authorization header or Bearer token found");
+        }
+		 Enumeration<String> headerNames = request.getHeaderNames();
+
+	        // Iterate through headers and log/print them
+	        while (headerNames.hasMoreElements()) {
+	            String headerName = headerNames.nextElement();
+	            String headerValue = request.getHeader(headerName);
+	            System.out.println("Header Name: " + headerName + " | Header Value: " + headerValue);
+	        }
+		System.out.println("inside second filter class"+requestTokenHeader);
 		String username = null;
 		String jwtToken = null;
 		

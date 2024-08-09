@@ -1,4 +1,7 @@
 package com.digisprint;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,7 +17,6 @@ public class CorsConfig {
         corsConfiguration.addAllowedOrigin("*"); // Replace with your frontend domain
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
-
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
 

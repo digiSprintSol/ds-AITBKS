@@ -53,9 +53,12 @@ public class RegistrationController {
 	@Autowired
 	private HttpServletRequest request;
 	
-	 public String getToken() {
-	        return request.getHeader("Token");	        
-	    }
+	public String getToken() {
+		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
+		String token = requestHeaders.substring(7); // Remove "Bearer " prefix
+		return token;
+	}
+
 	
 	@Operation(summary="This method is used for 1st level of Registration")
 	@PostMapping("/register")
@@ -84,12 +87,13 @@ public class RegistrationController {
 	public void committeePresidentAccountantApproval(@PathVariable(value="userId") String userId,
 			@RequestBody ApprovalFrom approvalFrom) throws Exception {
 		 registrationService.committeePresidentAccountantApproval(getToken(),userId,approvalFrom );
-	}
+	} 
 	
 	@Operation(summary="")
-	@PostMapping(value="/progressBar/{userId}")
+	@GetMapping(value="/progressBar/{userId}")
 	public ProgressBarReport progressBarForAUser(@RequestParam(value="userId") String userId) {
-		return registrationService.progressBarForAUser(userId);
+		return registrationService.progressBarForAUser(userId); 
+		//implement with token 
 	}
 	
 	@Operation(summary="")

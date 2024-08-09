@@ -148,15 +148,15 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public String  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-		 String token = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
-			Cookie cookie = new Cookie("token",token);
-			cookie.setHttpOnly(true); // Make the cookie HTTP-only
-			cookie.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
-			cookie.setMaxAge(60 * 60 * 24); // Set cookie expiration (in seconds)
-			response.addCookie(cookie);
-			cookie.setPath("/"); 
-			System.out.println("cookies get values::"+cookie.getValue());
-		 return token;
+		 String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+//			Cookie cookie1 = new Cookie("auth",cookie);
+//			cookie1.setHttpOnly(true); // Make the cookie HTTP-only
+//			cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
+//			cookie1.setMaxAge(60 * 60 * 24); // Set cookie expiration (in seconds)
+//			response.addCookie(cookie1);
+//			cookie1.setPath("/"); 
+//			System.out.println("cookies get values::"+cookie1.getValue());
+		 return cookie;
 	}
 
 	public  Claims decodeAndValidateToken(String token) {

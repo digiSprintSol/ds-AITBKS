@@ -2,6 +2,7 @@ package com.digisprint.bean;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,6 +25,8 @@ public class AccessBean {
 	
 	private String password;
 	
+	private String phoneNumber;
+	
 	private boolean president;
 	
 	private boolean accountant;
@@ -32,6 +35,7 @@ public class AccessBean {
 	
 	private boolean user;
 	
+	@CreatedDate
 	private LocalDateTime dateOfAssignedPosition;
 
 	private boolean deleted;
