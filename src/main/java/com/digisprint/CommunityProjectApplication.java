@@ -24,20 +24,6 @@ public class CommunityProjectApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CommunityProjectApplication.class, args);
 	}
-
-//	@Bean
-//	public OperationCustomizer customGlobalHeaders() {
-//		return (Operation operation, HandlerMethod handlerMethod) -> {
-//			Parameter token = new Parameter()
-//					.in(ParameterIn.HEADER.toString())
-//					.schema(new StringSchema())
-//					.name(ApplicationConstants.TOKEN)
-//					.description(ApplicationConstants.AUTH_TOKEN)
-//					.required(true);
-//			operation.addParametersItem(token);
-//			return operation;
-//		};
-//	}
 	
 	@Bean
 	public OperationCustomizer customGlobalHeaders() {

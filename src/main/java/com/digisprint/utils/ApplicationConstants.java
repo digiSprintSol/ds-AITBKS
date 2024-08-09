@@ -47,34 +47,34 @@ public class ApplicationConstants {
 	public static final String NONE = "none";
 
 	public static final String TOKEN = "Token";
-	
+
 	public static final String AUTH_TOKEN = "Auth token";
 
 	public static final String USER_NOT_FOUND_WITH_USERNAME =  "User not found with username: ";
 
 	public static final String FILE_UPLOADED_SUCCESSFULLY ="File uploaded successfully!";
-	
+
 	public static final String ALLOW_CROS_ORIGIN = "Access-Control-Allow-Origin";
-	
+
 	public static final String ALLOW_ORIGINS = "*";
-	
+
 	public static final String ACCESS = "access";
-	
+
 	public static final String LOGIN = "login";
-	
+
 	public static final String SWAGGER = "swagger";
-	
+
 	public static final String API_DOCS	= "api-docs";
-	
+
 	public static final String ACTUATOR = "actuator";
-	
+
 	public static final String EVENTS = "EVENTS";
-	
+
 	public static final String IMAGES = "IMAGES";
-	
+
 	public static final String TRANSCATION = "TRANSCATION RECEPIT";
 
 	public static final String APPROVED = "Approved";
-	
+
 
 }
