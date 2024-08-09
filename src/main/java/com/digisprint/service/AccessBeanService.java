@@ -10,7 +10,7 @@ import com.digisprint.bean.AccessBean;
 
 public interface AccessBeanService {
 	
-	String login(String userName, String password);
+	ResponseEntity login(String userName, String password);
 	ResponseEntity saveInternalUsers(AccessBean accessBean);
 	ResponseEntity getAllInternalUsers();
 	ResponseEntity fetchInternalUsersById(String id);

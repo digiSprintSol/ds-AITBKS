@@ -54,7 +54,7 @@ public class AccessBeanController {
 
 	@Operation(summary = "Method Used for LogIn")
 	@PostMapping("/login")
-	String login(@RequestBody LoginPayload login) {
+	ResponseEntity login(@RequestBody LoginPayload login) {
 		return accessBeanService.login(login.getUsername(), login.getPassword());
 	}
 

@@ -32,6 +32,7 @@ import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
+import com.digisprint.responseBody.LoginResponse;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.ErrorResponseConstants;
@@ -63,7 +64,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Value("${org.home}")
 	private String pathForStorage;
-	
+
 	@Autowired
 	HttpServletResponse response;
 
@@ -146,17 +147,19 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	} 
 
 	@Override
-	public String  login(String userName, String password) {
+	public ResponseEntity  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-		 String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
-//			Cookie cookie1 = new Cookie("auth",cookie);
-//			cookie1.setHttpOnly(true); // Make the cookie HTTP-only
-//			cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
-//			cookie1.setMaxAge(60 * 60 * 24); // Set cookie expiration (in seconds)
-//			response.addCookie(cookie1);
-//			cookie1.setPath("/"); 
-//			System.out.println("cookies get values::"+cookie1.getValue());
-		 return cookie;
+		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+		Cookie cookie1 = new Cookie("token",cookie);
+		cookie1.setHttpOnly(true); // Make the cookie HTTP-only
+		cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
+		cookie1.setMaxAge(60 * 60 * 24); // Set cookie expiration (in seconds)
+		response.addCookie(cookie1);
+		cookie1.setPath("/"); 
+		//			System.out.println("cookies get values::"+cookie1.getValue());
+		LoginResponse loginResponse = new LoginResponse();
+		loginResponse.setToken(cookie);
+		return new ResponseEntity(loginResponse,HttpStatus.OK);
 	}
 
 	public  Claims decodeAndValidateToken(String token) {
@@ -293,7 +296,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			return new ResponseEntity("No Announcements found",HttpStatus.NOT_FOUND);
 		}
 		else {
-		return new ResponseEntity(announcements,HttpStatus.OK);
+			return new ResponseEntity(announcements,HttpStatus.OK);
 		}
 	}
 
