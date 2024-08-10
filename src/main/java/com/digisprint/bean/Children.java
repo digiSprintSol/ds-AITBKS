@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 @Data
-public class Childern {
+public class Children {
 
 	private String name;
 
@@ -17,6 +17,8 @@ public class Childern {
 	private String isMarried;
 	
 	private String childAge;
+	
+	private String gender;
 	
 	
 }

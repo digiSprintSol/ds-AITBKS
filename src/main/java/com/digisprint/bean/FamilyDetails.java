@@ -18,13 +18,13 @@ public class FamilyDetails {
 	@NotNull(message="Requried")
 	private String motherName;
 	
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
 	private String spouseName;
 	
 	private String spouseOccupation;
 	
 	private boolean isMarried;
 	
-	private List<Childern> childern;
+	private String numberOfchildren;
+	
+	private List<Children> children;
 }
