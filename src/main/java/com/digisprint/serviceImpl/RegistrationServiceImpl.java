@@ -247,8 +247,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		List accessList = jwtTokenUtil.getAccessList(token);
 		String userType = null;
 
-		if(accessList.contains(ApplicationConstants.PRESIDENT) && accessList.contains(ApplicationConstants.COMMITEE)
-				&& accessList.contains(ApplicationConstants.ACCOUNTANT)) {
+		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
 			userType = ApplicationConstants.PRESIDENT;
 		}
 
