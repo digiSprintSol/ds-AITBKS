@@ -35,11 +35,13 @@ public interface RegistrationService {
 
 	ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException;
 
-	ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit) throws IOException, MessagingException;
+	ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit, String transcationId) throws IOException, MessagingException;
 
 	RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
 
 	ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException;
+
+	ResponseEntity getUserDetails(String token);
 	
 
 }

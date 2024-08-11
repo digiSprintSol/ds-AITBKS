@@ -117,8 +117,8 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used to upload the payment receipt")
 	@PostMapping(value="/uploadTranscationReceipt" ,  consumes = { "multipart/form-data" })
-	public ResponseEntity uploadTranscationRecepit(@RequestParam MultipartFile transcationRecepit) throws IOException, MessagingException {
-		return registrationService.uploadTranscationRecepit(getToken(), transcationRecepit);
+	public ResponseEntity uploadTranscationRecepit(@RequestParam MultipartFile transcationRecepit,@RequestParam String transcationId) throws IOException, MessagingException {
+		return registrationService.uploadTranscationRecepit(getToken(), transcationRecepit,transcationId);
 	}
 	
 	@Operation(summary="This method is used to get payment receipt")
@@ -126,4 +126,13 @@ public class RegistrationController {
 	public ResponseEntity getPaymentReceipt(@PathVariable String userId) throws MalformedURLException {
 		return registrationService.getPaymentReceipt(userId);
 	}
+	
+	@Operation(summary="This method is used to get payment receipt")
+	@GetMapping(value="/getSpecificUserDetails")
+	public ResponseEntity getUserDetails() {
+		return registrationService.getUserDetails(getToken());
+		
+	}
+	
 }
+

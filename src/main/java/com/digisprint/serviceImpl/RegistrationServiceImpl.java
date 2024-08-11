@@ -477,7 +477,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit) throws IOException, MessagingException {
+	public ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit,String transcationId) throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
@@ -492,6 +492,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		PaymentInfo paymentInfo= user.getPaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
 		paymentInfo.setPaymentDetailDocument(fileName);
+		paymentInfo.setTrasactionId(transcationId);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
 
@@ -518,6 +519,19 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				.contentType(MediaType.parseMediaType("application/octet-stream"))
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
 				.body(resource);
+	}
+
+	@Override
+	public ResponseEntity getUserDetails(String token) {
+		JSONObject tokenObject = decodeToken(token);
+		String userId= tokenObject.getString("userId");
+		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
+		if (specificUserDetails == null) {
+			return new ResponseEntity("No user found",HttpStatus.NOT_FOUND);
+		}
+		else {
+			return new ResponseEntity(specificUserDetails,HttpStatus.OK);
+		}
 	}
 
 }
