@@ -516,11 +516,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		
 		Path filePath = Paths.get(UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + user.getPaymentInfo().getPaymentDetailDocument());
 		System.out.println(filePath);
-		Resource resource = new UrlResource(filePath.toUri());
-		return ResponseEntity.ok()
-				.contentType(MediaType.parseMediaType("application/octet-stream"))
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-				.body(resource);
+		if(filePath!=null) {
+			return new ResponseEntity(filePath,HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity("No recepit found with the user",HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@Override
