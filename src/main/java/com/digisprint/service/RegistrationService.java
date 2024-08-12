@@ -25,7 +25,7 @@ public interface RegistrationService {
 		
 	Page<RegistrationFrom> getAllRegisteredUsers(int page, int size);
 	
-	void committeePresidentAccountantApproval(String token, String userId,ApprovalFrom approvalFrom) throws UserNotFoundException, Exception;
+	ResponseEntity committeePresidentAccountantApproval(String token, String userId,ApprovalFrom approvalFrom) throws UserNotFoundException, Exception;
 	
 	ProgressBarReport progressBarForAUser(String id);
 	

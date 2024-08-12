@@ -232,7 +232,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public void committeePresidentAccountantApproval(String token, String userId,ApprovalFrom from  ) throws Exception {
+	public ResponseEntity committeePresidentAccountantApproval(String token, String userId,ApprovalFrom from  ) throws Exception {
 
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
@@ -260,19 +260,20 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
-			throw new IllegalArgumentException("No user found with the provided phone number");
+			return new ResponseEntity("No user found with the user id",HttpStatus.NOT_FOUND);
 		}
 
 		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
 		if (!optionalProgressBarReport.isPresent()) {
-			throw new IllegalArgumentException("No progress bar report found for the user");
+			return new ResponseEntity("No progress bar report found for the user",HttpStatus.NOT_FOUND);
 		}
 		String[] user= new String[1];
 		user[0] = specificUserDetails.getEmailAddress();
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
 	
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
-			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE) {
+			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL) ) {
 				specificUserDetails.setCommitteeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeRemarksForApplicant(from.getRemarks());
 				String body = null;
@@ -280,8 +281,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				String username = specificUserDetails.getEmailAddress();
 				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(), specificUserDetails.getPhoneNumber());
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
-				body = body.replace("[]", username)
-						.replace("[]", passcode);
+				body = body.replace("[UserName]", username)
+						.replace("[Password]", passcode);
 
 				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 				progressBarReport.setCommitteeApproval(true);
@@ -310,8 +311,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			}
 		} else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
 			if (specificUserDetails != null && progressBarReport != null 
-					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					) {
+					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE 
+					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL) ) {
 				String body = null;
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
@@ -345,16 +346,17 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.MEMBERSHIP_APPROVED);
 
 			} else {
-				throw new IllegalArgumentException("All conditions for accountant approval are not met");
+				return new ResponseEntity("All conditions for accountant approval are not met",HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
 		} else {
-			throw new Exception("You don't have access !!");
+			return new ResponseEntity("You don't have access !!",HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		specificUserDetails.setStatus(from.getStatusOfApproval());
 		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
 		registrationFromRepository.save(specificUserDetails);
 		progressBarRepository.save(progressBarReport);
+		return new ResponseEntity("Status updated",HttpStatus.OK);
 
 	}
 

@@ -110,8 +110,7 @@ public class RegistrationFrom {
 	/**
 	 * DECLERATION
 	 */
-	@AssertTrue(message="Membership application must be requested")
-	private boolean requestForMembershipApplicationFromDeclaration;	
+	private boolean decalartionForRegOne;	
 
 	private String password;
 
@@ -126,10 +125,12 @@ public class RegistrationFrom {
 	
 	private String status; //from R1
 	
-	private boolean isApplicationForMembershipDeclaration; //R3
+	private boolean decalarationForRegThree; //R3
 	
 	private boolean isMemberOfOtherCommunity; //R3
-
+	
+	private String communityName;
+	
 	private PaymentInfo paymentInfo; //R3
 	
 	/**

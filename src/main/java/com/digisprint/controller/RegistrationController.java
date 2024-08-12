@@ -84,9 +84,9 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used for approval from various roles")
 	@PostMapping(value="/approval/{userId}")
-	public void committeePresidentAccountantApproval(@PathVariable(value="userId") String userId,
+	public ResponseEntity committeePresidentAccountantApproval(@PathVariable(value="userId") String userId,
 			@RequestBody ApprovalFrom approvalFrom) throws Exception {
-		 registrationService.committeePresidentAccountantApproval(getToken(),userId,approvalFrom );
+		return registrationService.committeePresidentAccountantApproval(getToken(),userId,approvalFrom );
 	} 
 	
 	@Operation(summary="This is used to see the progress bar")

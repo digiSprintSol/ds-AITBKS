@@ -6,10 +6,10 @@ public class RegistrationFormConstants {
 	
 	public static final boolean FALSE = false;
 
-	public static final String APPROVAL = "APPROVED";
+	public static final String APPROVAL = "accepted";
 	
-	public static final String REJECTED = "REJECTED";
+	public static final String REJECTED = "rejected";
 	
-	public static final String WAITING = "WAITING";
+	public static final String WAITING = "waiting";
 	
 }
