@@ -54,6 +54,7 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
+import com.digisprint.responseBody.GetPaymentDocumentResponse;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
@@ -486,9 +487,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		
 		String originalFileName = transcationRecepit.getOriginalFilename();
 		String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
+		File folder = new File(UPLOAD_TRANSCATION);
 		String fileName = user.getUserId() + ApplicationConstants.HYPHEN+ ApplicationConstants.TRANSCATION + extension;
-		String filePath = UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + transcationRecepit;
+		String filePath = UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + fileName;
 		Path path = Paths.get(filePath);
+		System.out.println("ertyuio"+fileName);
 		Files.write(path, transcationRecepit.getBytes());
 		
 		PaymentInfo paymentInfo= user.getPaymentInfo();
@@ -513,11 +516,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException {
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
-		
+		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
 		Path filePath = Paths.get(UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + user.getPaymentInfo().getPaymentDetailDocument());
-		System.out.println(filePath);
+		
 		if(filePath!=null) {
-			return new ResponseEntity(filePath,HttpStatus.OK);
+			documentResponse.setPathOfDocumnet(filePath.toString());
+			return new ResponseEntity(documentResponse,HttpStatus.OK);
 		}
 		else {
 			return new ResponseEntity("No recepit found with the user",HttpStatus.NOT_FOUND);
