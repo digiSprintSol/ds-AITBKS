@@ -110,7 +110,7 @@ public class RegistrationFrom {
 	/**
 	 * DECLERATION
 	 */
-	private boolean decalartionForRegOne;	
+ 	private boolean decalartionForRegOne;	
 
 	private String password;
 

@@ -10,4 +10,6 @@ public class RegistrationFrom2 {
 	private boolean isApplicationForMembershipDeclaration;
 	
 	private String nativePlace;
+	
+	private String communityName;
 }
