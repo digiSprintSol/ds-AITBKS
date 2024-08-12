@@ -322,6 +322,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 				
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				String body = null;
 				// rejection mail from president
