@@ -10,10 +10,8 @@ import lombok.Data;
 
 
 @Data
-@Document(collection = "payment_info")
 public class PaymentInfo {
 
-	@Id
 	private String trasactionId;
 	
 	private String amountPaid;
