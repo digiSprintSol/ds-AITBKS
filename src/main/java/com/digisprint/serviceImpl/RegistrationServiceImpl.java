@@ -377,7 +377,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		}
 
 		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("id") || !jsonObject.has("access")) {
+		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
 			throw new IllegalArgumentException("Token must contain 'id' and 'access' fields");
 		}
 
@@ -521,6 +521,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		
 		if(filePath!=null) {
 			documentResponse.setPathOfDocumnet(filePath.toString());
+			
 			return new ResponseEntity(documentResponse,HttpStatus.OK);
 		}
 		else {

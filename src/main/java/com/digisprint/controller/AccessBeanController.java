@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
+import com.digisprint.bean.MarketPlaces;
 import com.digisprint.requestBean.LoginPayload;
 import com.digisprint.requestBean.UploadAnnouncement;
 import com.digisprint.service.AccessBeanService;
@@ -119,5 +120,17 @@ public class AccessBeanController {
 	@GetMapping(value="/getImages")
 	public ResponseEntity getImages() throws MalformedURLException {
 		return accessBeanService.getImages();
+	}
+	
+	@Operation(summary="This method is used for posting market places")
+	@PostMapping(value="/postMarketPlace")
+	public ResponseEntity postMarketPlace(@RequestBody MarketPlaces marketPlaces) {
+		return accessBeanService.postMarketPlace(getToken(),marketPlaces);
+	}
+	
+	@Operation(summary="This method is used for getting market images")
+	@GetMapping(value="/getMarketPlaces")
+	public ResponseEntity getMarketPlace() {
+		return accessBeanService.getAllMarketPlaces();
 	}
 }

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -27,11 +29,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.MarketPlaces;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
+import com.digisprint.repository.MarketPlaceRepository;
 import com.digisprint.responseBody.LoginResponse;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
@@ -51,12 +55,16 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private JwtTokenUtil jwtTokenUtil;
 
+	private MarketPlaceRepository marketPlaceRepository;
+
 	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository,
-			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil) {
+			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil,
+			MarketPlaceRepository marketPlaceRepository) {
 		super();
 		this.accessBeanRepository = accessBeanRepository;
 		this.eventsImagesAnnouncementsRepo = eventsImagesAnnouncementsRepo;
 		this.jwtTokenUtil = jwtTokenUtil;
+		this.marketPlaceRepository = marketPlaceRepository;
 	}
 
 	@Value("${config.secretKey}")
@@ -321,5 +329,41 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				.body(resource);
 	}
 
+	public JSONObject decodeToken(String jwtToken) {
+		return JwtTokenUtil.decodeUserToken(jwtToken);
+	}
+
+	@Override
+	public ResponseEntity postMarketPlace(String token, MarketPlaces marketPlaces) {
+
+		JSONObject jsonObject = decodeToken(token);
+		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
+			throw new IllegalArgumentException("Token must contain 'id' and 'access' fields");
+		}
+
+		List accessList = jwtTokenUtil.getAccessList(token);
+
+		if(accessList.contains(ApplicationConstants.PRESIDENT)){
+			marketPlaces.setCreatedDate(LocalDateTime.now());
+			MarketPlaces marketPlaceObject= marketPlaceRepository.save(marketPlaces);
+			return new ResponseEntity(marketPlaceObject,HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity("No access found",HttpStatus.NOT_FOUND);
+		}
+	}
+
+	@Override
+	public ResponseEntity getAllMarketPlaces() {
+		
+		List<MarketPlaces> marketPlacesList	= marketPlaceRepository.findAll();
+		
+		if(marketPlacesList.size()==0) {
+			return new ResponseEntity("No data found",HttpStatus.NOT_FOUND);
+		}
+		else {
+			return new ResponseEntity(marketPlacesList,HttpStatus.OK);
+		}
+	}
 }
 
