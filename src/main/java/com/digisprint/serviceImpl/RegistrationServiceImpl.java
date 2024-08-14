@@ -114,10 +114,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
 
-		ProgressBarReport progressBarReport = new ProgressBarReport();
-		progressBarReport.setUserId(registrationForm.getUserId());
-		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
-		progressBarRepository.save(progressBarReport);
+		
 		//Sending mail to user.
 		List<String> membersList = new ArrayList<>();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom());
@@ -139,7 +136,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
-		registrationFromRepository.save(registrationForm);
+		 RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
+		ProgressBarReport progressBarReport = new ProgressBarReport();
+		progressBarReport.setUserId(userDeatils.getUserId());
+		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
+		progressBarRepository.save(progressBarReport);
 		return registrationForm;
 	}
 
