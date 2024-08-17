@@ -424,7 +424,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	public List<RegistrationFrom> accountFirstView(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		return registrationFromRepository.findAll(pageable).stream()
-				.filter(p->p.getPaymentInfo().getPaymentDetailDocument()!=null)
+				.filter(p->p.getPaymentInfo()!=null)
 				.collect(Collectors.toList());
 	}
 

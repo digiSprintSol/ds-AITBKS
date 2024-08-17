@@ -72,6 +72,9 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Value("${org.home}")
 	private String pathForStorage;
+	
+	@Value("${org.marketPlace}")
+	private String pathForMarketPlaces;
 
 	@Autowired
 	HttpServletResponse response;
@@ -225,9 +228,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			String originalFileName = file.getOriginalFilename();
 			String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
 			System.out.println("dhfjsdhf::"+extension);
-			//		if (!extension.equalsIgnoreCase(ApplicationConstants.PDF)) {
-			//			return originalFileName + ErrorResponseConstants.INVALID_FILE_TYPE;
-			//		}
 
 			String newFileName = title+ ApplicationConstants.UNDERSCORE + fileType
 					+ ApplicationConstants.UNDERSCORE
