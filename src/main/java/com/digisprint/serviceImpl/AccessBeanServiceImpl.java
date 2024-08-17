@@ -9,7 +9,10 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.Cookie;
@@ -36,6 +39,7 @@ import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
 import com.digisprint.repository.MarketPlaceRepository;
+import com.digisprint.responseBody.GetPaymentDocumentResponse;
 import com.digisprint.responseBody.LoginResponse;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
@@ -313,18 +317,21 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
 		return getFile(event.getEventImageName());
 	}
-
+	
 	@Override
 	public ResponseEntity getImages() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
 		return getFile(event.getImageName());
 	}
 
-	private ResponseEntity getFile(String documentName) throws MalformedURLException {
-		Path filePath = Paths.get(pathForStorage +"\\"+documentName);
 
+	private ResponseEntity getFile(String documentName) throws MalformedURLException {
+		Path filePath = Paths.get(pathForStorage + ApplicationConstants.DOUBLE_SLASH +documentName);
+		System.out.println(filePath.toString());
+		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
 		if(filePath != null) {
-			return new ResponseEntity(filePath,HttpStatus.OK);
+			documentResponse.setPathOfDocumnet(filePath.toString());
+			return new ResponseEntity(documentResponse,HttpStatus.OK);
 
 		}else {
 			return new ResponseEntity("File not found",HttpStatus.NOT_FOUND);
@@ -337,7 +344,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	}
 
 	@Override
-	public ResponseEntity postMarketPlace(String token, MarketPlaces marketPlaces) {
+	public ResponseEntity postMarketPlace(String token, String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, MultipartFile image) throws IOException {
 
 		JSONObject jsonObject = decodeToken(token);
 		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
@@ -347,9 +354,29 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		List accessList = jwtTokenUtil.getAccessList(token);
 
 		if(accessList.contains(ApplicationConstants.PRESIDENT)){
-			marketPlaces.setCreatedDate(LocalDateTime.now());
-			MarketPlaces marketPlaceObject= marketPlaceRepository.save(marketPlaces);
-			return new ResponseEntity(marketPlaceObject,HttpStatus.OK);
+			
+			File directory = new File(pathForMarketPlaces);
+	        if (!directory.exists()) {
+	            directory.mkdirs();
+	        }
+
+	        String filename = UUID.randomUUID() + "_" + image.getOriginalFilename();
+	        String filePath = Paths.get(pathForMarketPlaces, filename).toString();
+
+	        Files.write(Paths.get(filePath), image.getBytes());
+
+	        MarketPlaces marketPlace = new MarketPlaces();
+	        marketPlace.setNameOfShop(nameOfShop);
+	        marketPlace.setContactPerson(contactPerson);
+	        marketPlace.setMobileNumber(mobileNumber);
+	        marketPlace.setLocation(location);
+	        marketPlace.setCategory(category);
+	        marketPlace.setCity(city);
+	        marketPlace.setImage(filename);
+	        marketPlace.setCreatedDate(LocalDateTime.now());
+			
+			 marketPlaceRepository.save(marketPlace);
+			return new ResponseEntity(marketPlace,HttpStatus.OK);
 		}
 		else {
 			return new ResponseEntity("No access found",HttpStatus.NOT_FOUND);
@@ -368,5 +395,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			return new ResponseEntity(marketPlacesList,HttpStatus.OK);
 		}
 	}
+
+
 }
 

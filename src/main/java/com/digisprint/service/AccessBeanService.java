@@ -22,6 +22,6 @@ public interface AccessBeanService {
 	ResponseEntity getAllAnnouncement();
 	ResponseEntity getEvents() throws MalformedURLException;
 	ResponseEntity getImages() throws MalformedURLException;
-	ResponseEntity postMarketPlace(String token, MarketPlaces marketPlaces);
+	ResponseEntity postMarketPlace(String token,String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, MultipartFile image)throws IOException;
 	ResponseEntity getAllMarketPlaces();
 }

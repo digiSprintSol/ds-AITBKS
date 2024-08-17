@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -123,9 +124,20 @@ public class AccessBeanController {
 	}
 	
 	@Operation(summary="This method is used for posting market places")
-	@PostMapping(value="/postMarketPlace")
-	public ResponseEntity postMarketPlace(@RequestBody MarketPlaces marketPlaces) {
-		return accessBeanService.postMarketPlace(getToken(),marketPlaces);
+	@PostMapping(value="/postMarketPlace",consumes = { "multipart/form-data" })
+	public ResponseEntity postMarketPlace( @RequestParam("nameOfShop") String nameOfShop,
+            @RequestParam("contactPerson") String contactPerson,
+            @RequestParam("mobileNumber") String mobileNumber,
+            @RequestParam("location") String location,
+            @RequestParam("category") String category,
+            @RequestParam("city") String city,
+            @RequestParam(name="image",required =false) MultipartFile image) {
+        try {
+        	accessBeanService.postMarketPlace(getToken(), nameOfShop, contactPerson, mobileNumber, location, category, city, image);
+            return ResponseEntity.status(HttpStatus.CREATED).body("MarketPlace added successfully.");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving MarketPlace: " + e.getMessage());
+        }
 	}
 	
 	@Operation(summary="This method is used for getting market images")
@@ -133,4 +145,6 @@ public class AccessBeanController {
 	public ResponseEntity getMarketPlace() {
 		return accessBeanService.getAllMarketPlaces();
 	}
+	
+	
 }
