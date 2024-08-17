@@ -2,6 +2,7 @@ package com.digisprint.controller;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -146,5 +147,16 @@ public class AccessBeanController {
 		return accessBeanService.getAllMarketPlaces();
 	}
 	
+	@Operation(summary = "This method is used to get specific market place image")
+	@GetMapping(value="/getMarketPlaceImage/{marketPlaceId}")
+	public ResponseEntity getSelectedMarketPlace(@PathVariable("marketPlaceId") String marketPlaceId) throws MalformedURLException {
+		return accessBeanService.getSelectedMarketPlace(marketPlaceId);
+	}
+
+	@GetMapping("/categories")
+    public ResponseEntity<List<String>> getAllCategories() {
+        List<String> categories = accessBeanService.getAllCategories();
+        return ResponseEntity.ok(categories);
+    }
 	
 }

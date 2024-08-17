@@ -323,6 +323,28 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
 		return getFile(event.getImageName());
 	}
+	
+	@Override
+	public ResponseEntity getSelectedMarketPlace(String marketPlaceId) throws MalformedURLException {
+		MarketPlaces marketPlaces = marketPlaceRepository.findById(marketPlaceId).get();
+		System.out.println(marketPlaces.toString());
+		System.out.println(marketPlaces.getImage());
+		return getMPImage(marketPlaces.getImage());
+	}
+	
+	private ResponseEntity getMPImage(String documentName) throws MalformedURLException {
+		Path filePath = Paths.get(pathForMarketPlaces + ApplicationConstants.DOUBLE_SLASH +documentName);
+		System.out.println(filePath.toString());
+		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
+		if(filePath != null) {
+			documentResponse.setPathOfDocumnet(filePath.toString());
+			return new ResponseEntity(documentResponse,HttpStatus.OK);
+
+		}else {
+			return new ResponseEntity("File not found",HttpStatus.NOT_FOUND);
+		}
+
+	}
 
 
 	private ResponseEntity getFile(String documentName) throws MalformedURLException {
@@ -396,6 +418,18 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	@Override
+	public List<String> getAllCategories() {
+		
+		List<MarketPlaces> list = marketPlaceRepository.findAll();
+		
+		return list.stream()
+                .map(MarketPlaces::getCategory)
+                .distinct()             
+                .collect(Collectors.toList());
+	}
+
+	
 
 }
 

@@ -24,7 +24,7 @@ public class MarketPlaces {
 	
 	private String location;
 	
-	private String category; //hotel ,food,
+	private String category;
 	
 	private String city;
 	
