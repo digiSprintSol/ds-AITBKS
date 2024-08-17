@@ -134,5 +134,10 @@ public class RegistrationController {
 		
 	}
 	
+	@GetMapping("/membersForDropDown")
+    public List<String> getMembers() {
+        return registrationService.referenceOneDropdown();
+    }
+	
 }
 

@@ -322,11 +322,14 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private ResponseEntity getFile(String documentName) throws MalformedURLException {
 		Path filePath = Paths.get(pathForStorage +"\\"+documentName);
-		Resource resource = new UrlResource(filePath.toUri());
-		return ResponseEntity.ok()
-				.contentType(MediaType.parseMediaType("application/octet-stream"))
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-				.body(resource);
+
+		if(filePath != null) {
+			return new ResponseEntity(filePath,HttpStatus.OK);
+
+		}else {
+			return new ResponseEntity("File not found",HttpStatus.NOT_FOUND);
+		}
+
 	}
 
 	public JSONObject decodeToken(String jwtToken) {
@@ -355,9 +358,9 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllMarketPlaces() {
-		
+
 		List<MarketPlaces> marketPlacesList	= marketPlaceRepository.findAll();
-		
+
 		if(marketPlacesList.size()==0) {
 			return new ResponseEntity("No data found",HttpStatus.NOT_FOUND);
 		}

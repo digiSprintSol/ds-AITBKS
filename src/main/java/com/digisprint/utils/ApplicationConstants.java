@@ -70,7 +70,7 @@ public class ApplicationConstants {
 
 	public static final String EVENTS = "EVENTS";
 
-	public static final String IMAGES = "IMAGES";
+	public static final String IMAGES = "HOME_PAGE_IMAGE";
 
 	public static final String TRANSCATION = "TRANSCATION RECEPIT";
 

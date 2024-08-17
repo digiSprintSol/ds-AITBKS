@@ -114,7 +114,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
 
-		
+		Optional<RegistrationFrom> existingUser = registrationFromRepository.findByEmailAddress(registrationForm.getEmailAddress());
+		if (existingUser.isPresent()) {
+			throw new IllegalArgumentException("The entered email id already exists. Please enter another email id.");
+		}
+
 		//Sending mail to user.
 		List<String> membersList = new ArrayList<>();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom());
@@ -125,7 +129,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
 		//Sending mail to committee members
 		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
-		
+
 		List<AccessBean> committeList= accessBeanRepository.findByCommitee(true);
 		List<String> emailOfCommittee= committeList.stream().map(object->object.getEmail()).collect(Collectors.toList());
 		String[] emailsForCommiteeArray = new String[emailOfCommittee.size()];
@@ -136,7 +140,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
-		 RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
+		RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(userDeatils.getUserId());
 		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
@@ -155,10 +159,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		if (!file.isEmpty()) {
 			String originalFileName = file.getOriginalFilename();
 			String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
-
-			//			if (!extension.equalsIgnoreCase(ApplicationConstants.PDF)) {
-			//				return originalFileName + ErrorResponseConstants.INVALID_FILE_TYPE;
-			//			}
 
 			String newFileName = user_from.getUserId() + ApplicationConstants.UNDERSCORE + fileType
 					+ ApplicationConstants.UNDERSCORE
@@ -272,7 +272,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		String[] user= new String[1];
 		user[0] = specificUserDetails.getEmailAddress();
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
-	
+
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
 			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL) ) {
@@ -288,7 +288,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 				progressBarReport.setCommitteeApproval(true);
-				
+
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
 				accessBean.setAccountant(false);
@@ -297,7 +297,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				accessBean.setEmail(username);
 				accessBean.setPassword(passcode);
 				accessBeanRepository.save(accessBean);
-				
+
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setCommitteeApproval(false);
 				String body = null;
@@ -322,7 +322,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
-				
+
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
@@ -396,35 +396,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	}
 
-	//	@Override
-	//	public RegistrationFrom presidentFillingRegistrationThreeForm(String token, String appicantId, String categoryOfMemberShipRecomendedByPresident, String remarks) {
-	//
-	//		if (token == null || token.isEmpty()) {
-	//			throw new IllegalArgumentException("Token cannot be null or empty");
-	//		}
-	//
-	//		JSONObject jsonObject = decodeToken(token);
-	//		if (!jsonObject.has("id") || !jsonObject.has("access")) {
-	//			throw new IllegalArgumentException("Token must contain 'id' and 'type' fields");
-	//		}
-	//
-	//		List accessList = jwtTokenUtil.getAccessList(token);
-	//
-	//		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
-	//			RegistrationFrom form = registrationFromRepository.findById(appicantId).get();
-	//
-	//			form.setPresidentChoosenMembershipForApplicant(categoryOfMemberShipRecomendedByPresident);
-	//			form.setPresidentRemarksForApplicant(remarks);
-	//
-	//			registrationFromRepository.save(form);
-	//
-	//		}else {
-	//			throw new IllegalArgumentException("Invalid access");
-	//		}
-	//
-	//		return null;
-	//	}
-
 	@Override
 	public RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2 ) {
 		JSONObject tokenObject = decodeToken(token);
@@ -441,7 +412,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		BeanUtils.copyProperties(registrationFrom2, specificUserDetails);
 		registrationFromRepository.save(specificUserDetails);
-		
+
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
 		progressBarReport.setRegistrationThreeFormCompleted(RegistrationFormConstants.TRUE);
 		progressBarRepository.save(progressBarReport);
@@ -485,7 +456,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
-		
+
 		String originalFileName = transcationRecepit.getOriginalFilename();
 		String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
 		File folder = new File(UPLOAD_TRANSCATION);
@@ -494,8 +465,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		Path path = Paths.get(filePath);
 		System.out.println("ertyuio"+fileName);
 		Files.write(path, transcationRecepit.getBytes());
-		
-		PaymentInfo paymentInfo= user.getPaymentInfo();
+
+		PaymentInfo paymentInfo= new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
 		paymentInfo.setPaymentDetailDocument(fileName);
 		paymentInfo.setTrasactionId(transcationId);
@@ -519,10 +490,10 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
 		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
 		Path filePath = Paths.get(UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + user.getPaymentInfo().getPaymentDetailDocument());
-		
+
 		if(filePath!=null) {
 			documentResponse.setPathOfDocumnet(filePath.toString());
-			
+
 			return new ResponseEntity(documentResponse,HttpStatus.OK);
 		}
 		else {
@@ -541,6 +512,33 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		else {
 			return new ResponseEntity(specificUserDetails,HttpStatus.OK);
 		}
+	}
+
+	@Override
+	public List<String> referenceOneDropdown() {
+
+        List<ProgressBarReport> trueMembers = progressBarRepository.findByMemberTrue();
+
+        List<String> userIds = trueMembers.stream()
+                                          .map(ProgressBarReport::getUserId)
+                                          .collect(Collectors.toList());
+
+        List<RegistrationFrom> registrationForms = new ArrayList<>();
+        for (String userId : userIds) {
+            Optional<RegistrationFrom> optionalForm = registrationFromRepository.findById(userId);
+            if (optionalForm.isPresent()) {
+                registrationForms.add(optionalForm.get());
+            } else {
+                System.out.println("No RegistrationForm found for User ID: " + userId);
+            }
+        }
+
+        List<String> memberNames = registrationForms.stream()
+                                                    .map(RegistrationFrom::getFullName)
+                                                    .collect(Collectors.toList());
+
+        return memberNames;
+
 	}
 
 }
