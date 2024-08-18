@@ -27,4 +27,5 @@ public interface AccessBeanService {
 	ResponseEntity getAllMarketPlaces();
 	ResponseEntity getSelectedMarketPlace(String marketPlaceId)throws MalformedURLException;
 	List<String> getAllCategories();
+	List<String> getAllCities();
 }

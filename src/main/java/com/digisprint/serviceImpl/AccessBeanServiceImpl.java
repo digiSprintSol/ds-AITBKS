@@ -429,6 +429,17 @@ public class AccessBeanServiceImpl implements AccessBeanService{
                 .collect(Collectors.toList());
 	}
 
+	@Override
+	public List<String> getAllCities() {
+		
+		List<MarketPlaces> list = marketPlaceRepository.findAll();
+		
+		return list.stream()
+				.map(MarketPlaces::getCity)
+				.distinct()
+				.collect(Collectors.toList());
+	}
+
 	
 
 }

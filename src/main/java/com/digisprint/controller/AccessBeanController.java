@@ -159,4 +159,10 @@ public class AccessBeanController {
         return ResponseEntity.ok(categories);
     }
 	
+	@GetMapping("/cities")
+    public ResponseEntity<List<String>> getAllCities() {
+        List<String> cities = accessBeanService.getAllCities();
+        return ResponseEntity.ok(cities);
+    }
+	
 }
