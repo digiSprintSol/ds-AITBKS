@@ -146,5 +146,10 @@ public class RegistrationFrom {
 	private String presidentRemarksForApplicant; //R2
 	
 	private String committeeRemarksForApplicant; //R1
+	
+	/**
+	 * Membership id
+	 */
+	private String membershipId;
 
 }
