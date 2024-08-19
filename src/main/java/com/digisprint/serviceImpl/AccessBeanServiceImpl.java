@@ -265,7 +265,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile imagesForHomePage,
 			String title, String description) throws IOException {
-		String folderPath = "/tmp/" + pathForStorage;
+		String folderPath = pathForStorage;
 		File folder = new File(folderPath);
 		ResponseEntity result = null;
 		String strinFormateLocalDate = LocalDate.now().toString();
@@ -377,7 +377,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 		if(accessList.contains(ApplicationConstants.PRESIDENT)){
 			
-			File directory = new File("/tmp/" + pathForMarketPlaces);
+			File directory = new File(pathForMarketPlaces);
 	        if (!directory.exists()) {
 	            directory.mkdirs();
 	        }
