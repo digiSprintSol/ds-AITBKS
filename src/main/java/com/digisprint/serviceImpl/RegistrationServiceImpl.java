@@ -54,7 +54,7 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
-import com.digisprint.responseBody.GetPaymentDocumentResponse;
+import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
@@ -112,7 +112,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	private String UPLOAD_TRANSCATION;
 
 	@Override
-	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
+	public RegistrationFrom registerUser(RegistrationFrom registrationForm, String imageUrl) throws IOException, MessagingException {
 
 		Optional<RegistrationFrom> existingUser = registrationFromRepository.findByEmailAddress(registrationForm.getEmailAddress());
 		if (existingUser.isPresent()) {
@@ -140,6 +140,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
+		registrationForm.setProfilePic(imageUrl);
 		RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(userDeatils.getUserId());
@@ -154,83 +155,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		return registrationFromRepository.findAll(pageable); 
 	}
 
-	private String saveFileIfValid(MultipartFile file, String folderPath, RegistrationFrom user_from, String fileType,
-			String formattedDate) throws IOException {
-		if (!file.isEmpty()) {
-			String originalFileName = file.getOriginalFilename();
-			String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
-
-			String newFileName = user_from.getUserId() + ApplicationConstants.UNDERSCORE + fileType
-					+ ApplicationConstants.UNDERSCORE
-					+ formattedDate.replace(ApplicationConstants.COMMA, ApplicationConstants.HYPHEN) + extension;
-			System.out.println(newFileName);
-			String filePath = folderPath + ApplicationConstants.DOUBLE_SLASH + newFileName;
-			Path path = Paths.get(filePath);
-			Files.write(path, file.getBytes());
-
-			switch (fileType) {
-			case ApplicationConstants.AADHAR_CARD:
-				user_from.setAadharCard(newFileName);
-				break;
-			case ApplicationConstants.VOTERID_CARD:
-				user_from.setVoterIdCard(newFileName);
-				break;
-			case ApplicationConstants.PROFILE_PIC:
-				user_from.setProfilePic(newFileName);
-				break;	
-
-			default:
-				return ErrorResponseConstants.UNSUPPORTED_FILE_TYPE + fileType;
-			}
-
-			registrationFromRepository.save(user_from);
-		}
-		return null;
-	}
-
 	public JSONObject decodeToken(String jwtToken) {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	public ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic) throws Exception {
-		RegistrationFrom userRegister = registrationFromRepository.findById(userId).orElseThrow(()-> new Exception(ErrorResponseConstants.USER_NOT_FOUND));
-
-		if (userRegister != null) {
-			String folderPath = UPLOAD_DIR ;
-			File folder = new File(UPLOAD_DIR);
-			String fileType = null;
-			if (folder.exists()) {
-				try {
-					String strinFormateLocalDate = LocalDate.now().toString();
-					if(aadharCard!=null) {
-						fileType = ApplicationConstants.AADHAR_CARD;
-						saveFileIfValid(aadharCard, folderPath, userRegister,fileType,strinFormateLocalDate);
-
-					}
-					if(voterIdCard!=null){
-						fileType = ApplicationConstants.VOTERID_CARD;
-						saveFileIfValid(voterIdCard, folderPath, userRegister,fileType,strinFormateLocalDate);
-
-					}
-					if(profilePic!=null) {
-						fileType = ApplicationConstants.PROFILE_PIC;
-						saveFileIfValid(profilePic, folderPath, userRegister,fileType,strinFormateLocalDate);
-
-					}
-					return new ResponseEntity(ApplicationConstants.FILE_UPLOADED_SUCCESSFULLY,HttpStatus.OK);
-				} catch (IOException e) {
-					log.error(ErrorResponseConstants.FAILED_TO_UPLOAD_FILE + e.getMessage());
-					return new ResponseEntity(ErrorResponseConstants.FAILED_TO_UPLOAD_FILE,HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-			} else {
-				log.error(ErrorResponseConstants.FOLDER_NOT_FOUND + userRegister);
-				return new ResponseEntity(ErrorResponseConstants.FOLDER_NOT_FOUND + userRegister,HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-
-		return new ResponseEntity(ErrorResponseConstants.USER_NOT_FOUND + userRegister,HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@Override
@@ -432,43 +358,19 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	public ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException {
 
 		RegistrationFrom user= registrationFromRepository.findById(userId).get();
-		String documentName=null;
-		if(user.getAadharCard()!=null) {
-			documentName =user.getAadharCard();
-			System.out.println(documentName);
-		}
-		else if(user.getVoterIdCard()!=null) {
-			documentName = user.getVoterIdCard();
-		}
-		else  {
-			documentName = user.getProfilePic();
-		}
-		Path filePath = Paths.get(UPLOAD_DIR + ApplicationConstants.DOUBLE_SLASH + documentName);
-		Resource resource = new UrlResource(filePath.toUri());
-		return ResponseEntity.ok()
-				.contentType(MediaType.parseMediaType("application/octet-stream"))
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-				.body(resource);
+		
+		return new ResponseEntity(user.getProfilePic(),HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit,String transcationId) throws IOException, MessagingException {
+	public ResponseEntity uploadTranscationRecepit(String token, String imageUrl,String transcationId) throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
 
-		String originalFileName = transcationRecepit.getOriginalFilename();
-		String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
-		File folder = new File(UPLOAD_TRANSCATION);
-		String fileName = user.getUserId() + ApplicationConstants.HYPHEN+ ApplicationConstants.TRANSCATION + extension;
-		String filePath = UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + fileName;
-		Path path = Paths.get(filePath);
-		System.out.println("ertyuio"+fileName);
-		Files.write(path, transcationRecepit.getBytes());
-
 		PaymentInfo paymentInfo= new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
-		paymentInfo.setPaymentDetailDocument(fileName);
+		paymentInfo.setPaymentDetailDocument(imageUrl);
 		paymentInfo.setTrasactionId(transcationId);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
@@ -488,13 +390,10 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException {
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
-		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
-		Path filePath = Paths.get(UPLOAD_TRANSCATION + ApplicationConstants.DOUBLE_SLASH + user.getPaymentInfo().getPaymentDetailDocument());
 
-		if(filePath!=null) {
-			documentResponse.setPathOfDocumnet(filePath.toString());
+		if(user!=null) {
 
-			return new ResponseEntity(documentResponse,HttpStatus.OK);
+			return new ResponseEntity(user.getPaymentInfo().getPaymentDetailDocument(),HttpStatus.OK);
 		}
 		else {
 			return new ResponseEntity("No recepit found with the user",HttpStatus.NOT_FOUND);

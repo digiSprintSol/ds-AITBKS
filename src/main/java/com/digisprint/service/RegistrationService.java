@@ -19,10 +19,8 @@ import com.digisprint.requestBean.RegistrationFrom2;
 
 public interface RegistrationService {
 
-	RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException;
+	RegistrationFrom registerUser(RegistrationFrom registrationForm,String imageUrl) throws IOException, MessagingException;
 	
-	ResponseEntity upload(String userId, MultipartFile aadharCard, MultipartFile voterIdCard, MultipartFile profilePic)throws Exception;
-		
 	Page<RegistrationFrom> getAllRegisteredUsers(int page, int size);
 	
 	ResponseEntity committeePresidentAccountantApproval(String token, String userId,ApprovalFrom approvalFrom) throws UserNotFoundException, Exception;
@@ -35,7 +33,7 @@ public interface RegistrationService {
 
 	ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException;
 
-	ResponseEntity uploadTranscationRecepit(String token, MultipartFile transcationRecepit, String transcationId) throws IOException, MessagingException;
+	ResponseEntity uploadTranscationRecepit(String token, String imageUrl, String transcationId) throws IOException, MessagingException;
 
 	RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
 

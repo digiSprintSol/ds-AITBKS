@@ -62,17 +62,10 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used for 1st level of Registration")
 	@PostMapping("/register")
-	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from) throws IOException, MessagingException {
+	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from,
+			@RequestParam(name="imageUrl",required = false) String imageUrl) throws IOException, MessagingException {
 		
-		return this.registrationService.registerUser(from) ;
-	}
-
-	@Operation(summary = "This method is used to upload files for user, aadhar, voter id and caste certificate and profile")
-	@PostMapping(value = "/uploadByUserId/{userId}", consumes = { "multipart/form-data" })
-	public ResponseEntity uploadFile(@PathVariable String userId, @RequestParam(name="aadharCard",required =false) MultipartFile aadharCard,
-			@RequestParam(name="voterIdCard",required =false) MultipartFile voterIdCard,
-			@RequestParam(name="profilePic",required =false) MultipartFile profilePic) throws Exception {
-		return registrationService.upload(userId, aadharCard, voterIdCard, profilePic);
+		return this.registrationService.registerUser(from,imageUrl) ;
 	} 
 	
 	@Operation(summary= "This method is used to get all users ")
@@ -116,9 +109,9 @@ public class RegistrationController {
 	}
 	
 	@Operation(summary="This method is used to upload the payment receipt")
-	@PostMapping(value="/uploadTranscationReceipt" ,  consumes = { "multipart/form-data" })
-	public ResponseEntity uploadTranscationRecepit(@RequestParam MultipartFile transcationRecepit,@RequestParam String transcationId) throws IOException, MessagingException {
-		return registrationService.uploadTranscationRecepit(getToken(), transcationRecepit,transcationId);
+	@PostMapping(value="/uploadTranscationReceipt")
+	public ResponseEntity uploadTranscationRecepit(@RequestParam String imageUrl,@RequestParam String transcationId) throws IOException, MessagingException {
+		return registrationService.uploadTranscationRecepit(getToken(), imageUrl,transcationId);
 	}
 	
 	@Operation(summary="This method is used to get payment receipt")
