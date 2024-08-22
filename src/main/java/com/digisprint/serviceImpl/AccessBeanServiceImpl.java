@@ -24,12 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
@@ -40,6 +42,7 @@ import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
+import com.digisprint.repository.ImageRepository;
 import com.digisprint.repository.MarketPlaceRepository;
 import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.responseBody.LoginResponse;
@@ -63,24 +66,21 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private MarketPlaceRepository marketPlaceRepository;
 
+	private ImageRepository imageRepository;
+
 	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository,
 			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil,
-			MarketPlaceRepository marketPlaceRepository) {
+			MarketPlaceRepository marketPlaceRepository,ImageRepository imageRepository) {
 		super();
 		this.accessBeanRepository = accessBeanRepository;
 		this.eventsImagesAnnouncementsRepo = eventsImagesAnnouncementsRepo;
 		this.jwtTokenUtil = jwtTokenUtil;
 		this.marketPlaceRepository = marketPlaceRepository;
+		this.imageRepository = imageRepository;
 	}
 
 	@Value("${config.secretKey}")
 	private  String secretKey;
-
-	@Value("${org.home}")
-	private String pathForStorage;
-	
-	@Value("${org.marketPlace}")
-	private String pathForMarketPlaces;
 
 	@Autowired
 	HttpServletResponse response;
@@ -226,65 +226,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 
 	}
-	private void saveFileForEventsOrImages(String title,String folderPath, String fileType , MultipartFile file,
-			String formattedDate,String description) throws IOException {
-		EventsImagesAnnouncements object = new EventsImagesAnnouncements();
-
-		if(!file.isEmpty()) {
-			String originalFileName = file.getOriginalFilename();
-			String extension = originalFileName.substring(originalFileName.lastIndexOf(ApplicationConstants.FULL_STOP));
-			System.out.println("dhfjsdhf::"+extension);
-
-			String newFileName = title+ ApplicationConstants.UNDERSCORE + fileType
-					+ ApplicationConstants.UNDERSCORE
-					+ formattedDate.replace(ApplicationConstants.COMMA, ApplicationConstants.HYPHEN) + extension;
-			System.out.println(newFileName);
-			String filePath = folderPath + ApplicationConstants.DOUBLE_SLASH + newFileName;
-			System.out.println(":::::::::::::::::::::"+filePath);
-			Path path = Paths.get(filePath);
-			Files.write(path, file.getBytes());
-
-			switch (fileType) {
-			case ApplicationConstants.EVENTS :
-				object.setId("1");
-				object.setEventDescription(description);
-				object.setEventTitle(title);
-				object.setEventImageURL(newFileName);
-				break;
-			case ApplicationConstants.IMAGES :
-				object.setId("2");
-				object.setGalleryTitle(title);
-				object.setGalleryDescription(description);
-				object.setGalleryURL(description);
-				break;
-			default:
-				break;
-			}
-			eventsImagesAnnouncementsRepo.save(object);
-		}
-	}
-
-	@Override
-	public ResponseEntity uploadEventsAnnocementsImages(MultipartFile events, MultipartFile imagesForHomePage,
-			String title, String description) throws IOException {
-		String folderPath = pathForStorage;
-		File folder = new File(folderPath);
-		ResponseEntity result = null;
-		String strinFormateLocalDate = LocalDate.now().toString();
-
-		if(folder.exists()) {
-			if(events!=null) {
-				saveFileForEventsOrImages(title, folderPath, ApplicationConstants.EVENTS, events,strinFormateLocalDate , description);
-			}
-			if(imagesForHomePage != null) {
-				saveFileForEventsOrImages(title, folderPath, ApplicationConstants.IMAGES, imagesForHomePage, strinFormateLocalDate, description);
-			}
-			return new ResponseEntity("Files Uploaded",HttpStatus.OK);
-		}
-		else {
-			return new ResponseEntity("Folder doesnot exsists",HttpStatus.NOT_FOUND);
-		}
-	}
 
 	@Override
 	public ResponseEntity postingAnnouncements(String title, String description) {
@@ -317,50 +258,15 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity getEvents() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
-		return getFile(event.getEventImageURL());
+		return new ResponseEntity (event,HttpStatus.OK);
 	}
-	
-	@Override
-	public ResponseEntity getImages() throws MalformedURLException {
-		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
-		return getFile(event.getEventImageURL());
-	}
-	
+
 	@Override
 	public ResponseEntity getSelectedMarketPlace(String marketPlaceId) {
 		MarketPlaces marketPlaces = marketPlaceRepository.findById(marketPlaceId).get();
 		GetDocumentURL documentURL = new GetDocumentURL();
 		documentURL.setPathOfDocumnet(marketPlaces.getImage());
 		return new ResponseEntity<>(documentURL,HttpStatus.OK);
-	}
-	
-	private ResponseEntity getMPImage(String documentName) throws MalformedURLException {
-		Path filePath = Paths.get(pathForMarketPlaces + ApplicationConstants.DOUBLE_SLASH +documentName);
-		System.out.println(filePath.toString());
-		GetDocumentURL documentResponse = new GetDocumentURL();
-		if(filePath != null) {
-			documentResponse.setPathOfDocumnet(filePath.toString());
-			return new ResponseEntity(documentResponse,HttpStatus.OK);
-
-		}else {
-			return new ResponseEntity("File not found",HttpStatus.NOT_FOUND);
-		}
-
-	}
-
-
-	private ResponseEntity getFile(String documentName) throws MalformedURLException {
-		Path filePath = Paths.get(pathForStorage + ApplicationConstants.DOUBLE_SLASH +documentName);
-		System.out.println(filePath.toString());
-		GetDocumentURL documentResponse = new GetDocumentURL();
-		if(filePath != null) {
-			documentResponse.setPathOfDocumnet(filePath.toString());
-			return new ResponseEntity(documentResponse,HttpStatus.OK);
-
-		}else {
-			return new ResponseEntity("File not found",HttpStatus.NOT_FOUND);
-		}
-
 	}
 
 	public JSONObject decodeToken(String jwtToken) {
@@ -379,17 +285,17 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 		if(accessList.contains(ApplicationConstants.PRESIDENT)){
 
-	        MarketPlaces marketPlace = new MarketPlaces();
-	        marketPlace.setNameOfShop(nameOfShop);
-	        marketPlace.setContactPerson(contactPerson);
-	        marketPlace.setMobileNumber(mobileNumber);
-	        marketPlace.setLocation(location);
-	        marketPlace.setCategory(category);
-	        marketPlace.setCity(city);
-	        marketPlace.setImage(photoUrl);
-	        marketPlace.setCreatedDate(LocalDateTime.now());
-			
-			 marketPlaceRepository.save(marketPlace);
+			MarketPlaces marketPlace = new MarketPlaces();
+			marketPlace.setNameOfShop(nameOfShop);
+			marketPlace.setContactPerson(contactPerson);
+			marketPlace.setMobileNumber(mobileNumber);
+			marketPlace.setLocation(location);
+			marketPlace.setCategory(category);
+			marketPlace.setCity(city);
+			marketPlace.setImage(photoUrl);
+			marketPlace.setCreatedDate(LocalDateTime.now());
+
+			marketPlaceRepository.save(marketPlace);
 			return new ResponseEntity(marketPlace,HttpStatus.OK);
 		}
 		else {
@@ -412,20 +318,20 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public List<String> getAllCategories() {
-		
+
 		List<MarketPlaces> list = marketPlaceRepository.findAll();
-		
+
 		return list.stream()
-                .map(MarketPlaces::getCategory)
-                .distinct()             
-                .collect(Collectors.toList());
+				.map(MarketPlaces::getCategory)
+				.distinct()             
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<String> getAllCities() {
-		
+
 		List<MarketPlaces> list = marketPlaceRepository.findAll();
-		
+
 		return list.stream()
 				.map(MarketPlaces::getCity)
 				.distinct()
@@ -451,7 +357,84 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
-	
+	@Override
+	public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(String title, String description, String imageUrl) throws MalformedURLException {
+		try {
+			if (imageUrl == null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or missing image URL");
+			}
+
+			Image image = imageRepository.findByUrl(imageUrl);
+
+			if (image == null) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
+			}
+
+			String folderName = image.getFolderName();
+
+			if (folderName == null || folderName.trim().isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Folder name is missing or invalid");
+			}
+
+			EventsImagesAnnouncements eventsImagesAnnouncements = new EventsImagesAnnouncements();
+
+			switch (folderName) {
+			case ApplicationConstants.EVENTS:
+				eventsImagesAnnouncements.setId("1");
+				eventsImagesAnnouncements.setEventDescription(description);
+				eventsImagesAnnouncements.setEventTitle(title);
+				eventsImagesAnnouncements.setEventImageURL(imageUrl);
+				eventsImagesAnnouncements.setEvents(true);
+				break;
+			case ApplicationConstants.GALLERY:
+				eventsImagesAnnouncements.setGalleryDescription(description);
+				eventsImagesAnnouncements.setGalleryTitle(title);
+				eventsImagesAnnouncements.setGalleryURL(folderName);
+				eventsImagesAnnouncements.setGallery(true);
+				break;
+			case ApplicationConstants.AWARDS:
+				eventsImagesAnnouncements.setAwardDescription(description);
+				eventsImagesAnnouncements.setAwardsTitle(title);
+				eventsImagesAnnouncements.setAwardImageURL(imageUrl);
+				eventsImagesAnnouncements.setAwards(true);
+				break;
+			case ApplicationConstants.QR_CODE:
+				eventsImagesAnnouncements.setId("2");
+				eventsImagesAnnouncements.setQrCodeImageUrl(imageUrl);
+				eventsImagesAnnouncements.setQrCode(true);
+				break;
+			default:
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid folder name");
+			}
+
+			eventsImagesAnnouncementsRepo.save(eventsImagesAnnouncements);
+
+			return new ResponseEntity<>("Files Uploaded Successfully", HttpStatus.OK);
+
+		} catch (ResponseStatusException e) {
+			return new ResponseEntity<>(e.getReason(), e.getStatus());
+		} catch (DataAccessException e) {
+			return new ResponseEntity<>("Database error occurred while saving the data", HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			return new ResponseEntity<>("An unexpected error occurred: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@Override
+	public List<EventsImagesAnnouncements> getAllGallery() {
+		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByGalleryTrue();
+
+        return galleryItems;
+	}
+
+	@Override
+	public List<EventsImagesAnnouncements> getAllAwards() {
+		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByAwardsTrue();
+
+        return galleryItems;
+	}
+
+
 
 }
 

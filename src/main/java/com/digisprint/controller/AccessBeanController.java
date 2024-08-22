@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
+import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.MarketPlaces;
 import com.digisprint.requestBean.LoginPayload;
 import com.digisprint.requestBean.UploadAnnouncement;
@@ -89,15 +90,6 @@ public class AccessBeanController {
 	ResponseEntity softDeleteInternalUsers(@PathVariable("id") String id) {
 		return accessBeanService.softDeleteInternalUsers(id);
 	}
-	
-	@Operation(summary = "This method is used to upload events or images")
-	@PostMapping(value="/uploadEventsImages",consumes = { "multipart/form-data" })
-	public ResponseEntity uploadEventsAnnocementsImages(@RequestParam(name="events",required =false) MultipartFile events,
-			@RequestParam(name="imagesForHomePage",required =false) MultipartFile imagesForHomePage ,
-			@RequestParam(name="title",required=false) String title,
-			@RequestParam(name="description",required=false) String description) throws IOException{
-		return accessBeanService.uploadEventsAnnocementsImages(events, imagesForHomePage, title, description);
-	}
 
 	@Operation(summary = "This method is used to post announcement")
 	@PostMapping(value="/postingAnnouncements")
@@ -115,12 +107,6 @@ public class AccessBeanController {
 	@GetMapping(value="/getEvents")
 	public ResponseEntity getEvents() throws MalformedURLException {
 		return accessBeanService.getEvents();
-	}
-
-	@Operation(summary = "This method is used to get ")
-	@GetMapping(value="/getImages")
-	public ResponseEntity getImages() throws MalformedURLException {
-		return accessBeanService.getImages();
 	}
 	
 	@Operation(summary="This method is used for posting market places")
@@ -168,5 +154,27 @@ public class AccessBeanController {
 	public ResponseEntity deleteAnnouncement(@PathVariable("id") String id) {
 		return accessBeanService.deleteAnnouncement(id);
 	}
+	
+	@PostMapping("/uploadEventsAnnouncementsGalleryAwardsQRCodeImages")
+    public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(
+            @RequestParam("title") String title, 
+            @RequestParam("description") String description, 
+            @RequestParam("imageUrl") String imageUrl) throws MalformedURLException {
+		return accessBeanService.uploadEventsAnnouncementsGalleryAwardsQRCodeImages(title, description, imageUrl);
+	}
+	
+	@GetMapping("/gallery-urls")
+    public ResponseEntity<List<EventsImagesAnnouncements>> getGalleryURLs() {
+        List<EventsImagesAnnouncements> galleryUrls = accessBeanService.getAllGallery();
+        
+        return new ResponseEntity<>(galleryUrls, HttpStatus.OK);
+    }
+	
+	@GetMapping("/award-urls")
+    public ResponseEntity<List<EventsImagesAnnouncements>> getAwardURLs() {
+        List<EventsImagesAnnouncements> awardUrls = accessBeanService.getAllAwards();
+        
+        return new ResponseEntity<>(awardUrls, HttpStatus.OK);
+    }
 	
 }
