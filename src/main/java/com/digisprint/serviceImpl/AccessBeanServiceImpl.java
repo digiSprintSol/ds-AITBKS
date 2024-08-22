@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.Image;
 import com.digisprint.bean.MarketPlaces;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
@@ -39,7 +41,7 @@ import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
 import com.digisprint.repository.MarketPlaceRepository;
-import com.digisprint.responseBody.GetPaymentDocumentResponse;
+import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.responseBody.LoginResponse;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
@@ -247,13 +249,13 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				object.setId("1");
 				object.setEventDescription(description);
 				object.setEventTitle(title);
-				object.setEventImageName(newFileName);
+				object.setEventImageURL(newFileName);
 				break;
 			case ApplicationConstants.IMAGES :
 				object.setId("2");
-				object.setImageTitle(title);
-				object.setImageDescription(description);
-				object.setImageName(newFileName);
+				object.setGalleryTitle(title);
+				object.setGalleryDescription(description);
+				object.setGalleryURL(description);
 				break;
 			default:
 				break;
@@ -315,27 +317,27 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity getEvents() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
-		return getFile(event.getEventImageName());
+		return getFile(event.getEventImageURL());
 	}
 	
 	@Override
 	public ResponseEntity getImages() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
-		return getFile(event.getImageName());
+		return getFile(event.getEventImageURL());
 	}
 	
 	@Override
-	public ResponseEntity getSelectedMarketPlace(String marketPlaceId) throws MalformedURLException {
+	public ResponseEntity getSelectedMarketPlace(String marketPlaceId) {
 		MarketPlaces marketPlaces = marketPlaceRepository.findById(marketPlaceId).get();
-		System.out.println(marketPlaces.toString());
-		System.out.println(marketPlaces.getImage());
-		return getMPImage(marketPlaces.getImage());
+		GetDocumentURL documentURL = new GetDocumentURL();
+		documentURL.setPathOfDocumnet(marketPlaces.getImage());
+		return new ResponseEntity<>(documentURL,HttpStatus.OK);
 	}
 	
 	private ResponseEntity getMPImage(String documentName) throws MalformedURLException {
 		Path filePath = Paths.get(pathForMarketPlaces + ApplicationConstants.DOUBLE_SLASH +documentName);
 		System.out.println(filePath.toString());
-		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
+		GetDocumentURL documentResponse = new GetDocumentURL();
 		if(filePath != null) {
 			documentResponse.setPathOfDocumnet(filePath.toString());
 			return new ResponseEntity(documentResponse,HttpStatus.OK);
@@ -350,7 +352,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	private ResponseEntity getFile(String documentName) throws MalformedURLException {
 		Path filePath = Paths.get(pathForStorage + ApplicationConstants.DOUBLE_SLASH +documentName);
 		System.out.println(filePath.toString());
-		GetPaymentDocumentResponse documentResponse = new GetPaymentDocumentResponse();
+		GetDocumentURL documentResponse = new GetDocumentURL();
 		if(filePath != null) {
 			documentResponse.setPathOfDocumnet(filePath.toString());
 			return new ResponseEntity(documentResponse,HttpStatus.OK);
@@ -366,7 +368,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	}
 
 	@Override
-	public ResponseEntity postMarketPlace(String token, String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, MultipartFile image) throws IOException {
+	public ResponseEntity postMarketPlace(String token, String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, String photoUrl) throws IOException {
 
 		JSONObject jsonObject = decodeToken(token);
 		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
@@ -376,16 +378,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		List accessList = jwtTokenUtil.getAccessList(token);
 
 		if(accessList.contains(ApplicationConstants.PRESIDENT)){
-			
-			File directory = new File(pathForMarketPlaces);
-	        if (!directory.exists()) {
-	            directory.mkdirs();
-	        }
-
-	        String filename = UUID.randomUUID() + "_" + image.getOriginalFilename();
-	        String filePath = Paths.get(pathForMarketPlaces, filename).toString();
-
-	        Files.write(Paths.get(filePath), image.getBytes());
 
 	        MarketPlaces marketPlace = new MarketPlaces();
 	        marketPlace.setNameOfShop(nameOfShop);
@@ -394,7 +386,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	        marketPlace.setLocation(location);
 	        marketPlace.setCategory(category);
 	        marketPlace.setCity(city);
-	        marketPlace.setImage(filename);
+	        marketPlace.setImage(photoUrl);
 	        marketPlace.setCreatedDate(LocalDateTime.now());
 			
 			 marketPlaceRepository.save(marketPlace);
@@ -438,6 +430,25 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				.map(MarketPlaces::getCity)
 				.distinct()
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public ResponseEntity deleteAnnouncement(String id) {
+		try {
+			Optional<EventsImagesAnnouncements> imageOptional = eventsImagesAnnouncementsRepo.findById(id);
+
+			if (imageOptional.isPresent()) {
+				eventsImagesAnnouncementsRepo.deleteById(id);
+
+				return ResponseEntity.ok("Image with id " + id + " has been successfully deleted.");
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND)
+						.body("Image with id " + id + " not found.");
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("An error occurred while trying to delete the image.");
+		}
 	}
 
 	

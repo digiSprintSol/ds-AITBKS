@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.MarketPlaces;
+import com.digisprint.responseBody.GetDocumentURL;
 
 public interface AccessBeanService {
 	
@@ -23,9 +24,10 @@ public interface AccessBeanService {
 	ResponseEntity getAllAnnouncement();
 	ResponseEntity getEvents() throws MalformedURLException;
 	ResponseEntity getImages() throws MalformedURLException;
-	ResponseEntity postMarketPlace(String token,String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, MultipartFile image)throws IOException;
+	ResponseEntity postMarketPlace(String token,String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, String photoUrl)throws IOException;
 	ResponseEntity getAllMarketPlaces();
-	ResponseEntity getSelectedMarketPlace(String marketPlaceId)throws MalformedURLException;
+	ResponseEntity getSelectedMarketPlace(String marketPlaceId);
 	List<String> getAllCategories();
 	List<String> getAllCities();
+	ResponseEntity deleteAnnouncement(String id);
 }

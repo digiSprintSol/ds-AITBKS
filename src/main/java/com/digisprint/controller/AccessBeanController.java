@@ -34,7 +34,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-//@RequestMapping(ApplicationConstants.INTERNAL_USERS)
 @Tag(name= ApplicationConstants.ROLE_MANAGEMENT)
 @CrossOrigin
 public class AccessBeanController {
@@ -125,16 +124,16 @@ public class AccessBeanController {
 	}
 	
 	@Operation(summary="This method is used for posting market places")
-	@PostMapping(value="/postMarketPlace",consumes = { "multipart/form-data" })
+	@PostMapping(value="/postMarketPlace")
 	public ResponseEntity postMarketPlace( @RequestParam("nameOfShop") String nameOfShop,
             @RequestParam("contactPerson") String contactPerson,
             @RequestParam("mobileNumber") String mobileNumber,
             @RequestParam("location") String location,
             @RequestParam("category") String category,
             @RequestParam("city") String city,
-            @RequestParam(name="image",required =false) MultipartFile image) {
+            @RequestParam(name="imageUrl",required =false) String imageUrl) {
         try {
-        	accessBeanService.postMarketPlace(getToken(), nameOfShop, contactPerson, mobileNumber, location, category, city, image);
+        	accessBeanService.postMarketPlace(getToken(), nameOfShop, contactPerson, mobileNumber, location, category, city, imageUrl);
             return ResponseEntity.status(HttpStatus.CREATED).body("MarketPlace added successfully.");
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving MarketPlace: " + e.getMessage());
@@ -164,5 +163,10 @@ public class AccessBeanController {
         List<String> cities = accessBeanService.getAllCities();
         return ResponseEntity.ok(cities);
     }
+	
+	@DeleteMapping(value="/deleteAnnouncement/{id}")
+	public ResponseEntity deleteAnnouncement(@PathVariable("id") String id) {
+		return accessBeanService.deleteAnnouncement(id);
+	}
 	
 }

@@ -3,7 +3,7 @@ package com.digisprint.responseBody;
 import lombok.Data;
 
 @Data
-public class GetPaymentDocumentResponse {
+public class GetDocumentURL {
 
 	private String pathOfDocumnet;
 }
