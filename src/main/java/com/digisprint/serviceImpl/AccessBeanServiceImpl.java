@@ -317,13 +317,13 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity getEvents() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
-		return getFile(event.getEventImageName());
+		return getFile(event.getEventImageURL());
 	}
 	
 	@Override
 	public ResponseEntity getImages() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("2").get();
-		return getFile(event.getImageName());
+		return getFile(event.getEventImageURL());
 	}
 	
 	@Override
