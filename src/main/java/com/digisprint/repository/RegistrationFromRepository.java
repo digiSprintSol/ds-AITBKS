@@ -20,5 +20,7 @@ public interface RegistrationFromRepository extends MongoRepository<Registration
 	
 	List<RegistrationFrom> findByUserIdIn(List<String> userIds);
 
+	RegistrationFrom findTopByMembershipIdStartingWithOrderByMembershipIdDesc(String prefix);
+
 	
 }

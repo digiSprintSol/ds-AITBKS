@@ -102,14 +102,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		this.accessBeanRepository = accessBeanRepository;
 	}
 
-	@Value("${org.uploadFiles}")
-	private String UPLOAD_DIR;
-
 	@Value("${spring.mail.username}")
 	private String ADMIN_USERNAME;
-
-	@Value("${org.transcation}")
-	private String UPLOAD_TRANSCATION;
 
 	@Override
 	public RegistrationFrom registerUser(RegistrationFrom registrationForm, String imageUrl) throws IOException, MessagingException {
@@ -268,7 +262,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 				progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
 				progressBarReport.setMember(RegistrationFormConstants.TRUE);
-				String memberIdentityNumber = generatingCredentials.generateMemberId();
+				String memberIdentityNumber = generatingCredentials.generateMemberId(userId);
 				// send congratulations mail with generated memberID 
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
@@ -356,9 +350,9 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 	@Override
 	public ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException {
-
+		// get user id card
 		RegistrationFrom user= registrationFromRepository.findById(userId).get();
-		
+		// response - image,name,membership type, member id.
 		return new ResponseEntity(user.getProfilePic(),HttpStatus.OK);
 	}
 

@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface ImageRepository extends MongoRepository<Image, String> {
 
 	boolean existsByNameAndFolderName(String string, String folderName);
+
+	Image findByUrl(String imageUrl);
 }

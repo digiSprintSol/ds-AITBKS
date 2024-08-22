@@ -34,6 +34,8 @@ public class EventsImagesAnnouncements {
 	
 	private String awardImageURL;
 	
+	private String qrCodeImageUrl;
+	
 	private boolean events;
 	
 	private boolean gallery;
@@ -41,4 +43,7 @@ public class EventsImagesAnnouncements {
 	private boolean awards;
 	
 	private boolean announcement;
+	
+	private boolean qrCode;
+	
 }

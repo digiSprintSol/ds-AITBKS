@@ -10,4 +10,8 @@ public interface EventsImagesAnnouncementsRepo extends MongoRepository<EventsIma
 
 	List<EventsImagesAnnouncements> findByAnnouncement(boolean b);
 
+	List<EventsImagesAnnouncements> findByGalleryTrue();
+	
+	List<EventsImagesAnnouncements> findByAwardsTrue();
+
 }
