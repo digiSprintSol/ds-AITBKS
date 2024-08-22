@@ -14,19 +14,31 @@ public class EventsImagesAnnouncements {
 	
 	private String eventTitle;
 	
-	private String eventImageName;
+	private String eventImageURL;
 	
 	private String eventDescription;
 	
-	private String imageTitle;
+	private String galleryTitle;
 	
-	private String imageName;
+	private String galleryURL;
 	
-	private String imageDescription;
+	private String galleryDescription;
 	
 	private String announcementTitle;
 	
 	private String announcementDescription;
+	
+	private String awardsTitle;
+	
+	private String awardDescription;
+	
+	private String awardImageURL;
+	
+	private boolean events;
+	
+	private boolean gallery;
+	
+	private boolean awards;
 	
 	private boolean announcement;
 }

@@ -249,13 +249,13 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				object.setId("1");
 				object.setEventDescription(description);
 				object.setEventTitle(title);
-				object.setEventImageName(newFileName);
+				object.setEventImageURL(newFileName);
 				break;
 			case ApplicationConstants.IMAGES :
 				object.setId("2");
-				object.setImageTitle(title);
-				object.setImageDescription(description);
-				object.setImageName(newFileName);
+				object.setGalleryTitle(title);
+				object.setGalleryDescription(description);
+				object.setGalleryURL(description);
 				break;
 			default:
 				break;
