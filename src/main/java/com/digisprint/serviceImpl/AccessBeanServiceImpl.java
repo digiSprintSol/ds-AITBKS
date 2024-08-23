@@ -1,42 +1,34 @@
 package com.digisprint.serviceImpl;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Random;
 import java.util.stream.Collectors;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.Image;
 import com.digisprint.bean.MarketPlaces;
+import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
@@ -44,11 +36,17 @@ import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.EventsImagesAnnouncementsRepo;
 import com.digisprint.repository.ImageRepository;
 import com.digisprint.repository.MarketPlaceRepository;
+import com.digisprint.responseBody.AwardsResponse;
+import com.digisprint.responseBody.EventsResponse;
+import com.digisprint.responseBody.FilterMemberResponse;
+import com.digisprint.responseBody.GalleryResponse;
 import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.responseBody.LoginResponse;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
+import com.digisprint.utils.EmailConstants;
 import com.digisprint.utils.ErrorResponseConstants;
+import com.digisprint.utils.RegistrationFormConstants;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -68,19 +66,25 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private ImageRepository imageRepository;
 
+	private EmailService email;
+
 	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository,
 			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil,
-			MarketPlaceRepository marketPlaceRepository,ImageRepository imageRepository) {
+			MarketPlaceRepository marketPlaceRepository, ImageRepository imageRepository, EmailService email) {
 		super();
 		this.accessBeanRepository = accessBeanRepository;
 		this.eventsImagesAnnouncementsRepo = eventsImagesAnnouncementsRepo;
 		this.jwtTokenUtil = jwtTokenUtil;
 		this.marketPlaceRepository = marketPlaceRepository;
 		this.imageRepository = imageRepository;
+		this.email = email;
 	}
 
 	@Value("${config.secretKey}")
 	private  String secretKey;
+	
+	@Value("${spring.mail.username}")
+	private String ADMIN_USERNAME;
 
 	@Autowired
 	HttpServletResponse response;
@@ -258,14 +262,16 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity getEvents() throws MalformedURLException {
 		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
-		return new ResponseEntity (event,HttpStatus.OK);
+		EventsResponse eventsResponse = new EventsResponse();
+		BeanUtils.copyProperties(event, eventsResponse);
+		return new ResponseEntity (eventsResponse,HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity getSelectedMarketPlace(String marketPlaceId) {
 		MarketPlaces marketPlaces = marketPlaceRepository.findById(marketPlaceId).get();
 		GetDocumentURL documentURL = new GetDocumentURL();
-		documentURL.setPathOfDocumnet(marketPlaces.getImage());
+		documentURL.setPathOfDocumnet(marketPlaces.getImageUrl());
 		return new ResponseEntity<>(documentURL,HttpStatus.OK);
 	}
 
@@ -274,7 +280,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	}
 
 	@Override
-	public ResponseEntity postMarketPlace(String token, String nameOfShop, String contactPerson, String mobileNumber, String location, String category, String city, String photoUrl) throws IOException {
+	public ResponseEntity postMarketPlace(String token, MarketPlaces marketPlaces) throws IOException {
 
 		JSONObject jsonObject = decodeToken(token);
 		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
@@ -285,17 +291,9 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 		if(accessList.contains(ApplicationConstants.PRESIDENT)){
 
-			MarketPlaces marketPlace = new MarketPlaces();
-			marketPlace.setNameOfShop(nameOfShop);
-			marketPlace.setContactPerson(contactPerson);
-			marketPlace.setMobileNumber(mobileNumber);
-			marketPlace.setLocation(location);
-			marketPlace.setCategory(category);
-			marketPlace.setCity(city);
-			marketPlace.setImage(photoUrl);
-			marketPlace.setCreatedDate(LocalDateTime.now());
+			marketPlaces.setCreatedDate(LocalDateTime.now());
 
-			marketPlaceRepository.save(marketPlace);
+			 MarketPlaces marketPlace = marketPlaceRepository.save(marketPlaces);
 			return new ResponseEntity(marketPlace,HttpStatus.OK);
 		}
 		else {
@@ -389,7 +387,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			case ApplicationConstants.GALLERY:
 				eventsImagesAnnouncements.setGalleryDescription(description);
 				eventsImagesAnnouncements.setGalleryTitle(title);
-				eventsImagesAnnouncements.setGalleryURL(folderName);
+				eventsImagesAnnouncements.setGalleryURL(imageUrl);
 				eventsImagesAnnouncements.setGallery(true);
 				break;
 			case ApplicationConstants.AWARDS:
@@ -421,20 +419,103 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	}
 
 	@Override
-	public List<EventsImagesAnnouncements> getAllGallery() {
+	public ResponseEntity getAllGallery() {
 		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByGalleryTrue();
-
-        return galleryItems;
+		if(galleryItems.size()==0) {
+			return new ResponseEntity(ErrorResponseConstants.ERROR_NO_DATA_FOUND,HttpStatus.NOT_FOUND);
+		}
+		else {
+		List<GalleryResponse> galleryResponsesList = galleryItems.stream().map(p->{
+			GalleryResponse galleryResponse = new GalleryResponse();
+			BeanUtils.copyProperties(p, galleryResponse);
+			return galleryResponse;
+		}).collect(Collectors.toList());
+		return  new ResponseEntity(galleryResponsesList,HttpStatus.OK);
+		}
 	}
 
 	@Override
-	public List<EventsImagesAnnouncements> getAllAwards() {
-		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByAwardsTrue();
-
-        return galleryItems;
+	public ResponseEntity getAllAwards() {
+		List<EventsImagesAnnouncements> awardsItems = eventsImagesAnnouncementsRepo.findByAwardsTrue();
+		
+		if(awardsItems.size()==0) {
+			return new ResponseEntity(ErrorResponseConstants.ERROR_NO_DATA_FOUND,HttpStatus.NOT_FOUND);
+		}
+		else {
+			List<AwardsResponse> awardsResponseList = awardsItems.stream().map(p->{
+				AwardsResponse awardsResponse = new AwardsResponse();
+				BeanUtils.copyProperties(p, awardsItems);
+				return awardsResponse;
+			}).collect(Collectors.toList());
+			return  new ResponseEntity(awardsResponseList,HttpStatus.OK);
+		}
 	}
 
+	char[] OTP(int length) {
+		String numbers = "0123456";
+		Random random = new Random();
+		char[] otp = new char[4];
+		for(int i=0; i<4; i++) {
+			otp[i]=numbers.charAt(random.nextInt(numbers.length()));
+		}
+		System.out.println(otp);
+		return otp;
+	}
 
+	@Override
+	public ResponseEntity verifyEmail(String email) throws UserNotFoundException, IOException, MessagingException {
+
+		AccessBean accessBean =verifyEmailEntered(email);
+		long generatedOTP = OTP(6).hashCode();
+		Long longOtp = generatedOTP;
+		CharSequence otp = longOtp.toString().subSequence(0, 6);
+		accessBean.setOtp(otp);
+
+		String[] newUser= new String[1];
+		newUser[0] = accessBean.getEmail();
+		String	body = EmailConstants.OTP_BODY
+				.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, accessBean.getName())
+				.replace(EmailConstants.REPLACE_GENERATED_OTP, otp);
+		this.email.MailSendingService(ADMIN_USERNAME, newUser,body, EmailConstants.FORGET_PASSWORD_OTP);
+
+		accessBeanRepository.save(accessBean);
+		return new ResponseEntity(email,HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity verifyOtp(String email,String otp) throws UserNotFoundException {
+
+		AccessBean accessBean =verifyEmailEntered(email);
+		if(accessBean.getOtp().equals(otp)) {
+			return new ResponseEntity("email verified",HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity("OTP incorrect",HttpStatus.NO_CONTENT);
+		}
+	}
+
+	@Override
+	public ResponseEntity forgotPassword(String email,String newPassword) throws UserNotFoundException {
+		AccessBean accessBean =verifyEmailEntered(email);
+		accessBean.setPassword(newPassword);
+		accessBean.setOtp(null);
+		accessBeanRepository.save(accessBean);
+		return new ResponseEntity("Your new password is reset try to ",HttpStatus.OK);
+	}
+
+	private AccessBean verifyEmailEntered(String email) throws UserNotFoundException {
+		AccessBean accessBean = accessBeanRepository.findByEmail(email).orElseThrow(()-> new  UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
+		return accessBean;
+	}
+
+	@Override
+	public ResponseEntity getQRCode() {
+		
+		EventsImagesAnnouncements qrCode = eventsImagesAnnouncementsRepo.findById("2").get();
+		GetDocumentURL documentURL = new GetDocumentURL();
+		documentURL.setPathOfDocumnet(qrCode.getQrCodeImageUrl());
+		return new ResponseEntity(documentURL,HttpStatus.OK);
+	}
 
 }
 

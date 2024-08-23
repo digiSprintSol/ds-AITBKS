@@ -68,14 +68,11 @@ public class ApplicationConstants {
 
 	public static final String ACTUATOR = "actuator";
 
-	public static final String EVENTS = "EVENTS";
-
-	public static final String IMAGES = "HOME_PAGE_IMAGE";
-
-	public static final String TRANSCATION = "TRANSCATION RECEPIT";
-
 	public static final String APPROVED = "Approved";
 
+	public static final String TRANSCATION = "transcation-recepit";
+	
+	public static final String EVENTS = "events";
 	
 	public static final String MARKET_PLACE = "market-place"; // done
 	

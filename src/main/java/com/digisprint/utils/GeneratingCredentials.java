@@ -34,13 +34,13 @@ public class GeneratingCredentials {
 		String currentYear = String.valueOf(LocalDate.now().getYear()).substring(2);
 		String prefix = new String();
 		
-		if(typeOfMembership.equalsIgnoreCase("trustee"))
+		if(typeOfMembership.equalsIgnoreCase(RegistrationFormConstants.TRUSTEE))
 			prefix = "TM-" + currentYear + "-";
 		
-		if(typeOfMembership.equalsIgnoreCase("patron"))
+		if(typeOfMembership.equalsIgnoreCase(RegistrationFormConstants.PATRON))
 			prefix = "PM-" + currentYear + "-";
 		
-		if(typeOfMembership.equalsIgnoreCase("lifemember"))
+		if(typeOfMembership.equalsIgnoreCase(RegistrationFormConstants.LIFE_MEMBER))
 			prefix = "LM-" + currentYear + "-";
 		
 		RegistrationFrom latestMember = registrationFromRepository.findTopByMembershipIdStartingWithOrderByMembershipIdDesc(prefix);

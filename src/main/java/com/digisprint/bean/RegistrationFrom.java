@@ -26,7 +26,7 @@ public class RegistrationFrom {
 
 	@Id
 	private String userId;
-	
+
 	/**
 	 * PERSONAL DETAILS
 	 */
@@ -39,7 +39,7 @@ public class RegistrationFrom {
 	private String fullName;
 
 	@NotNull(message="Required")
-    @Past(message="Date of birth must be in the past")
+	@Past(message="Date of birth must be in the past")
 	private LocalDateTime dateOfBirth;
 
 	@NotEmpty(message="Don't pass an empty String")
@@ -110,7 +110,7 @@ public class RegistrationFrom {
 	/**
 	 * DECLERATION
 	 */
- 	private boolean decalartionForRegOne;	
+	private boolean decalartionForRegOne;	
 
 	private String password;
 
@@ -120,36 +120,48 @@ public class RegistrationFrom {
 	private LocalDateTime createdDate;	
 
 	private LocalDateTime lastModifiedDate;
-	
+
 	private String nativePlace; //R3
-	
+
 	private String status; //from R1
-	
+
 	private boolean decalarationForRegThree; //R3
-	
+
 	private boolean isMemberOfOtherCommunity; //R3
-	
+
 	private String communityName;
-	
+
 	private PaymentInfo paymentInfo; //R3
-	
+
+	private String district;
+
 	/**
 	 * MEMBERSHIP INFO
 	 */
-	
+
 	private String applicantChoosenMembership;
-	
-	private String committeeChoosenMembershipForApplicant;
-	
+
+	private String committeeOneChoosenMembershipForApplicant;
+
+	private String committeeOneRemarksForApplicant;
+
+	private String committeeTwoChoosenMembershipForApplicant;
+
+	private String committeeTwoRemarksForApplicant;
+
+	private String committeeThreeChoosenMembershipForApplicant;
+
+	private String committeeThreeRemarksForApplicant;
+
 	private String presidentChoosenMembershipForApplicant; //R2
-	
+
 	private String presidentRemarksForApplicant; //R2
-	
-	private String committeeRemarksForApplicant; //R1
-	
+
 	/**
 	 * Membership id
 	 */
+	private boolean member;
+	
 	private String membershipId;
 
 }

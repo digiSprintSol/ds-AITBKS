@@ -21,7 +21,7 @@ public interface RegistrationService {
 
 	RegistrationFrom registerUser(RegistrationFrom registrationForm,String imageUrl) throws IOException, MessagingException;
 	
-	Page<RegistrationFrom> getAllRegisteredUsers(int page, int size);
+	ResponseEntity getAllRegisteredUsers(String token);
 	
 	ResponseEntity committeePresidentAccountantApproval(String token, String userId,ApprovalFrom approvalFrom) throws UserNotFoundException, Exception;
 	
@@ -31,7 +31,7 @@ public interface RegistrationService {
 	
 	List<RegistrationFrom> accountFirstView(int page, int size);
 
-	ResponseEntity getIDOfUser(String userId) throws MalformedURLException;
+	ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException;
 
 	ResponseEntity uploadTranscationRecepit(String token, String imageUrl, String transcationId) throws IOException, MessagingException;
 
@@ -45,5 +45,6 @@ public interface RegistrationService {
 	
 	ResponseEntity bulkEmailUpload(String toEmail, String subject, String body)throws IOException, MessagingException;
 	
+	ResponseEntity getAllFilteredMembers(String categoryOfMember);
 
 }

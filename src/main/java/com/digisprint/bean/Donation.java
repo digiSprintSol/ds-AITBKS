@@ -1,5 +1,6 @@
 package com.digisprint.bean;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
@@ -25,6 +26,8 @@ public class Donation {
 	private String transactionId;
 
 	private int amountPaid;
+	
+	private LocalDate transactionDate;
 
 	private String transactionReceiptUploadUrl;
 }

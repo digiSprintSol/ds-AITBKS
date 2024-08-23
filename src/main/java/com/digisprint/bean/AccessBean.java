@@ -35,6 +35,8 @@ public class AccessBean {
 	
 	private boolean user;
 	
+	private CharSequence otp;
+	
 	@CreatedDate
 	private LocalDateTime dateOfAssignedPosition;
 

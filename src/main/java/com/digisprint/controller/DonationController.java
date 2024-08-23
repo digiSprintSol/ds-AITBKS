@@ -1,23 +1,38 @@
 package com.digisprint.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.Donation;
+import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.service.DonationService;
+import com.digisprint.utils.ApplicationConstants;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
+@RequestMapping("/donations")
 public class DonationController {
 
 	@Autowired
 	DonationService donationService;
+	
+	@Autowired
+	private HttpServletRequest request;
+	
+	public String getToken() {
+		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
+		String token = requestHeaders.substring(7); // Remove "Bearer " prefix
+		return token;
+	}
 
 	@PostMapping(value = "/createDonation")
 	public ResponseEntity<String> DonationController(@RequestBody Donation donation) {
@@ -35,8 +50,8 @@ public class DonationController {
 	}
 
 	@GetMapping(value = "/getAllDonation")
-	public ResponseEntity<String> getAllDonation() {
-		return donationService.getAllDonation();
+	public ResponseEntity<String> getAllDonation() throws UserNotFoundException {
+		return donationService.getAllDonation(getToken());
 	}
 
 }

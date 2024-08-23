@@ -1,5 +1,7 @@
 package com.digisprint.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -8,25 +10,38 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.Feedback;
+import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.service.FeedBackService;
+import com.digisprint.utils.ApplicationConstants;
 
 @RestController
+@RequestMapping("/feedback")
 public class FeedBackController {
 
 	@Autowired
 	FeedBackService feedBackService;
 
+	@Autowired
+	private HttpServletRequest request;
+
+	public String getToken() {
+		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
+		String token = requestHeaders.substring(7); // Remove "Bearer " prefix
+		return token;
+	}
+	
 	@PostMapping(value = "/createFeedBack")
-	public ResponseEntity<String> createFeedBack(@RequestBody Feedback feedback) {
-		return feedBackService.createFeedBack(feedback);
+	public ResponseEntity<String> createFeedBack(@RequestBody Feedback feedback) throws UserNotFoundException {
+		return feedBackService.createFeedBack(getToken(),feedback);
 	}
 
-	@PutMapping(value = "/updateFeedBack")
-	public ResponseEntity<String> updateFeedBack(@RequestBody Feedback feedback) {
-		return feedBackService.updateFeedBack(feedback);
+	@PutMapping(value = "/updateFeedBack/{feedBackId}")
+	public ResponseEntity<String> updateFeedBack(@RequestBody Feedback feedback) throws UserNotFoundException {
+		return feedBackService.updateFeedBack(getToken(),feedback);
 	}
 
 	@GetMapping(value = "/getFeedBack/{feedBackId}")
@@ -40,8 +55,8 @@ public class FeedBackController {
 	}
 
 	@DeleteMapping(value = "/deleteFeedBack/{feedBackId}")
-	public ResponseEntity<String> deleteFeedBack(@PathVariable String feedBackId) {
-		return feedBackService.deleteFeedBack(feedBackId);
+	public ResponseEntity<String> deleteFeedBack(@PathVariable String feedBackId) throws UserNotFoundException {
+		return feedBackService.deleteFeedBack(getToken(),feedBackId);
 	}
 
 }

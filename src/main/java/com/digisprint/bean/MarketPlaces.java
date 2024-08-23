@@ -28,7 +28,7 @@ public class MarketPlaces {
 	
 	private String city;
 	
-	private String image;
+	private String imageUrl;
 	
 	@CreatedDate
 	private LocalDateTime createdDate;

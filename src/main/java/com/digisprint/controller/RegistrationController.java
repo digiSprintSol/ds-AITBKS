@@ -2,19 +2,13 @@ package com.digisprint.controller;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.http.HttpHeaders;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,12 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
+import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.service.RegistrationService;
@@ -49,6 +42,9 @@ public class RegistrationController {
 		super();
 		this.registrationService = registrationService;
 	}
+	
+	@Autowired
+	ProgressBarRepository progressBarRepository;
 
 	@Autowired
 	private HttpServletRequest request;
@@ -70,9 +66,8 @@ public class RegistrationController {
 	
 	@Operation(summary= "This method is used to get all users ")
 	@GetMapping(value="/getAllUsers")
-	public Page<RegistrationFrom> getAllRegisteredUsers( @RequestParam(defaultValue = "0") int page,
-			 @RequestParam(defaultValue = "10") int size) {
-		return registrationService.getAllRegisteredUsers(page,size);
+	public ResponseEntity getAllRegisteredUsers() {
+		return registrationService.getAllRegisteredUsers(getToken());
 	}
 	
 	@Operation(summary="This method is used for approval from various roles")
@@ -102,9 +97,9 @@ public class RegistrationController {
 	}
 	
 	@Operation(summary="This method is used to download documents of the user")
-	@GetMapping(value = "/getIDOfUser/{userId}")
-	public ResponseEntity getDocuments(@PathVariable String userId) throws UserNotFoundException, MalformedURLException {
-		return registrationService.getIDOfUser(userId);
+	@GetMapping(value = "/getIDOfUser")
+	public ResponseEntity getDocuments() throws UserNotFoundException, MalformedURLException {
+		return registrationService.getIDOfUser(getToken());
 		
 	}
 	
@@ -132,5 +127,14 @@ public class RegistrationController {
         return registrationService.referenceOneDropdown();
     }
 	
+	@GetMapping("/BarReport")
+	public ProgressBarReport barReport(@RequestParam String UserId) {
+		return progressBarRepository.findById(UserId).get();
+	}
+	
+	@GetMapping("/getFiltereedMembers")
+	public ResponseEntity getTheMembers(@RequestParam String categoryOfMember){
+		return registrationService.getAllFilteredMembers(categoryOfMember);
+	}
 }
 

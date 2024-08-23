@@ -23,4 +23,9 @@ public class ErrorResponseConstants {
 	public static final String NOT_AUTHORISED = "Not Authorised to use the request";
 	
 	public static final String USER_ALREADY_LOGGEDIN = "User is already loggedIn";
+	
+	public static final String  ERROR_RESPONSE_FOR_WRONG_TOKEN = "You dont have proper access to perform the action";
+	
+	public static final String ERROR_NO_DATA_FOUND= "No data found";
+	
 }

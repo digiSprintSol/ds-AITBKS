@@ -20,4 +20,6 @@ public class FolderConstants {
 	
 	public static final String QR_CODE = "qr-code";
 	
+	public static final String FEEDBACK = "feedback";
+	
 }
