@@ -7,15 +7,15 @@ import lombok.Data;
 
 @Data
 @Document(collection = "feedbacks")
-public class Feedbacks {
+public class Feedback {
 
 	@Id
 	private String id;
-	
+
+	private String url;
+
 	private String yourName;
-	
-//	private boolean aitbksMember;
-	
+
 	private String description;
-	
+
 }
