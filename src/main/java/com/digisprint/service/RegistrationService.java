@@ -42,6 +42,9 @@ public interface RegistrationService {
 	ResponseEntity getUserDetails(String token);
 	
 	List<String> referenceOneDropdown();
+
+	ResponseEntity getAllFilteredMembers(String categoryOfMember);
+	
 	
 
 }

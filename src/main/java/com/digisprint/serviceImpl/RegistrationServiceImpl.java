@@ -54,6 +54,7 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
+import com.digisprint.responseBody.FilterMemberResponse;
 import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
@@ -193,11 +194,47 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		user[0] = specificUserDetails.getEmailAddress();
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
 
+		boolean approvalStatus=false;
+
+		switch(from.getStatusOfApproval()) {
+
+		case RegistrationFormConstants.APPROVAL:
+			approvalStatus = true;
+			break;
+
+		case RegistrationFormConstants.REJECTED:
+			approvalStatus = false;
+			break;
+
+		default :
+			approvalStatus = false;
+		}
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
-			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL) ) {
-				specificUserDetails.setCommitteeChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeRemarksForApplicant(from.getRemarks());
+
+			if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+					&& specificUserDetails.getCommitteeOneRemarksForApplicant().isEmpty()
+					&& progressBarReport.isCommitteeOneApproval()==RegistrationFormConstants.FALSE){
+				progressBarReport.setCommitteeOneApproval(approvalStatus);
+				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setCommitteeOneRemarksForApplicant(from.getRemarks());
+
+			}
+			else if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+					&& !specificUserDetails.getCommitteeOneRemarksForApplicant().isEmpty()
+					&& progressBarReport.isCommitteeTwoApproval()==RegistrationFormConstants.FALSE
+					) {
+				progressBarReport.setCommitteeTwoApproval(approvalStatus);
+				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setCommitteeTwoRemarksForApplicant(from.getRemarks());
+			}
+			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
+					&& !specificUserDetails.getCommitteeOneRemarksForApplicant().isEmpty()
+					&& !specificUserDetails.getCommitteeTwoRemarksForApplicant().isEmpty()
+					&& progressBarReport.isCommitteeThreeApproval() == RegistrationFormConstants.FALSE) {
+				progressBarReport.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
+				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
 				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
@@ -207,7 +244,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 						.replace("[Password]", passcode);
 
 				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-				progressBarReport.setCommitteeApproval(true);
+				progressBarReport.setCommitteeThreeApproval(true);
 
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
@@ -219,15 +256,14 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				accessBeanRepository.save(accessBean);
 
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
-				progressBarReport.setCommitteeApproval(false);
+				progressBarReport.setCommitteeThreeApproval(false);
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
 
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
-				progressBarReport.setCommitteeApproval(false);
 
 			} else {
-				progressBarReport.setCommitteeApproval(false);
+				progressBarReport.setCommitteeThreeApproval(false);
 
 				// waiting email
 			}
@@ -256,7 +292,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			}
 
 		} else if (userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
-			if (progressBarReport.isCommitteeApproval() && progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
 					&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
 
@@ -267,6 +303,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.MEMBERSHIP_APPROVED);
+				specificUserDetails.setMembershipId(memberIdentityNumber);
+				specificUserDetails.setMember(RegistrationFormConstants.TRUE);
 
 			} else {
 				return new ResponseEntity("All conditions for accountant approval are not met",HttpStatus.INTERNAL_SERVER_ERROR);
@@ -410,27 +448,68 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public List<String> referenceOneDropdown() {
 
-        List<ProgressBarReport> trueMembers = progressBarRepository.findByMemberTrue();
+		List<ProgressBarReport> trueMembers = progressBarRepository.findByMemberTrue();
 
-        List<String> userIds = trueMembers.stream()
-                                          .map(ProgressBarReport::getUserId)
-                                          .collect(Collectors.toList());
+		List<String> userIds = trueMembers.stream()
+				.map(ProgressBarReport::getUserId)
+				.collect(Collectors.toList());
 
-        List<RegistrationFrom> registrationForms = new ArrayList<>();
-        for (String userId : userIds) {
-            Optional<RegistrationFrom> optionalForm = registrationFromRepository.findById(userId);
-            if (optionalForm.isPresent()) {
-                registrationForms.add(optionalForm.get());
-            } else {
-                System.out.println("No RegistrationForm found for User ID: " + userId);
-            }
-        }
+		List<RegistrationFrom> registrationForms = new ArrayList<>();
+		for (String userId : userIds) {
+			Optional<RegistrationFrom> optionalForm = registrationFromRepository.findById(userId);
+			if (optionalForm.isPresent()) {
+				registrationForms.add(optionalForm.get());
+			} else {
+				System.out.println("No RegistrationForm found for User ID: " + userId);
+			}
+		}
 
-        List<String> memberNames = registrationForms.stream()
-                                                    .map(RegistrationFrom::getFullName)
-                                                    .collect(Collectors.toList());
+		List<String> memberNames = registrationForms.stream()
+				.map(RegistrationFrom::getFullName)
+				.collect(Collectors.toList());
 
-        return memberNames;
+		return memberNames;
+	}
+
+	@Override
+	public ResponseEntity getAllFilteredMembers(String categoryOfMember) {
+
+		List<RegistrationFrom> allUsers	= registrationFromRepository.findAll();
+		if(allUsers.size()==0) {
+			return new ResponseEntity("No data found",HttpStatus.NOT_FOUND);
+		}
+		else {
+			switch(categoryOfMember) {
+
+			case RegistrationFormConstants.TRUSTEE :
+				allUsers =	allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.TRUSTEE))
+				.collect(Collectors.toList());
+				break;
+
+			case RegistrationFormConstants.PATRON :
+				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.PATRON))
+				.collect(Collectors.toList());
+				break;
+
+			case RegistrationFormConstants.LIFE_MEMBER :
+				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.LIFE_MEMBER))
+				.collect(Collectors.toList());
+				break;
+			}
+		}
+
+		if(allUsers.size()==0) {
+			return new ResponseEntity("No data found",HttpStatus.NOT_FOUND);
+		}
+		
+		else {
+			List<FilterMemberResponse> filterMemberResponsesList = allUsers.stream().map( eachUser -> {
+				FilterMemberResponse filteredResponseBean = new FilterMemberResponse();
+				BeanUtils.copyProperties(eachUser, filteredResponseBean);
+				return filteredResponseBean;
+			}).collect(Collectors.toList());
+			return new ResponseEntity(filterMemberResponsesList,HttpStatus.OK);
+		}
 
 	}
 
