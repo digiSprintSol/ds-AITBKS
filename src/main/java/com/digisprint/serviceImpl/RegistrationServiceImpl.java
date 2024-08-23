@@ -354,7 +354,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		RegistrationFrom user= registrationFromRepository.findById(userId).get();
 		IdentityCard card = new IdentityCard();
-		
+
 		card.setImage(user.getProfilePic());
 		card.setMembershipId(user.getMembershipId());
 		card.setNameofTheApplicant(user.getFullName());
@@ -417,28 +417,83 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	@Override
 	public List<String> referenceOneDropdown() {
 
-        List<ProgressBarReport> trueMembers = progressBarRepository.findByMemberTrue();
+		List<ProgressBarReport> trueMembers = progressBarRepository.findByMemberTrue();
 
-        List<String> userIds = trueMembers.stream()
-                                          .map(ProgressBarReport::getUserId)
-                                          .collect(Collectors.toList());
+		List<String> userIds = trueMembers.stream()
+				.map(ProgressBarReport::getUserId)
+				.collect(Collectors.toList());
 
-        List<RegistrationFrom> registrationForms = new ArrayList<>();
-        for (String userId : userIds) {
-            Optional<RegistrationFrom> optionalForm = registrationFromRepository.findById(userId);
-            if (optionalForm.isPresent()) {
-                registrationForms.add(optionalForm.get());
-            } else {
-                System.out.println("No RegistrationForm found for User ID: " + userId);
-            }
-        }
+		List<RegistrationFrom> registrationForms = new ArrayList<>();
+		for (String userId : userIds) {
+			Optional<RegistrationFrom> optionalForm = registrationFromRepository.findById(userId);
+			if (optionalForm.isPresent()) {
+				registrationForms.add(optionalForm.get());
+			} else {
+				System.out.println("No RegistrationForm found for User ID: " + userId);
+			}
+		}
 
-        List<String> memberNames = registrationForms.stream()
-                                                    .map(RegistrationFrom::getFullName)
-                                                    .collect(Collectors.toList());
+		List<String> memberNames = registrationForms.stream()
+				.map(RegistrationFrom::getFullName)
+				.collect(Collectors.toList());
 
-        return memberNames;
+		return memberNames;
 
+	}
+
+	@Override
+	public ResponseEntity bulkEmailUpload(String toEmail, String subject, String body) throws IOException, MessagingException {
+
+		List<RegistrationFrom> allusers = registrationFromRepository.findAll();
+
+		switch (toEmail) {
+		case EmailConstants.TRUSTEE:
+
+			List<RegistrationFrom> filterByTrustee = allusers.stream()
+			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
+			
+			email.MailSendingService(toEmail, null, body, subject);
+
+			break;
+		case EmailConstants.PATRON:
+
+			List<RegistrationFrom> filterByPatron = allusers.stream()
+			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
+
+			break;
+		case EmailConstants.LIFE_MEMBER:
+
+			List<RegistrationFrom> filterByLifeMember = allusers.stream()
+			.filter(r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
+
+			break;
+		case EmailConstants.ACCOUNTANT:
+
+			List<AccessBean> accountant = accessBeanRepository.findAll();
+
+			List<AccessBean> ac = accountant.stream()
+					.filter(AccessBean::isAccountant)
+					.collect(Collectors.toList());
+
+			break;
+		case EmailConstants.COMMITTEE_MEMBER:
+
+			List<AccessBean> committee = accessBeanRepository.findAll();
+
+			List<AccessBean> cm = committee.stream()
+					.filter(AccessBean::isAccountant)
+					.collect(Collectors.toList());
+
+			break;
+
+		default:
+			break;
+		}
+
+		return null;
 	}
 
 }

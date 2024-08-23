@@ -43,5 +43,7 @@ public interface RegistrationService {
 	
 	List<String> referenceOneDropdown();
 	
+	ResponseEntity bulkEmailUpload(String toEmail, String subject, String body)throws IOException, MessagingException;
+	
 
 }

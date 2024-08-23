@@ -22,5 +22,15 @@ public class EmailConstants {
 	
 	public static final String REPLACE_PLACEHOLDER_NAME = "[NAME]";
 	
+	public static final String TRUSTEE = "trustee";
+	
+	public static final String PATRON = "patron";
+	
+	public static final String LIFE_MEMBER = "lifemember";
+	
+	public static final String ACCOUNTANT = "accountant";
+	
+	public static final String COMMITTEE_MEMBER = "committeemember";
+	
 	
 }
