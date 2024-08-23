@@ -31,7 +31,7 @@ public interface RegistrationService {
 	
 	List<RegistrationFrom> accountFirstView(int page, int size);
 
-	ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException;
+	ResponseEntity getIDOfUser(String userId) throws MalformedURLException;
 
 	ResponseEntity uploadTranscationRecepit(String token, String imageUrl, String transcationId) throws IOException, MessagingException;
 
@@ -42,6 +42,8 @@ public interface RegistrationService {
 	ResponseEntity getUserDetails(String token);
 	
 	List<String> referenceOneDropdown();
+	
+	ResponseEntity bulkEmailUpload(String toEmail, String subject, String body)throws IOException, MessagingException;
 	
 
 }
