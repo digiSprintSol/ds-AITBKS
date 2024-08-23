@@ -31,7 +31,6 @@ import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
-import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.service.RegistrationService;
@@ -51,9 +50,6 @@ public class RegistrationController {
 		this.registrationService = registrationService;
 	}
 
-	@Autowired
-	ProgressBarRepository progressBarRepository;
-	
 	@Autowired
 	private HttpServletRequest request;
 	
@@ -136,14 +132,5 @@ public class RegistrationController {
         return registrationService.referenceOneDropdown();
     }
 	
-	@GetMapping("/BarReport")
-	public ProgressBarReport barReport(@RequestParam String UserId) {
-		return progressBarRepository.findById(UserId).get();
-	}
-	
-	@GetMapping("/getFiltereedMembers")
-	public ResponseEntity getTheMembers(@RequestParam String categoryOfMember){
-		return registrationService.getAllFilteredMembers(categoryOfMember);
-	}
 }
 

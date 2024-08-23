@@ -4,15 +4,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.MarketPlaces;
-import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.responseBody.GetDocumentURL;
 
 public interface AccessBeanService {
@@ -35,7 +32,4 @@ public interface AccessBeanService {
 	ResponseEntity uploadEventsAnnouncementsGalleryAwardsQRCodeImages(String title, String description, String imageUrl)throws MalformedURLException;
 	List<EventsImagesAnnouncements> getAllGallery();
 	List<EventsImagesAnnouncements> getAllAwards();
-	ResponseEntity verifyEmail(String email) throws UserNotFoundException, IOException, MessagingException;
-	ResponseEntity verifyOtp(String email,String otp) throws UserNotFoundException ;
-	ResponseEntity forgotPassword(String email,String newPassword)throws UserNotFoundException;
 }

@@ -11,25 +11,21 @@ public class ProgressBarReport {
 
 	@Id
 	private String userId;
-
+	
 	private boolean registrationOneFormCompleted;
-
-	private boolean committeeOneApproval;
-
-	private boolean committeeTwoApproval;
-
-	private boolean committeeThreeApproval;	
+	
+	private boolean committeeApproval;
 	
 	private boolean presidentFillingRegistrationTwoForm;
-
+	
 	private boolean presidentApproval;
-
+	
 	private boolean registrationThreeFormCompleted;
-
+	
 	private boolean payment;
-
+	
 	private boolean accountantAcknowledgement;
-
+	
 	private boolean member;
-
+	
 }

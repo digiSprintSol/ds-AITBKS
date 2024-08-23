@@ -133,36 +133,23 @@ public class RegistrationFrom {
 	
 	private PaymentInfo paymentInfo; //R3
 	
-	private String district;
-	
 	/**
 	 * MEMBERSHIP INFO
 	 */
 	
 	private String applicantChoosenMembership;
 	
-	private String committeeOneChoosenMembershipForApplicant;
-
-	private String committeeOneRemarksForApplicant;
-
-	private String committeeTwoChoosenMembershipForApplicant;
-
-	private String committeeTwoRemarksForApplicant;
-
-	private String committeeThreeChoosenMembershipForApplicant;
-
-	private String committeeThreeRemarksForApplicant;
+	private String committeeChoosenMembershipForApplicant;
 	
 	private String presidentChoosenMembershipForApplicant; //R2
 	
 	private String presidentRemarksForApplicant; //R2
 	
+	private String committeeRemarksForApplicant; //R1
+	
 	/**
 	 * Membership id
 	 */
-	
-	private boolean member;
-	
 	private String membershipId;
 
 }
