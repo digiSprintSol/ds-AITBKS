@@ -12,4 +12,10 @@ public class RegistrationFormConstants {
 	
 	public static final String WAITING = "waiting";
 	
+	public static final String TRUSTEE = "trustee";
+	
+	public static final String PATRON = "patron";
+	
+	public static final String LIFE_MEMBER = "lifemember";
+	
 }

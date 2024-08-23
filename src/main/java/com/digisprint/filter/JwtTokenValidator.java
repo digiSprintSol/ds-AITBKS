@@ -56,7 +56,6 @@ public class JwtTokenValidator implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		System.out.println("inside token validator class");
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		HttpServletResponse httpServletResponse=(HttpServletResponse) response;
 		httpServletResponse.setHeader(ApplicationConstants.ALLOW_CROS_ORIGIN, ApplicationConstants.ALLOW_ORIGINS);
@@ -64,7 +63,6 @@ public class JwtTokenValidator implements Filter {
 		String token = null;
 		if (requetHeaders != null && requetHeaders.startsWith("Bearer ")) {
             token = requetHeaders.substring(7); // Remove "Bearer " prefix
-            System.out.println("Token: " + token);
             // Further processing with the token
 		}
 		if (token != null && !((HttpServletRequest) request).getRequestURI().contains(ApplicationConstants.LOGIN) 
@@ -87,14 +85,11 @@ public class JwtTokenValidator implements Filter {
 					ObjectMapper mapper = new ObjectMapper();
 					response.getWriter().write(mapper.writeValueAsString(e));
 					((HttpServletResponse) response).sendError(HttpStatus.UNAUTHORIZED.value(),ErrorResponseConstants.NOT_AUTHORISED);
-				System.out.println("inside if and getting eror");
 				}else {
 					String body = new String(decoder.decode(chunks[1]));
 					JSONObject jsonObject = new JSONObject(body);
 					JSONArray array = (JSONArray) jsonObject.get(ApplicationConstants.ACCESS);
-					System.out.println("i am here");
 					chain.doFilter(request, response);
-					System.out.println("i am here after hittinf jwt request");
 				}
 			}
 		}else if (((HttpServletRequest) request).getRequestURI().contains(ApplicationConstants.LOGIN) 

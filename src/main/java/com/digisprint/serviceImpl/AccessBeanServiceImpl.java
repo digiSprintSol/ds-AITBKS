@@ -13,9 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.Image;
@@ -48,6 +51,7 @@ import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.responseBody.LoginResponse;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
+import com.digisprint.utils.EmailConstants;
 import com.digisprint.utils.ErrorResponseConstants;
 
 import io.jsonwebtoken.Claims;
@@ -68,19 +72,25 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private ImageRepository imageRepository;
 
+	private EmailService email;
+
 	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository,
 			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil,
-			MarketPlaceRepository marketPlaceRepository,ImageRepository imageRepository) {
+			MarketPlaceRepository marketPlaceRepository, ImageRepository imageRepository, EmailService email) {
 		super();
 		this.accessBeanRepository = accessBeanRepository;
 		this.eventsImagesAnnouncementsRepo = eventsImagesAnnouncementsRepo;
 		this.jwtTokenUtil = jwtTokenUtil;
 		this.marketPlaceRepository = marketPlaceRepository;
 		this.imageRepository = imageRepository;
+		this.email = email;
 	}
 
 	@Value("${config.secretKey}")
 	private  String secretKey;
+
+	@Value("${spring.mail.username}")
+	private String ADMIN_USERNAME;
 
 	@Autowired
 	HttpServletResponse response;
@@ -424,16 +434,72 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	public List<EventsImagesAnnouncements> getAllGallery() {
 		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByGalleryTrue();
 
-        return galleryItems;
+		return galleryItems;
 	}
 
 	@Override
 	public List<EventsImagesAnnouncements> getAllAwards() {
 		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByAwardsTrue();
 
-        return galleryItems;
+		return galleryItems;
 	}
 
+	char[] OTP(int length) {
+		String numbers = "0123456";
+		Random random = new Random();
+		char[] otp = new char[4];
+		for(int i=0; i<4; i++) {
+			otp[i]=numbers.charAt(random.nextInt(numbers.length()));
+		}
+		System.out.println(otp);
+		return otp;
+	}
+
+	@Override
+	public ResponseEntity verifyEmail(String email) throws UserNotFoundException, IOException, MessagingException {
+
+		AccessBean accessBean =verifyEmailEntered(email);
+		long generatedOTP = OTP(6).hashCode();
+		Long longOtp = generatedOTP;
+		CharSequence otp = longOtp.toString().subSequence(0, 6);
+		accessBean.setOtp(otp);
+
+		String[] newUser= new String[1];
+		newUser[0] = accessBean.getEmail();
+		String	body = EmailConstants.OTP_BODY
+				.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, accessBean.getName())
+				.replace(EmailConstants.REPLACE_GENERATED_OTP, otp);
+		this.email.MailSendingService(ADMIN_USERNAME, newUser,body, EmailConstants.FORGET_PASSWORD_OTP);
+
+		accessBeanRepository.save(accessBean);
+		return new ResponseEntity(email,HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity verifyOtp(String email,String otp) throws UserNotFoundException {
+
+		AccessBean accessBean =verifyEmailEntered(email);
+		if(accessBean.getOtp().equals(otp)) {
+			return new ResponseEntity("email verified",HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity("OTP incorrect",HttpStatus.NO_CONTENT);
+		}
+	}
+
+	@Override
+	public ResponseEntity forgotPassword(String email,String newPassword) throws UserNotFoundException {
+		AccessBean accessBean =verifyEmailEntered(email);
+		accessBean.setPassword(newPassword);
+		accessBean.setOtp(null);
+		accessBeanRepository.save(accessBean);
+		return new ResponseEntity("Your new password is reset try to ",HttpStatus.OK);
+	}
+
+	private AccessBean verifyEmailEntered(String email) throws UserNotFoundException {
+		AccessBean accessBean = accessBeanRepository.findByEmail(email).orElseThrow(()-> new  UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
+       return accessBean;
+	}
 
 
 }
