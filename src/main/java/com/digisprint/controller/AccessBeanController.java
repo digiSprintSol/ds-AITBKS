@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,10 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.MarketPlaces;
-import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.LoginPayload;
 import com.digisprint.requestBean.UploadAnnouncement;
-import com.digisprint.requestBean.VerifyEmail;
 import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -111,30 +108,30 @@ public class AccessBeanController {
 	public ResponseEntity getEvents() throws MalformedURLException {
 		return accessBeanService.getEvents();
 	}
-
+	
 	@Operation(summary="This method is used for posting market places")
 	@PostMapping(value="/postMarketPlace")
 	public ResponseEntity postMarketPlace( @RequestParam("nameOfShop") String nameOfShop,
-			@RequestParam("contactPerson") String contactPerson,
-			@RequestParam("mobileNumber") String mobileNumber,
-			@RequestParam("location") String location,
-			@RequestParam("category") String category,
-			@RequestParam("city") String city,
-			@RequestParam(name="imageUrl",required =false) String imageUrl) {
-		try {
-			accessBeanService.postMarketPlace(getToken(), nameOfShop, contactPerson, mobileNumber, location, category, city, imageUrl);
-			return ResponseEntity.status(HttpStatus.CREATED).body("MarketPlace added successfully.");
-		} catch (IOException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving MarketPlace: " + e.getMessage());
-		}
+            @RequestParam("contactPerson") String contactPerson,
+            @RequestParam("mobileNumber") String mobileNumber,
+            @RequestParam("location") String location,
+            @RequestParam("category") String category,
+            @RequestParam("city") String city,
+            @RequestParam(name="imageUrl",required =false) String imageUrl) {
+        try {
+        	accessBeanService.postMarketPlace(getToken(), nameOfShop, contactPerson, mobileNumber, location, category, city, imageUrl);
+            return ResponseEntity.status(HttpStatus.CREATED).body("MarketPlace added successfully.");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while saving MarketPlace: " + e.getMessage());
+        }
 	}
-
+	
 	@Operation(summary="This method is used for getting market images")
 	@GetMapping(value="/getMarketPlaces")
 	public ResponseEntity getMarketPlace() {
 		return accessBeanService.getAllMarketPlaces();
 	}
-
+	
 	@Operation(summary = "This method is used to get specific market place image")
 	@GetMapping(value="/getMarketPlaceImage/{marketPlaceId}")
 	public ResponseEntity getSelectedMarketPlace(@PathVariable("marketPlaceId") String marketPlaceId) throws MalformedURLException {
@@ -142,58 +139,42 @@ public class AccessBeanController {
 	}
 
 	@GetMapping("/categories")
-	public ResponseEntity<List<String>> getAllCategories() {
-		List<String> categories = accessBeanService.getAllCategories();
-		return ResponseEntity.ok(categories);
-	}
-
+    public ResponseEntity<List<String>> getAllCategories() {
+        List<String> categories = accessBeanService.getAllCategories();
+        return ResponseEntity.ok(categories);
+    }
+	
 	@GetMapping("/cities")
-	public ResponseEntity<List<String>> getAllCities() {
-		List<String> cities = accessBeanService.getAllCities();
-		return ResponseEntity.ok(cities);
-	}
-
+    public ResponseEntity<List<String>> getAllCities() {
+        List<String> cities = accessBeanService.getAllCities();
+        return ResponseEntity.ok(cities);
+    }
+	
 	@DeleteMapping(value="/deleteAnnouncement/{id}")
 	public ResponseEntity deleteAnnouncement(@PathVariable("id") String id) {
 		return accessBeanService.deleteAnnouncement(id);
 	}
-
+	
 	@PostMapping("/uploadEventsAnnouncementsGalleryAwardsQRCodeImages")
-	public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(
-			@RequestParam("title") String title, 
-			@RequestParam("description") String description, 
-			@RequestParam("imageUrl") String imageUrl) throws MalformedURLException {
+    public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(
+            @RequestParam("title") String title, 
+            @RequestParam("description") String description, 
+            @RequestParam("imageUrl") String imageUrl) throws MalformedURLException {
 		return accessBeanService.uploadEventsAnnouncementsGalleryAwardsQRCodeImages(title, description, imageUrl);
 	}
-
+	
 	@GetMapping("/gallery-urls")
-	public ResponseEntity<List<EventsImagesAnnouncements>> getGalleryURLs() {
-		List<EventsImagesAnnouncements> galleryUrls = accessBeanService.getAllGallery();
-
-		return new ResponseEntity<>(galleryUrls, HttpStatus.OK);
-	}
-
+    public ResponseEntity<List<EventsImagesAnnouncements>> getGalleryURLs() {
+        List<EventsImagesAnnouncements> galleryUrls = accessBeanService.getAllGallery();
+        
+        return new ResponseEntity<>(galleryUrls, HttpStatus.OK);
+    }
+	
 	@GetMapping("/award-urls")
-	public ResponseEntity<List<EventsImagesAnnouncements>> getAwardURLs() {
-		List<EventsImagesAnnouncements> awardUrls = accessBeanService.getAllAwards();
-
-		return new ResponseEntity<>(awardUrls, HttpStatus.OK);
-	}
-
-	@PostMapping("/verifyEmail")
-	public ResponseEntity verifyEmail(@RequestBody VerifyEmail verifyEmail) throws UserNotFoundException, IOException, MessagingException {
-		return accessBeanService.verifyEmail(verifyEmail.getEmail());
-
-	}
+    public ResponseEntity<List<EventsImagesAnnouncements>> getAwardURLs() {
+        List<EventsImagesAnnouncements> awardUrls = accessBeanService.getAllAwards();
+        
+        return new ResponseEntity<>(awardUrls, HttpStatus.OK);
+    }
 	
-	@PostMapping("/verifyOtp")
-	ResponseEntity verifyOtp(@RequestBody VerifyEmail verifyEmail) throws UserNotFoundException {
-		return accessBeanService.verifyOtp(verifyEmail.getEmail(), verifyEmail.getOtp());
-	}
-	
-	@PostMapping("/resetPassword")
-	ResponseEntity forgotPassword(@RequestBody VerifyEmail verifyEmail) throws UserNotFoundException{
-		return accessBeanService.forgotPassword(verifyEmail.getEmail(),verifyEmail.getPassword());
-	}
-
 }

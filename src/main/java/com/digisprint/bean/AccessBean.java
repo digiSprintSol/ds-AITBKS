@@ -40,8 +40,6 @@ public class AccessBean {
 
 	private boolean deleted;
 	
-	private CharSequence otp;
-	
 	public String getEmail() {
 		return email.toLowerCase();
 	}
