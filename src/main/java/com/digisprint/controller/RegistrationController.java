@@ -102,9 +102,9 @@ public class RegistrationController {
 	}
 	
 	@Operation(summary="This method is used to download documents of the user")
-	@GetMapping(value = "/downloadUserDocuments/{userId}")
+	@GetMapping(value = "/getIDOfUser/{userId}")
 	public ResponseEntity getDocuments(@PathVariable String userId) throws UserNotFoundException, MalformedURLException {
-		return registrationService.getDocumentOfUser(userId);
+		return registrationService.getIDOfUser(userId);
 		
 	}
 	

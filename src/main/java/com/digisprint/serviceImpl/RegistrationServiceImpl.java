@@ -55,6 +55,7 @@ import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.responseBody.GetDocumentURL;
+import com.digisprint.responseBody.IdentityCard;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
@@ -349,11 +350,17 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity getDocumentOfUser(String userId) throws MalformedURLException {
-		// get user id card
+	public ResponseEntity getIDOfUser(String userId) throws MalformedURLException {
+
 		RegistrationFrom user= registrationFromRepository.findById(userId).get();
-		// response - image,name,membership type, member id.
-		return new ResponseEntity(user.getProfilePic(),HttpStatus.OK);
+		IdentityCard card = new IdentityCard();
+		
+		card.setImage(user.getProfilePic());
+		card.setMembershipId(user.getMembershipId());
+		card.setNameofTheApplicant(user.getFullName());
+		card.setTypeOfMemberShip(user.getPresidentChoosenMembershipForApplicant());
+
+		return new ResponseEntity(card,HttpStatus.OK);
 	}
 
 	@Override
