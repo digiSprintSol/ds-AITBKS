@@ -1,22 +1,24 @@
 package com.digisprint.serviceImpl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.Feedback;
-import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.FeedbackRepository;
+import com.digisprint.requestBean.FeedbackRequest;
+import com.digisprint.responseBody.FeedbackResponse;
 import com.digisprint.service.FeedBackService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.ErrorResponseConstants;
@@ -37,68 +39,88 @@ public class FeedBackServiceImpl implements FeedBackService {
 	}
 
 	@Override
-	public ResponseEntity<String> createFeedBack(String token,Feedback feedback) throws UserNotFoundException {
-
+	public ResponseEntity<String> createFeedBack(String token, FeedbackRequest feedback) throws UserNotFoundException {
 		if (token == null || token.isEmpty()) {
-			AccessBean presidentUser = getTokenVerified(token); 
-			feedback.setCreatedDate(LocalDateTime.now());
-			feedback.setCreatedBy(presidentUser.getName());
-			return new ResponseEntity(feedbackRepository.save(feedback), HttpStatus.OK);
+			AccessBean presidentUser = getTokenVerified(token);
+			Feedback feedBackEntity = new Feedback();
+			BeanUtils.copyProperties(feedback, feedBackEntity);
+			feedBackEntity.setCreatedDate(LocalDateTime.now());
+			feedBackEntity.setCreatedBy(presidentUser.getName());
+			Feedback response= feedbackRepository.save(feedBackEntity);
+			FeedbackResponse feedbackResponse = new FeedbackResponse();
+			BeanUtils.copyProperties(response,feedbackResponse);
+			return new ResponseEntity(feedbackResponse, HttpStatus.OK);
 
-		}
-		else {
-			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN,HttpStatus.BAD_REQUEST);
+		} else {
+			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
 		}
 
 	}
 
 	@Override
-	public ResponseEntity<String> updateFeedBack(String token,Feedback feedback) throws UserNotFoundException {
+	public ResponseEntity<String> updateFeedBack(String token, Feedback feedback) throws UserNotFoundException {
 
-		if(token!=null) {
+		if (token != null) {
 			AccessBean presidentUser = getTokenVerified(token);
-			//change the code for update add id in path and do findby and then update
-
-			return new ResponseEntity(feedbackRepository.save(feedback), HttpStatus.OK);
+			// change the code for update add id in path and do findby and then update
+			Optional<Feedback> optionalFeedBck = feedbackRepository.findById(feedback.getId());
+			if (optionalFeedBck.isPresent()) {
+				feedback.setModifiedDate(LocalDateTime.now());
+				feedback.setModifiedBy(presidentUser.getName());
+				Feedback response = feedbackRepository.save(feedback);
+				FeedbackResponse feedbackResponse = new FeedbackResponse();
+				BeanUtils.copyProperties(response, feedbackResponse);
+				return new ResponseEntity(feedbackResponse, HttpStatus.OK);
+			}
+			return new ResponseEntity("Feedback not found", HttpStatus.OK);
 		}
-		else {
-			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN,HttpStatus.BAD_REQUEST);
-		}
+		return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
 	}
 
 	@Override
 	public ResponseEntity<String> getFeedBack(String feedBackId) {
 		Optional<Feedback> optionalFeedBack = feedbackRepository.findById(feedBackId);
 		if (optionalFeedBack.isPresent()) {
-			return new ResponseEntity(optionalFeedBack.get(), HttpStatus.OK);
+			FeedbackResponse feedbackResponse = new FeedbackResponse();
+			BeanUtils.copyProperties(optionalFeedBack.get(), feedbackResponse);
+			return new ResponseEntity(feedbackResponse, HttpStatus.OK);
 		}
 		return new ResponseEntity("FeedBack not found", HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<String> deleteFeedBack(String token,String feedBackId) throws UserNotFoundException {
+	public ResponseEntity<String> deleteFeedBack(String token, String feedBackId) throws UserNotFoundException {
 
-		if(token!=null) {
+		if (token != null) {
 			AccessBean presidentUser = getTokenVerified(token);
-			//change the code for delete here do either soft or hard delete
+			// change the code for delete here do either soft or hard delete
 			Optional<Feedback> optionalFeedBack = feedbackRepository.findById(feedBackId);
 			if (optionalFeedBack.isPresent()) {
-				return new ResponseEntity(optionalFeedBack.get(), HttpStatus.OK);
-			}
-			else {
+				Feedback feedback = optionalFeedBack.get();
+				feedback.setDeleted(true);
+				feedback.setModifiedDate(LocalDateTime.now());
+				feedback.setModifiedBy(presidentUser.getName());
+				feedbackRepository.save(feedback);
+				return new ResponseEntity("Feedback is deleted", HttpStatus.OK);
+			} else {
 				return new ResponseEntity("FeedBack not found", HttpStatus.OK);
 			}
-		}
-		else {
-			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN,HttpStatus.BAD_REQUEST);
+		} else {
+			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@Override
 	public ResponseEntity<String> getAllFeedBacks() {
 		List<Feedback> feedBacks = feedbackRepository.findAll();
+		List<FeedbackResponse> feedbackResponses = new ArrayList<>();
 		if (feedBacks.size() > 0) {
-			return new ResponseEntity(feedBacks, HttpStatus.OK);
+			feedBacks.stream().forEach((feedbackEntity) -> {
+				FeedbackResponse feedbackResponse = new FeedbackResponse();
+				BeanUtils.copyProperties(feedbackEntity, feedbackResponse);
+				feedbackResponses.add(feedbackResponse);
+			});
+			return new ResponseEntity(feedbackResponses, HttpStatus.OK);
 		}
 		return new ResponseEntity("No Data Found", HttpStatus.OK);
 	}
@@ -119,9 +141,9 @@ public class FeedBackServiceImpl implements FeedBackService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 		AccessBean accessBeanUser = new AccessBean();
-		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
-			accessBeanUser= accessBeanRepository.findById(identityNumber)
-					.orElseThrow(()->new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
+		if (accessList.contains(ApplicationConstants.PRESIDENT)) {
+			accessBeanUser = accessBeanRepository.findById(identityNumber)
+					.orElseThrow(() -> new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
 		}
 		return accessBeanUser;
 	}

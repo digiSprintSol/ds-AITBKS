@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.Feedback;
 import com.digisprint.exception.UserNotFoundException;
+import com.digisprint.requestBean.FeedbackRequest;
 import com.digisprint.service.FeedBackService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -35,7 +36,7 @@ public class FeedBackController {
 	}
 	
 	@PostMapping(value = "/createFeedBack")
-	public ResponseEntity<String> createFeedBack(@RequestBody Feedback feedback) throws UserNotFoundException {
+	public ResponseEntity<String> createFeedBack(@RequestBody FeedbackRequest feedback) throws UserNotFoundException {
 		return feedBackService.createFeedBack(getToken(),feedback);
 	}
 
