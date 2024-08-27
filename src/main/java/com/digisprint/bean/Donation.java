@@ -3,7 +3,6 @@ package com.digisprint.bean;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -31,10 +30,4 @@ public class Donation {
 	private LocalDate transactionDate;
 
 	private String transactionReceiptUploadUrl;
-	
-	@CreatedDate
-	private LocalDateTime modifiedDate;
-	
-	@CreatedDate
-	private LocalDateTime createdDate;
 }

@@ -1,12 +1,10 @@
 package com.digisprint.serviceImpl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.json.JSONObject;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,14 +15,13 @@ import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
 import com.digisprint.repository.DonationRepository;
-import com.digisprint.requestBean.DonationRequest;
-import com.digisprint.responseBody.DonationResponse;
 import com.digisprint.service.DonationService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.ErrorResponseConstants;
 
 @Service
 public class DonationServiceImpl implements DonationService {
+
 
 	private DonationRepository donationRepository;
 
@@ -41,61 +38,40 @@ public class DonationServiceImpl implements DonationService {
 	}
 
 	@Override
-	public ResponseEntity<String> createDonation(DonationRequest donation) {
-		// this method not working check
-		Donation donationEntity = new Donation();
-		BeanUtils.copyProperties(donation, donationEntity);
-		donationEntity.setCreatedDate(LocalDateTime.now());
-		Donation response = this.donationRepository.save(donationEntity);
-		DonationResponse donationResponse = new DonationResponse();
-		BeanUtils.copyProperties(response, donationResponse);
-		return new ResponseEntity(donationResponse, HttpStatus.OK);
+	public ResponseEntity<String> createDonation(Donation donation) {
+		//this method not working check
+		return new ResponseEntity(this.donationRepository.save(donation), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<String> getDonation(String donationId) {
 		Optional<Donation> optionalDonation = donationRepository.findById(donationId);
 		if (optionalDonation.isPresent()) {
-			DonationResponse donationResponse = new DonationResponse();
-			BeanUtils.copyProperties(optionalDonation.get(), donationResponse);
-			return new ResponseEntity(donationResponse, HttpStatus.OK);
+			return new ResponseEntity(optionalDonation.get(), HttpStatus.OK);
 		}
 		return new ResponseEntity("Donation not found", HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<String> getAllDonation(String token) throws UserNotFoundException {
-		if (token != null) {
+		if(token!=null) {
 			AccessBean accountantUser = getTokenVerified(token);
 			List<Donation> donations = donationRepository.findAll();
-			List<DonationResponse> donationResponses = new ArrayList<>();
 			if (donations.size() > 0) {
-				donations.stream().forEach((donationEntity)->{
-					DonationResponse response = new DonationResponse();
-					BeanUtils.copyProperties(donationEntity, response);
-					donationResponses.add(response);
-				});
-				return new ResponseEntity(donationResponses, HttpStatus.OK);
-			} else {
-				return new ResponseEntity("Data not found", HttpStatus.INTERNAL_SERVER_ERROR);
-//				check this statement
-//				return new ResponseEntity("Token cannot be null", HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity(donations, HttpStatus.OK);
 			}
-		} else {
-			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
+			else {
+				return new ResponseEntity("Token cannot be null", HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+		else {
+			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN,HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@Override
 	public ResponseEntity<String> updateDonation(Donation donation) {
-		if (donationRepository.findById(donation.getId()).isPresent()) {
-			donation.setModifiedDate(LocalDateTime.now());
-			Donation donationEntity= donationRepository.save(donation);
-			DonationResponse donationResponse= new DonationResponse();
-			BeanUtils.copyProperties(donationEntity, donationResponse);
-			return new ResponseEntity(donationResponse, HttpStatus.OK);
-		}
-		return new ResponseEntity("Donation not found", HttpStatus.OK);
+		return new ResponseEntity(donationRepository.save(donation), HttpStatus.OK);
 	}
 
 	private AccessBean getTokenVerified(String token) throws UserNotFoundException {
@@ -110,9 +86,9 @@ public class DonationServiceImpl implements DonationService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 		AccessBean accessBeanUser = new AccessBean();
-		if (accessList.contains(ApplicationConstants.ACCOUNTANT)) {
-			accessBeanUser = accessBeanRepository.findById(identityNumber)
-					.orElseThrow(() -> new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
+		if(accessList.contains(ApplicationConstants.ACCOUNTANT)) {
+			accessBeanUser= accessBeanRepository.findById(identityNumber)
+					.orElseThrow(()->new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
 		}
 		return accessBeanUser;
 	}

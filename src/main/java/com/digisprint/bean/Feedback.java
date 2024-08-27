@@ -23,8 +23,6 @@ public class Feedback {
 
 	private String description;
 	
-	private Boolean deleted;
-	
 	private String createdBy;
 	
 	@CreatedDate
@@ -32,7 +30,6 @@ public class Feedback {
 	
 	private String modifiedBy;
 	
-	@CreatedDate
-	private LocalDateTime modifiedDate;
+	private String modifiedDate;
 
 }

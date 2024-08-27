@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.Donation;
 import com.digisprint.exception.UserNotFoundException;
-import com.digisprint.requestBean.DonationRequest;
 import com.digisprint.service.DonationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -36,7 +35,7 @@ public class DonationController {
 	}
 
 	@PostMapping(value = "/createDonation")
-	public ResponseEntity<String> donationController(@RequestBody DonationRequest donation) {
+	public ResponseEntity<String> DonationController(@RequestBody Donation donation) {
 		return donationService.createDonation(donation);
 	}
 
