@@ -19,7 +19,7 @@ import com.digisprint.requestBean.RegistrationFrom2;
 
 public interface RegistrationService {
 
-	RegistrationFrom registerUser(RegistrationFrom registrationForm,String imageUrl) throws IOException, MessagingException;
+	RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException;
 	
 	ResponseEntity getAllRegisteredUsers(String token);
 	
@@ -33,7 +33,7 @@ public interface RegistrationService {
 
 	ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException;
 
-	ResponseEntity uploadTranscationRecepit(String token, String imageUrl, String transcationId) throws IOException, MessagingException;
+	ResponseEntity uploadTranscationRecepit(String token, String transcationId) throws IOException, MessagingException;
 
 	RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
 

@@ -14,7 +14,6 @@ import javax.mail.MessagingException;
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -89,7 +88,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	private String ADMIN_USERNAME;
 
 	@Override
-	public RegistrationFrom registerUser(RegistrationFrom registrationForm, String imageUrl) throws IOException, MessagingException {
+	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationFrom> existingUser = registrationFromRepository.findByEmailAddress(registrationForm.getEmailAddress());
 		if (existingUser.isPresent()) {
@@ -117,7 +116,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
-		registrationForm.setProfilePic(imageUrl);
 		RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(userDeatils.getUserId());
@@ -414,14 +412,13 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token, String imageUrl,String transcationId) throws IOException, MessagingException {
+	public ResponseEntity uploadTranscationRecepit(String token,String transcationId) throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
 
 		PaymentInfo paymentInfo= new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
-		paymentInfo.setPaymentDetailDocument(imageUrl);
 		paymentInfo.setTrasactionId(transcationId);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
