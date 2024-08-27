@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,20 +18,18 @@ import com.digisprint.requestBean.DonationRequest;
 import com.digisprint.service.DonationService;
 import com.digisprint.utils.ApplicationConstants;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-
 @RestController
 @RequestMapping("/donations")
 public class DonationController {
 
 	@Autowired
 	DonationService donationService;
-	
+
 	@Autowired
 	private HttpServletRequest request;
-	
+
 	public String getToken() {
-		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
+		String requestHeaders = request.getHeader(ApplicationConstants.TOKEN);
 		String token = requestHeaders.substring(7); // Remove "Bearer " prefix
 		return token;
 	}
