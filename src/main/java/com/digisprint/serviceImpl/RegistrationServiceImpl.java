@@ -545,8 +545,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByTrustee = allusers.stream()
 			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
-
-			email.MailSendingService(toEmail, null, body, subject);
+			List<String> trusteeMails=  filterByTrustee.stream().map((trustee)->{
+            	return trustee.getEmailAddress();
+            }).collect(Collectors.toList());
+	        String[] trusteeEmails=	trusteeMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, trusteeEmails, body, subject);
+			
 
 			break;
 		case EmailConstants.PATRON:
@@ -554,6 +558,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByPatron = allusers.stream()
 			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
+			
+			List<String> patronMails=  filterByPatron.stream().map((patron)->{
+            	return patron.getEmailAddress();
+            }).collect(Collectors.toList());
+	        String[] patronEmails=	patronMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, patronEmails, body, subject);
 
 			break;
 		case EmailConstants.LIFE_MEMBER:
@@ -561,15 +571,26 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByLifeMember = allusers.stream()
 			.filter(r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
+			
+			List<String> lifeMemberMails=  filterByLifeMember.stream().map((lifeMember)->{
+            	return lifeMember.getEmailAddress();
+            }).collect(Collectors.toList());
+	        String[] lifeMemberEmails=	lifeMemberMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, lifeMemberEmails, body, subject);
 
 			break;
 		case EmailConstants.ACCOUNTANT:
-
 			List<AccessBean> accountant = accessBeanRepository.findAll();
-
 			List<AccessBean> ac = accountant.stream()
 					.filter(AccessBean::isAccountant)
 					.collect(Collectors.toList());
+			
+			List<String> accountantMails=  ac.stream().map((eachAccountant)->{
+            	return eachAccountant.getEmail();
+            }).collect(Collectors.toList());
+			
+	        String[] accountantEmails=	accountantMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, accountantEmails, body, subject);
 
 			break;
 		case EmailConstants.COMMITTEE_MEMBER:
@@ -579,6 +600,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<AccessBean> cm = committee.stream()
 					.filter(AccessBean::isAccountant)
 					.collect(Collectors.toList());
+			
+			List<String> committeeMembetMails=  cm.stream().map((committeeMember)->{
+            	return committeeMember.getEmail();
+            }).collect(Collectors.toList());
+	        String[] committeeMemberEmails=	committeeMembetMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, committeeMemberEmails, body, subject);
 
 			break;
 
