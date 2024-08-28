@@ -225,6 +225,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant()==null
 					&& specificUserDetails.isCommitteeOneApproval()==RegistrationFormConstants.FALSE){
+				System.out.println("");
 				specificUserDetails.setCommitteeOneApproval(approvalStatus);
 				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeOneRemarksForApplicant(from.getRemarks());
@@ -243,7 +244,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
 					&& specificUserDetails.getCommitteeTwoRemarksForApplicant()!=null
-					&& specificUserDetails.getCommitteeOneRemarksForApplicant() == null) {
+					&& specificUserDetails.getCommitteeThreeChoosenMembershipForApplicant() == null) {
 				System.out.println("inside c3 approvals");
 				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
