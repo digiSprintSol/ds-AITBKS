@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class DonationRequest {
-	
+
 	private String fullName;
 
 	private LocalDateTime dob;
@@ -19,7 +19,7 @@ public class DonationRequest {
 	private String transactionId;
 
 	private int amountPaid;
-	
+
 	private LocalDate transactionDate;
 
 	private String transactionReceiptUploadUrl;

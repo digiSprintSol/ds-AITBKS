@@ -14,7 +14,6 @@ import javax.mail.MessagingException;
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -89,7 +88,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	private String ADMIN_USERNAME;
 
 	@Override
-	public RegistrationFrom registerUser(RegistrationFrom registrationForm, String imageUrl) throws IOException, MessagingException {
+	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationFrom> existingUser = registrationFromRepository.findByEmailAddress(registrationForm.getEmailAddress());
 		if (existingUser.isPresent()) {
@@ -117,7 +116,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
-		registrationForm.setProfilePic(imageUrl);
 		RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(userDeatils.getUserId());
@@ -453,14 +451,13 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token, String imageUrl,String transcationId) throws IOException, MessagingException {
+	public ResponseEntity uploadTranscationRecepit(String token,String transcationId) throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
 
 		PaymentInfo paymentInfo= new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
-		paymentInfo.setPaymentDetailDocument(imageUrl);
 		paymentInfo.setTrasactionId(transcationId);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
@@ -584,8 +581,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByTrustee = allusers.stream()
 			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
-
-			email.MailSendingService(toEmail, null, body, subject);
+			List<String> trusteeMails=  filterByTrustee.stream().map((trustee)->{
+            	return trustee.getEmailAddress();
+            }).collect(Collectors.toList());
+	        String[] trusteeEmails=	trusteeMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, trusteeEmails, body, subject);
+			
 
 			break;
 		case EmailConstants.PATRON:
@@ -593,6 +594,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByPatron = allusers.stream()
 			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
+			
+			List<String> patronMails=  filterByPatron.stream().map((patron)->{
+            	return patron.getEmailAddress();
+            }).collect(Collectors.toList());
+	        String[] patronEmails=	patronMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, patronEmails, body, subject);
 
 			break;
 		case EmailConstants.LIFE_MEMBER:
@@ -600,15 +607,26 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByLifeMember = allusers.stream()
 			.filter(r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
+			
+			List<String> lifeMemberMails=  filterByLifeMember.stream().map((lifeMember)->{
+            	return lifeMember.getEmailAddress();
+            }).collect(Collectors.toList());
+	        String[] lifeMemberEmails=	lifeMemberMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, lifeMemberEmails, body, subject);
 
 			break;
 		case EmailConstants.ACCOUNTANT:
-
 			List<AccessBean> accountant = accessBeanRepository.findAll();
-
 			List<AccessBean> ac = accountant.stream()
 					.filter(AccessBean::isAccountant)
 					.collect(Collectors.toList());
+			
+			List<String> accountantMails=  ac.stream().map((eachAccountant)->{
+            	return eachAccountant.getEmail();
+            }).collect(Collectors.toList());
+			
+	        String[] accountantEmails=	accountantMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, accountantEmails, body, subject);
 
 			break;
 		case EmailConstants.COMMITTEE_MEMBER:
@@ -618,6 +636,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<AccessBean> cm = committee.stream()
 					.filter(AccessBean::isAccountant)
 					.collect(Collectors.toList());
+			
+			List<String> committeeMembetMails=  cm.stream().map((committeeMember)->{
+            	return committeeMember.getEmail();
+            }).collect(Collectors.toList());
+	        String[] committeeMemberEmails=	committeeMembetMails.toArray(String[] :: new);
+            email.MailSendingService(toEmail, committeeMemberEmails, body, subject);
 
 			break;
 

@@ -57,10 +57,9 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used for 1st level of Registration")
 	@PostMapping("/register")
-	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from,
-			@RequestParam(name="imageUrl",required = false) String imageUrl) throws IOException, MessagingException {
+	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from) throws IOException, MessagingException {
 		
-		return this.registrationService.registerUser(from,imageUrl) ;
+		return this.registrationService.registerUser(from) ;
 	} 
 	
 	@Operation(summary= "This method is used to get all users ")
@@ -104,7 +103,6 @@ public class RegistrationController {
 	@Operation(summary="This method is used to upload the payment receipt")
 	@PostMapping(value="/uploadTranscationReceipt")
 	public ResponseEntity uploadTranscationRecepit(@RequestParam String imageUrl,@RequestParam String transcationId) throws IOException, MessagingException {
-	
 		return registrationService.uploadTranscationRecepit(getToken(), imageUrl,transcationId);
 	}
 	
