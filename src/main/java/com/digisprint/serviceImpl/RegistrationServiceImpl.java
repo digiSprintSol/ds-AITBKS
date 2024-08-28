@@ -451,7 +451,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token,String transcationId) throws IOException, MessagingException {
+	public ResponseEntity uploadTranscationRecepit(String token,String imageUrl,String transcationId) throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
@@ -459,6 +459,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		PaymentInfo paymentInfo= new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
 		paymentInfo.setTrasactionId(transcationId);
+		paymentInfo.setPaymentDetailDocument(imageUrl);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
 
