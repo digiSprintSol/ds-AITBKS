@@ -104,6 +104,7 @@ public class RegistrationController {
 	@Operation(summary="This method is used to upload the payment receipt")
 	@PostMapping(value="/uploadTranscationReceipt")
 	public ResponseEntity uploadTranscationRecepit(@RequestParam String imageUrl,@RequestParam String transcationId) throws IOException, MessagingException {
+	
 		return registrationService.uploadTranscationRecepit(getToken(), imageUrl,transcationId);
 	}
 	
