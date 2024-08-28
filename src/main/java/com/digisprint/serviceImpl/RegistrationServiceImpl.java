@@ -233,7 +233,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			else if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
 					&& specificUserDetails.isCommitteeTwoApproval()==RegistrationFormConstants.FALSE
-					) {
+				&& specificUserDetails.getCommitteeThreeRemarksForApplicant()==null	) {
 				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
 				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeTwoRemarksForApplicant(from.getRemarks()); 
