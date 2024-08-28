@@ -8,7 +8,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -91,9 +90,8 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used to see account view for users")
 	@GetMapping(value="/accountantFirstView")
-	public List<RegistrationFrom> accountFirstView( @RequestParam(defaultValue = "0") int page,
-			 @RequestParam(defaultValue = "10") int size) {
-		return registrationService.accountFirstView(page, size);
+	public List<RegistrationFrom> accountFirstView() {
+		return registrationService.accountFirstView();
 	}
 	
 	@Operation(summary="This method is used to download documents of the user")

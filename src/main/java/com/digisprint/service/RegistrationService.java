@@ -29,7 +29,7 @@ public interface RegistrationService {
 	
 	List<RegistrationFrom> committeePresidentAccountantViewListOfApplicants(String token);
 	
-	List<RegistrationFrom> accountFirstView(int page, int size);
+	List<RegistrationFrom> accountFirstView();
 
 	ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException;
 
