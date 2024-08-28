@@ -244,7 +244,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
 					&& specificUserDetails.getCommitteeTwoRemarksForApplicant()!=null
-					&& specificUserDetails.getCommitteeThreeChoosenMembershipForApplicant() == null) {
+					&& specificUserDetails.getCommitteeThreeRemarksForApplicant() == null) {
 				System.out.println("inside c3 approvals");
 				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
