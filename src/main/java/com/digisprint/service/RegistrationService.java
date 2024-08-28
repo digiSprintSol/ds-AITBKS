@@ -16,6 +16,7 @@ import com.digisprint.bean.RegistrationFrom;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
+import com.digisprint.requestBean.UploadPaymentReceipt;
 
 public interface RegistrationService {
 
@@ -33,8 +34,6 @@ public interface RegistrationService {
 
 	ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException;
 
-    ResponseEntity uploadTranscationRecepit(String token,String imageUrl,String transcationId) throws IOException, MessagingException ;
-
 	RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
 
 	ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException;
@@ -46,5 +45,7 @@ public interface RegistrationService {
 	ResponseEntity bulkEmailUpload(String toEmail, String subject, String body)throws IOException, MessagingException;
 	
 	ResponseEntity getAllFilteredMembers(String categoryOfMember);
+
+	ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt) throws IOException, MessagingException;
 
 }

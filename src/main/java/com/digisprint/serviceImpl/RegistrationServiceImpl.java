@@ -35,6 +35,7 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
+import com.digisprint.requestBean.UploadPaymentReceipt;
 import com.digisprint.responseBody.FilterMemberResponse;
 import com.digisprint.responseBody.IdentityCard;
 import com.digisprint.service.RegistrationService;
@@ -451,15 +452,15 @@ public class RegistrationServiceImpl  implements RegistrationService{
 	}
 
 	@Override
-	public ResponseEntity uploadTranscationRecepit(String token,String imageUrl,String transcationId) throws IOException, MessagingException {
+	public ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt) throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId= tokenObject.getString("userId");
 		RegistrationFrom user = registrationFromRepository.findById(userId).get();
 
 		PaymentInfo paymentInfo= new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
-		paymentInfo.setTrasactionId(transcationId);
-		paymentInfo.setPaymentDetailDocument(imageUrl);
+		paymentInfo.setPaymentDetailDocument(uploadPaymentReceipt.getPaymentImageUrl());
+		BeanUtils.copyProperties(uploadPaymentReceipt, paymentInfo);
 		user.setPaymentInfo(paymentInfo);
 		registrationFromRepository.save(user);
 

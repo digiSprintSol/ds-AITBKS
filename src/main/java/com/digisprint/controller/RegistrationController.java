@@ -25,6 +25,7 @@ import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
+import com.digisprint.requestBean.UploadPaymentReceipt;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -102,8 +103,8 @@ public class RegistrationController {
 	
 	@Operation(summary="This method is used to upload the payment receipt")
 	@PostMapping(value="/uploadTranscationReceipt")
-	public ResponseEntity uploadTranscationRecepit(@RequestParam String imageUrl,@RequestParam String transcationId) throws IOException, MessagingException {
-		return registrationService.uploadTranscationRecepit(getToken(), imageUrl,transcationId);
+	public ResponseEntity uploadTranscationRecepit(@RequestBody UploadPaymentReceipt uploadPaymentReceipt) throws IOException, MessagingException {
+		return registrationService.uploadTranscationRecepit(getToken(), uploadPaymentReceipt);
 	}
 	
 	@Operation(summary="This method is used to get payment receipt")
