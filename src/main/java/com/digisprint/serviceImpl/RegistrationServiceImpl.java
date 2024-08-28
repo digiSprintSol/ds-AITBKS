@@ -223,7 +223,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
 
 			if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeOneRemarksForApplicant().isEmpty()
+					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
 					&& specificUserDetails.isCommitteeOneApproval()==RegistrationFormConstants.FALSE){
 				specificUserDetails.setCommitteeOneApproval(approvalStatus);
 				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
@@ -231,7 +231,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 			}
 			else if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& !specificUserDetails.getCommitteeOneRemarksForApplicant().isEmpty()
+					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
 					&& specificUserDetails.isCommitteeTwoApproval()==RegistrationFormConstants.FALSE
 					) {
 				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
@@ -241,8 +241,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			//best of 3 committee members should true
 			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-					&& !specificUserDetails.getCommitteeOneRemarksForApplicant().isEmpty()
-					&& !specificUserDetails.getCommitteeTwoRemarksForApplicant().isEmpty()
+					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
+					&& specificUserDetails.getCommitteeTwoRemarksForApplicant()!=null
 					&& specificUserDetails.isCommitteeThreeApproval() == RegistrationFormConstants.FALSE) {
 				
 				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
