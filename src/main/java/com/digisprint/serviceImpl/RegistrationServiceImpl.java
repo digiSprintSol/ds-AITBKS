@@ -243,8 +243,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
 					&& specificUserDetails.getCommitteeTwoRemarksForApplicant()!=null
-					&& specificUserDetails.isCommitteeThreeApproval() == RegistrationFormConstants.FALSE) {
-				
+					&& specificUserDetails.getCommitteeOneRemarksForApplicant() == null) {
+				System.out.println("inside c3 approvals");
 				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
@@ -261,7 +261,6 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 				body = body.replace("[UserName]", username)
 						.replace("[Password]", passcode);
-
 				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 				specificUserDetails.setCommitteeThreeApproval(true);
 
@@ -292,7 +291,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 //}
 			else {
 				specificUserDetails.setCommitteeThreeApproval(approvalStatus);
-
+				System.out.println("inside c3 rejection");
 				// waiting email
 			}
 			
