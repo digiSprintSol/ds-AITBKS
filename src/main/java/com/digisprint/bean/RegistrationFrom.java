@@ -156,6 +156,12 @@ public class RegistrationFrom {
 	private String presidentChoosenMembershipForApplicant; //R2
 
 	private String presidentRemarksForApplicant; //R2
+	
+	private boolean committeeOneApproval;
+
+	private boolean committeeTwoApproval;
+
+	private boolean committeeThreeApproval;	
 
 	/**
 	 * Membership id
