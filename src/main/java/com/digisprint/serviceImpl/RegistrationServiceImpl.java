@@ -144,20 +144,23 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			return new ResponseEntity("No data present",HttpStatus.NOT_FOUND);
 		}
 		else {
-		if(accessList.contains(ApplicationConstants.PRESIDENT)) {
-			allUsersList = allUsersList.stream().filter(p-> !p.getCommitteeOneRemarksForApplicant().isEmpty() 
-					&& !p.getCommitteeTwoRemarksForApplicant().isEmpty() && !p.getCommitteeThreeRemarksForApplicant().isEmpty())
-					.collect(Collectors.toList());
-			if(allUsersList.size()==0) {
-				return new ResponseEntity("No data present",HttpStatus.NOT_FOUND);
+			if(accessList.contains(ApplicationConstants.PRESIDENT)) {
+				allUsersList = allUsersList.stream().filter(p->p.getCommitteeOneRemarksForApplicant()!=null && p.getCommitteeTwoRemarksForApplicant()!= null
+						 && p.getCommitteeThreeRemarksForApplicant()!=null).toList();
+				
+				allUsersList = allUsersList.stream().filter(p-> !p.getCommitteeOneRemarksForApplicant().isEmpty() 
+						&& !p.getCommitteeTwoRemarksForApplicant().isEmpty() && !p.getCommitteeThreeRemarksForApplicant().isEmpty())
+						.collect(Collectors.toList());
+				if(allUsersList.size()==0) {
+					return new ResponseEntity("No data present",HttpStatus.NOT_FOUND);
+				}
+				else {
+					return new ResponseEntity(allUsersList,HttpStatus.OK);
+				}
 			}
 			else {
 				return new ResponseEntity(allUsersList,HttpStatus.OK);
 			}
-		}
-		else {
-			return new ResponseEntity(allUsersList,HttpStatus.OK);
-		}
 		}
 	}
 
@@ -233,8 +236,8 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			}
 			else if(progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
-					&& specificUserDetails.isCommitteeTwoApproval()==RegistrationFormConstants.FALSE
-				&& specificUserDetails.getCommitteeThreeRemarksForApplicant()==null	) {
+					&& specificUserDetails.getCommitteeTwoRemarksForApplicant()==null
+					&& specificUserDetails.getCommitteeThreeRemarksForApplicant()==null	) {
 				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
 				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeTwoRemarksForApplicant(from.getRemarks()); 
@@ -242,19 +245,15 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			//best of 3 committee members should true
 			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-					&& specificUserDetails.getCommitteeOneRemarksForApplicant()!=null
-					&& specificUserDetails.getCommitteeTwoRemarksForApplicant()!=null
+					&& specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.TRUE
+					&& specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeThreeRemarksForApplicant() == null) {
 				System.out.println("inside c3 approvals");
 				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
-				
-				if(specificUserDetails.isCommitteeThreeApproval() == RegistrationFormConstants.TRUE 
-					&& specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.TRUE) {
-					
-					progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
+
+				progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
 				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
@@ -273,35 +272,34 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				accessBean.setEmail(username);
 				accessBean.setPassword(passcode);
 				accessBeanRepository.save(accessBean);
-				}
-				else {
-					progressBarReport.setCommitteeApproval(approvalStatus);
-					specificUserDetails.setCommitteeThreeApproval(approvalStatus);
-					String body = null;
-					body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
-
-					email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
-				}
 			}
-//			else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
-//				specificUserDetails.setCommitteeThreeApproval(false);
-//				String body = null;
-//				body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
-//
-//				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
-//}
-			else {
+
+			else if (specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE
+					&& specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.FALSE
+					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+				
+				progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
+				specificUserDetails.setCommitteeThreeApproval(false);
 				specificUserDetails.setCommitteeThreeApproval(approvalStatus);
+				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
 				System.out.println("inside c3 rejection");
+				String body = null;
+				body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
+
+				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
+			}
+			else {
+				System.out.println("inside waiting rejection");
 				// waiting email
 			}
-			
+
 		}//if commitee not approved, prsident should send the email after approval
 		else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
-			
+
 			if( progressBarReport.isCommitteeApproval() == RegistrationFormConstants.FALSE
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
-				
+
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
@@ -317,7 +315,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
 				email.MailSendingService(ADMIN_USERNAME,user , body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 
 			}
-			
+
 			else if (specificUserDetails != null && progressBarReport != null 
 					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE 
 					&& progressBarReport.isCommitteeApproval() == RegistrationFormConstants.TRUE
@@ -584,11 +582,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
 			List<String> trusteeMails=  filterByTrustee.stream().map((trustee)->{
-            	return trustee.getEmailAddress();
-            }).collect(Collectors.toList());
-	        String[] trusteeEmails=	trusteeMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, trusteeEmails, body, subject);
-			
+				return trustee.getEmailAddress();
+			}).collect(Collectors.toList());
+			String[] trusteeEmails=	trusteeMails.toArray(String[] :: new);
+			email.MailSendingService(toEmail, trusteeEmails, body, subject);
+
 
 			break;
 		case EmailConstants.PATRON:
@@ -596,12 +594,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByPatron = allusers.stream()
 			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
-			
+
 			List<String> patronMails=  filterByPatron.stream().map((patron)->{
-            	return patron.getEmailAddress();
-            }).collect(Collectors.toList());
-	        String[] patronEmails=	patronMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, patronEmails, body, subject);
+				return patron.getEmailAddress();
+			}).collect(Collectors.toList());
+			String[] patronEmails=	patronMails.toArray(String[] :: new);
+			email.MailSendingService(toEmail, patronEmails, body, subject);
 
 			break;
 		case EmailConstants.LIFE_MEMBER:
@@ -609,12 +607,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<RegistrationFrom> filterByLifeMember = allusers.stream()
 			.filter(r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
-			
+
 			List<String> lifeMemberMails=  filterByLifeMember.stream().map((lifeMember)->{
-            	return lifeMember.getEmailAddress();
-            }).collect(Collectors.toList());
-	        String[] lifeMemberEmails=	lifeMemberMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, lifeMemberEmails, body, subject);
+				return lifeMember.getEmailAddress();
+			}).collect(Collectors.toList());
+			String[] lifeMemberEmails=	lifeMemberMails.toArray(String[] :: new);
+			email.MailSendingService(toEmail, lifeMemberEmails, body, subject);
 
 			break;
 		case EmailConstants.ACCOUNTANT:
@@ -622,13 +620,13 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<AccessBean> ac = accountant.stream()
 					.filter(AccessBean::isAccountant)
 					.collect(Collectors.toList());
-			
+
 			List<String> accountantMails=  ac.stream().map((eachAccountant)->{
-            	return eachAccountant.getEmail();
-            }).collect(Collectors.toList());
-			
-	        String[] accountantEmails=	accountantMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, accountantEmails, body, subject);
+				return eachAccountant.getEmail();
+			}).collect(Collectors.toList());
+
+			String[] accountantEmails=	accountantMails.toArray(String[] :: new);
+			email.MailSendingService(toEmail, accountantEmails, body, subject);
 
 			break;
 		case EmailConstants.COMMITTEE_MEMBER:
@@ -638,12 +636,12 @@ public class RegistrationServiceImpl  implements RegistrationService{
 			List<AccessBean> cm = committee.stream()
 					.filter(AccessBean::isAccountant)
 					.collect(Collectors.toList());
-			
+
 			List<String> committeeMembetMails=  cm.stream().map((committeeMember)->{
-            	return committeeMember.getEmail();
-            }).collect(Collectors.toList());
-	        String[] committeeMemberEmails=	committeeMembetMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, committeeMemberEmails, body, subject);
+				return committeeMember.getEmail();
+			}).collect(Collectors.toList());
+			String[] committeeMemberEmails=	committeeMembetMails.toArray(String[] :: new);
+			email.MailSendingService(toEmail, committeeMemberEmails, body, subject);
 
 			break;
 
