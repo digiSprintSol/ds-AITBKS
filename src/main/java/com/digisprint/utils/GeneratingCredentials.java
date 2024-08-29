@@ -21,12 +21,12 @@ public class GeneratingCredentials {
 	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 	
 	@Autowired
-	private static RegistrationFromRepository registrationFromRepository;
+	private  RegistrationFromRepository registrationFromRepository;
 
 	/**
 	 * Generates MEMBER ID for the applicant
 	 */
-	public static String generateMemberId(String userId) {
+	public  String generateMemberId(String userId) {
 		
 		RegistrationFrom registrationFrom = registrationFromRepository.findById(userId).get();
 		String typeOfMembership = registrationFrom.getPresidentChoosenMembershipForApplicant();
