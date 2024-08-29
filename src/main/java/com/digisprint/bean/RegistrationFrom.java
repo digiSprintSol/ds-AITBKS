@@ -164,6 +164,14 @@ public class RegistrationFrom {
 	private boolean committeeThreeApproval;	
 	
 	private boolean presidentApproval;
+	
+	private String committeeMemberOneName;
+	
+	private String committeeMemberTwoName;
+	
+	private String committeeMemberThreeName;
+	
+	private String presidentName;
 
 	/**
 	 * Membership id

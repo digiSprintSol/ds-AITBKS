@@ -184,6 +184,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
 			throw new IllegalArgumentException("Token must contain userId and access fields");
 		}
+		String organisationUsers= jsonObject.getString("userId");
+		
+		AccessBean accessBeanUser = accessBeanRepository.findById(organisationUsers).get();
 
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
@@ -233,10 +236,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant() == null
 					&& specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE) {
-				System.out.println("");
 				specificUserDetails.setCommitteeOneApproval(approvalStatus);
 				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeOneRemarksForApplicant(from.getRemarks());
+				specificUserDetails.setCommitteeMemberOneName(accessBeanUser.getName());
 
 			} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeOneRemarksForApplicant() != null
@@ -245,6 +248,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
 				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeTwoRemarksForApplicant(from.getRemarks());
+				specificUserDetails.setCommitteeMemberTwoName(accessBeanUser.getName());
 			}
 			// best of 3 committee members should true
 			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
@@ -256,7 +260,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
-
+				specificUserDetails.setCommitteeMemberThreeName(accessBeanUser.getName());
 				progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
 				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
@@ -287,6 +291,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeThreeApproval(approvalStatus);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
+				specificUserDetails.setCommitteeMemberThreeName(accessBeanUser.getName());
 				System.out.println("inside c3 rejection");
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
@@ -308,6 +313,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
+				specificUserDetails.setPresidentName(accessBeanUser.getName());
+
 				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
@@ -330,12 +337,15 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
+				specificUserDetails.setPresidentName(accessBeanUser.getName());
+
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+				specificUserDetails.setPresidentName(accessBeanUser.getName());
 				String body = null;
 				// rejection mail from president
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
@@ -344,6 +354,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 			} else {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
+				specificUserDetails.setPresidentName(accessBeanUser.getName());
+
 				// waiting mail from president
 			}
 
