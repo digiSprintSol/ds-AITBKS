@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.digisprint.bean.EmailUpload;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
@@ -42,7 +43,7 @@ public interface RegistrationService {
 	
 	List<String> referenceOneDropdown();
 	
-	ResponseEntity bulkEmailUpload(String toEmail, String subject, String body)throws IOException, MessagingException;
+	ResponseEntity bulkEmailUpload(EmailUpload emailUpload)throws IOException, MessagingException;
 	
 	ResponseEntity getAllFilteredMembers(String categoryOfMember);
 
