@@ -307,6 +307,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
 				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
@@ -328,6 +329,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
+				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 
@@ -336,10 +338,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				String body = null;
 				// rejection mail from president
+				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_REJECTED_SUBJECT);
 			} else {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
 				// waiting mail from president
 			}
 

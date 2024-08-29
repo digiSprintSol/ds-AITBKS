@@ -162,6 +162,8 @@ public class RegistrationFrom {
 	private boolean committeeTwoApproval;
 
 	private boolean committeeThreeApproval;	
+	
+	private boolean presidentApproval;
 
 	/**
 	 * Membership id
