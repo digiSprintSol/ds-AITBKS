@@ -25,6 +25,7 @@ import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
 import com.digisprint.EmailUtils.LoadHtmlTemplates;
 import com.digisprint.bean.AccessBean;
+import com.digisprint.bean.EmailUpload;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationFrom;
@@ -535,11 +536,11 @@ public class RegistrationServiceImpl  implements RegistrationService{
 
 
 	@Override
-	public ResponseEntity bulkEmailUpload(String toEmail, String subject, String body) throws IOException, MessagingException {
+	public ResponseEntity bulkEmailUpload(EmailUpload emailUpload) throws IOException, MessagingException {
 
 		List<RegistrationFrom> allusers = registrationFromRepository.findAll();
 
-		switch (toEmail) {
+		switch (emailUpload.getToEmail()) {
 		case EmailConstants.TRUSTEE:
 
 			List<RegistrationFrom> filterByTrustee = allusers.stream()
@@ -549,7 +550,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
             	return trustee.getEmailAddress();
             }).collect(Collectors.toList());
 	        String[] trusteeEmails=	trusteeMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, trusteeEmails, body, subject);
+            email.MailSendingService(emailUpload.getToEmail(), trusteeEmails, emailUpload.getBody(), emailUpload.getSubject());
 			
 
 			break;
@@ -563,7 +564,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
             	return patron.getEmailAddress();
             }).collect(Collectors.toList());
 	        String[] patronEmails=	patronMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, patronEmails, body, subject);
+            email.MailSendingService(emailUpload.getToEmail(), patronEmails, emailUpload.getBody(), emailUpload.getSubject());
 
 			break;
 		case EmailConstants.LIFE_MEMBER:
@@ -576,7 +577,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
             	return lifeMember.getEmailAddress();
             }).collect(Collectors.toList());
 	        String[] lifeMemberEmails=	lifeMemberMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, lifeMemberEmails, body, subject);
+            email.MailSendingService(emailUpload.getToEmail(), lifeMemberEmails, emailUpload.getBody(), emailUpload.getSubject());
 
 			break;
 		case EmailConstants.ACCOUNTANT:
@@ -590,7 +591,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
             }).collect(Collectors.toList());
 			
 	        String[] accountantEmails=	accountantMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, accountantEmails, body, subject);
+            email.MailSendingService(emailUpload.getToEmail(), accountantEmails, emailUpload.getBody(), emailUpload.getSubject());
 
 			break;
 		case EmailConstants.COMMITTEE_MEMBER:
@@ -605,7 +606,7 @@ public class RegistrationServiceImpl  implements RegistrationService{
             	return committeeMember.getEmail();
             }).collect(Collectors.toList());
 	        String[] committeeMemberEmails=	committeeMembetMails.toArray(String[] :: new);
-            email.MailSendingService(toEmail, committeeMemberEmails, body, subject);
+            email.MailSendingService(emailUpload.getToEmail(), committeeMemberEmails, emailUpload.getBody(), emailUpload.getSubject());
 
 			break;
 
