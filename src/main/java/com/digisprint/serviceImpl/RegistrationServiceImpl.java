@@ -99,7 +99,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		// Sending mail to user.
 		List<String> membersList = new ArrayList<>();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom());
-		body = body.replaceAll(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFullName());
+		body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFullName());
 		membersList.add(registrationForm.getEmailAddress());
 		String[] newUser = new String[1];
 		newUser[0] = registrationForm.getEmailAddress();
@@ -322,6 +322,15 @@ public class RegistrationServiceImpl implements RegistrationService {
 				body = body.replace("[UserName]", username).replace("[Password]", passcode);
 
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+				
+				AccessBean accessBean = new AccessBean();
+				accessBean.setAccessId(specificUserDetails.getUserId());
+				accessBean.setAccountant(false);
+				accessBean.setUser(true);
+				accessBean.setDeleted(false);
+				accessBean.setEmail(username);
+				accessBean.setPassword(passcode);
+				accessBeanRepository.save(accessBean);
 
 			}
 
