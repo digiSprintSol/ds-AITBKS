@@ -120,7 +120,7 @@
    <version>2.4.0</version>
    <configuration>
       <version>1</version>
-      <projectId>aitbks-project</projectId>
+      <projectId>digisprint-portals</projectId>
    </configuration>
 </plugin>
 		</plugins>
