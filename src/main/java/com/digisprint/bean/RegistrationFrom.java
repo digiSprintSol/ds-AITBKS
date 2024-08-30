@@ -165,13 +165,13 @@ public class RegistrationFrom {
 	
 	private boolean presidentApproval;
 	
-	private String committeeMemberOneName;
+	private String committeeMemberOneId;
 	
-	private String committeeMemberTwoName;
+	private String committeeMemberTwoId;
 	
-	private String committeeMemberThreeName;
+	private String committeeMemberThreeId;
 	
-	private String presidentName;
+	private String presidentId;
 
 	/**
 	 * Membership id
