@@ -627,34 +627,20 @@ public class RegistrationServiceImpl implements RegistrationService {
 			email.MailSendingService(emailUpload.getToEmail(), lifeMemberEmails, emailUpload.getBody(), emailUpload.getSubject());
 
 			break;
-		case EmailConstants.ACCOUNTANT:
-			List<AccessBean> accountant = accessBeanRepository.findAll();
-			List<AccessBean> ac = accountant.stream().filter(AccessBean::isAccountant).collect(Collectors.toList());
-
-			List<String> accountantMails = ac.stream().map((eachAccountant) -> {
-				return eachAccountant.getEmail();
-			}).collect(Collectors.toList());
-
-			String[] accountantEmails = accountantMails.toArray(String[]::new);
-			email.MailSendingService(emailUpload.getToEmail(), accountantEmails, emailUpload.getBody(), emailUpload.getSubject());
-
-			break;
-		case EmailConstants.COMMITTEE_MEMBER:
-
-			List<AccessBean> committee = accessBeanRepository.findAll();
-
-			List<AccessBean> cm = committee.stream().filter(AccessBean::isAccountant).collect(Collectors.toList());
-
-			List<String> committeeMembetMails = cm.stream().map((committeeMember) -> {
-				return committeeMember.getEmail();
-			}).collect(Collectors.toList());
-			String[] committeeMemberEmails = committeeMembetMails.toArray(String[]::new);
-			email.MailSendingService(emailUpload.getToEmail(), committeeMemberEmails, emailUpload.getBody(), emailUpload.getSubject());
-
-			break;
-
 		default:
-			break;
+			List<RegistrationFrom> filterByAll = allusers.stream()
+												.filter(
+						r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
+						&& EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
+						&& EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+						.collect(Collectors.toList());
+			
+			List<String> allEmails = filterByAll.stream().map(RegistrationFrom ::getEmailAddress)
+					              .collect(Collectors.toList());
+			
+			String[] userEmails = allEmails.toArray(String[]::new);
+			email.MailSendingService(emailUpload.getToEmail(), userEmails, emailUpload.getBody(), emailUpload.getSubject());
+			
 		}
 
 		return null;

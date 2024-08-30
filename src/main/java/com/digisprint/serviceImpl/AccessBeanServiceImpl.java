@@ -202,7 +202,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		UserResponse userresponse = new UserResponse();
 		try {
 			Claims claims = decodeAndValidateToken(token);
-
 			if (claims == null) {
 				throw new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND);
 			}
