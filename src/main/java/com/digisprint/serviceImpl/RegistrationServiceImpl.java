@@ -281,10 +281,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 				accessBean.setPassword(passcode);
 				accessBeanRepository.save(accessBean);
 			}
-
-			else if (specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE
-					&& specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.FALSE
-					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+			else if (specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE ||
+					 specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.FALSE ||
+					from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 
 				progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
 				specificUserDetails.setCommitteeThreeApproval(false);
