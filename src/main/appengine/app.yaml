@@ -1,4 +1,4 @@
-runtime: java17
+runtime: java16
 instance_class: F2
 
 env_variables:
