@@ -172,7 +172,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
 		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
 		Cookie cookie1 = new Cookie("token",cookie);
-		cookie1.setHttpOnly(true); // Make the cookie HTTP-only
+		cookie1.setHttpOnly(true); // Make the coo kie HTTP-only
 		cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
 		cookie1.setMaxAge(60 * 60 * 24); // Set cookie expiration (in seconds)
 		response.addCookie(cookie1);

@@ -313,7 +313,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
-				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
+				specificUserDetails.setPresidentId(accessBeanUser.getAccessId()); 
 				String body = null;
 				// Sending credentials to the Applicant as Committee approved.
 				String username = specificUserDetails.getEmailAddress();
