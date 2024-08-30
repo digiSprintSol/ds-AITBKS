@@ -148,9 +148,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 			if (accessList.contains(ApplicationConstants.PRESIDENT)) {
 				allUsersList = allUsersList.stream()
 						.filter(p -> p.getCommitteeOneRemarksForApplicant() != null
-								&& p.getCommitteeTwoRemarksForApplicant() != null
-								&& p.getCommitteeThreeRemarksForApplicant() != null)
-						.toList();
+						&& p.getCommitteeTwoRemarksForApplicant() != null
+						&& p.getCommitteeThreeRemarksForApplicant() != null)
+						.collect(Collectors.toList());
 
 				allUsersList = allUsersList.stream()
 						.filter(p -> !p.getCommitteeOneRemarksForApplicant().isEmpty()
@@ -185,7 +185,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			throw new IllegalArgumentException("Token must contain userId and access fields");
 		}
 		String organisationUsers= jsonObject.getString("userId");
-		
+
 		AccessBean accessBeanUser = accessBeanRepository.findById(organisationUsers).get();
 
 		String identityNumber = jsonObject.getString("userId");
@@ -282,7 +282,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				accessBeanRepository.save(accessBean);
 			}
 			else if (specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE ||
-					 specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.FALSE ||
+					specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.FALSE ||
 					from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 
 				progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
@@ -322,7 +322,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				body = body.replace("[UserName]", username).replace("[Password]", passcode);
 
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-				
+
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
 				accessBean.setAccountant(false);
@@ -560,13 +560,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 			case RegistrationFormConstants.TRUSTEE:
 				allUsers = allUsers.stream().filter(
 						p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.TRUSTEE))
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 				break;
 
 			case RegistrationFormConstants.PATRON:
 				allUsers = allUsers.stream().filter(
 						p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.PATRON))
-						.collect(Collectors.toList());
+				.collect(Collectors.toList());
 				break;
 
 			case RegistrationFormConstants.LIFE_MEMBER:
@@ -600,8 +600,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		case EmailConstants.TRUSTEE:
 
 			List<RegistrationFrom> filterByTrustee = allusers.stream()
-					.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-					.collect(Collectors.toList());
+			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
 			List<String> trusteeMails = filterByTrustee.stream().map((trustee) -> {
 				return trustee.getEmailAddress();
 			}).collect(Collectors.toList());
@@ -612,8 +612,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		case EmailConstants.PATRON:
 
 			List<RegistrationFrom> filterByPatron = allusers.stream()
-					.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-					.collect(Collectors.toList());
+			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
 
 			List<String> patronMails = filterByPatron.stream().map((patron) -> {
 				return patron.getEmailAddress();
@@ -626,7 +626,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 			List<RegistrationFrom> filterByLifeMember = allusers.stream().filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-					.collect(Collectors.toList());
+			.collect(Collectors.toList());
 
 			List<String> lifeMemberMails = filterByLifeMember.stream().map((lifeMember) -> {
 				return lifeMember.getEmailAddress();
@@ -636,19 +636,23 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 			break;
 		default:
+			allusers = allusers.stream()
+			.filter(p -> p.getPresidentChoosenMembershipForApplicant() != null)
+			.collect(Collectors.toList());
+			
 			List<RegistrationFrom> filterByAll = allusers.stream()
-												.filter(
-						r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
-						&& EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
-						&& EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-						.collect(Collectors.toList());
-			
+			.filter(
+					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
+					|| EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
+					|| EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
+			System.out.println(filterByAll.size());
 			List<String> allEmails = filterByAll.stream().map(RegistrationFrom ::getEmailAddress)
-					              .collect(Collectors.toList());
-			
+					.collect(Collectors.toList());
+
 			String[] userEmails = allEmails.toArray(String[]::new);
 			email.MailSendingService(emailUpload.getToEmail(), userEmails, emailUpload.getBody(), emailUpload.getSubject());
-			
+
 		}
 
 		return null;
