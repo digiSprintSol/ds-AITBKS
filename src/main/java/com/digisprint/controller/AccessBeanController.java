@@ -49,6 +49,12 @@ public class AccessBeanController {
 	@Autowired
 	private HttpServletRequest request;
 
+	@GetMapping("/hello")
+    public String getMessage()
+    {
+        return "Hello World!";
+    }
+	
 	public String getToken() {
 		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
 		String token = requestHeaders.substring(7); // Remove "Bearer " prefix
