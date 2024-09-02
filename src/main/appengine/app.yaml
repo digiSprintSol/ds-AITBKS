@@ -1,5 +1,5 @@
-runtime: java
-env: flex
+runtime: java17
+instance_class: F1
 
 env_variables:
   SPRING_DATASOURCE_URL: "mongodb+srv://allindiatelagabalijakapusangam:Admin123@communityproject.okfwe.mongodb.net/CommunityProject?retryWrites=true&w=majority&appName=CommunityProject"
