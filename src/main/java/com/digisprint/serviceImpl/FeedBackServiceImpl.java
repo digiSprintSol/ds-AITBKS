@@ -32,15 +32,17 @@ public class FeedBackServiceImpl implements FeedBackService {
 
 	private AccessBeanRepository accessBeanRepository;
 
-	public FeedBackServiceImpl(FeedbackRepository feedbackRepository, JwtTokenUtil jwtTokenUtil) {
+	public FeedBackServiceImpl(FeedbackRepository feedbackRepository, JwtTokenUtil jwtTokenUtil,
+			AccessBeanRepository accessBeanRepository) {
 		super();
 		this.feedbackRepository = feedbackRepository;
 		this.jwtTokenUtil = jwtTokenUtil;
+		this.accessBeanRepository = accessBeanRepository;
 	}
 
 	@Override
 	public ResponseEntity<String> createFeedBack(String token, FeedbackRequest feedback) throws UserNotFoundException {
-		if (token != null || token.isEmpty()) {
+		if (token == null || token.isEmpty()) {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
 
 		} else {
