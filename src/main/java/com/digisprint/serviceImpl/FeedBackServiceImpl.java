@@ -40,7 +40,10 @@ public class FeedBackServiceImpl implements FeedBackService {
 
 	@Override
 	public ResponseEntity<String> createFeedBack(String token, FeedbackRequest feedback) throws UserNotFoundException {
-		if (token == null || token.isEmpty()) {
+		if (token != null || token.isEmpty()) {
+			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
+
+		} else {
 			AccessBean presidentUser = getTokenVerified(token);
 			Feedback feedBackEntity = new Feedback();
 			BeanUtils.copyProperties(feedback, feedBackEntity);
@@ -50,9 +53,6 @@ public class FeedBackServiceImpl implements FeedBackService {
 			FeedbackResponse feedbackResponse = new FeedbackResponse();
 			BeanUtils.copyProperties(response,feedbackResponse);
 			return new ResponseEntity(feedbackResponse, HttpStatus.OK);
-
-		} else {
-			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
 		}
 
 	}
