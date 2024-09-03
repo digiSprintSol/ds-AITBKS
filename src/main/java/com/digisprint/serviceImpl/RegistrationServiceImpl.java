@@ -555,23 +555,24 @@ public class RegistrationServiceImpl implements RegistrationService {
 		if (allUsers.size() == 0) {
 			return new ResponseEntity("No data found", HttpStatus.NOT_FOUND);
 		} else {
-			switch (categoryOfMember) {
+			switch (categoryOfMember){
 
 			case RegistrationFormConstants.TRUSTEE:
+				System.out.println(categoryOfMember);
 				allUsers = allUsers.stream().filter(
-						p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.TRUSTEE))
+						p -> p.getPresidentChoosenMembershipForApplicant().equalsIgnoreCase(RegistrationFormConstants.TRUSTEE))
 				.collect(Collectors.toList());
 				break;
 
 			case RegistrationFormConstants.PATRON:
 				allUsers = allUsers.stream().filter(
-						p -> p.getPresidentChoosenMembershipForApplicant().equals(RegistrationFormConstants.PATRON))
+						p -> p.getPresidentChoosenMembershipForApplicant().equalsIgnoreCase(RegistrationFormConstants.PATRON))
 				.collect(Collectors.toList());
 				break;
 
 			case RegistrationFormConstants.LIFE_MEMBER:
 				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant()
-						.equals(RegistrationFormConstants.LIFE_MEMBER)).collect(Collectors.toList());
+						.equalsIgnoreCase(RegistrationFormConstants.LIFE_MEMBER)).collect(Collectors.toList());
 				break;
 			}
 		}
@@ -582,6 +583,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		else {
 			List<FilterMemberResponse> filterMemberResponsesList = allUsers.stream().map(eachUser -> {
+				System.out.println(":::::::"+eachUser.getPresidentChoosenMembershipForApplicant());
 				FilterMemberResponse filteredResponseBean = new FilterMemberResponse();
 				BeanUtils.copyProperties(eachUser, filteredResponseBean);
 				return filteredResponseBean;
