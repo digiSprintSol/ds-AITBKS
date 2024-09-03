@@ -133,8 +133,6 @@ public class RegistrationFrom {
 
 	private PaymentInfo paymentInfo; //R3
 
-	private String district;
-
 	/**
 	 * MEMBERSHIP INFO
 	 */
