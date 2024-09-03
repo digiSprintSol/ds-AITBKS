@@ -10,7 +10,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.bean.RegistrationForm;
 import com.digisprint.repository.RegistrationFromRepository;
 
 @Component
@@ -28,7 +28,7 @@ public class GeneratingCredentials {
 	 */
 	public  String generateMemberId(String userId) {
 		
-		RegistrationFrom registrationFrom = registrationFromRepository.findById(userId).get();
+		RegistrationForm registrationFrom = registrationFromRepository.findById(userId).get();
 		String typeOfMembership = registrationFrom.getPresidentChoosenMembershipForApplicant();
 		
 		String currentYear = String.valueOf(LocalDate.now().getYear()).substring(2);
@@ -43,7 +43,7 @@ public class GeneratingCredentials {
 		if(typeOfMembership.equalsIgnoreCase(RegistrationFormConstants.LIFE_MEMBER))
 			prefix = "LM-" + currentYear + "-";
 		
-		RegistrationFrom latestMember = registrationFromRepository.findTopByMembershipIdStartingWithOrderByMembershipIdDesc(prefix);
+		RegistrationForm latestMember = registrationFromRepository.findTopByMembershipIdStartingWithOrderByMembershipIdDesc(prefix);
 		
 		int nextSequenceMember = 1;
 		

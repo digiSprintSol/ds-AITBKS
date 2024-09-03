@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.digisprint.bean.EmailUpload;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
-import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.bean.RegistrationForm;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
@@ -21,7 +21,7 @@ import com.digisprint.requestBean.UploadPaymentReceipt;
 
 public interface RegistrationService {
 
-	RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException;
+	RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException;
 	
 	ResponseEntity getAllRegisteredUsers(String token);
 	
@@ -29,13 +29,13 @@ public interface RegistrationService {
 	
 	ProgressBarReport progressBarForAUser(String id);
 	
-	List<RegistrationFrom> committeePresidentAccountantViewListOfApplicants(String token);
+	List<RegistrationForm> committeePresidentAccountantViewListOfApplicants(String token);
 	
-	List<RegistrationFrom> accountFirstView();
+	List<RegistrationForm> accountFirstView();
 
 	ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException;
 
-	RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
+	RegistrationForm userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2);
 
 	ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException;
 

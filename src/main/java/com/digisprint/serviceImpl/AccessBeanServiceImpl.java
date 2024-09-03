@@ -28,7 +28,7 @@ import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EventsImagesAnnouncements;
 import com.digisprint.bean.Image;
 import com.digisprint.bean.MarketPlaces;
-import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.bean.RegistrationForm;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;

@@ -9,18 +9,18 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.stereotype.Repository;
 
-import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.bean.RegistrationForm;
 
 @Repository
-public interface RegistrationFromRepository extends MongoRepository<RegistrationFrom, String> {
+public interface RegistrationFromRepository extends MongoRepository<RegistrationForm, String> {
 
-	RegistrationFrom findByPhoneNumber(String phoneNumber);
+	RegistrationForm findByPhoneNumber(String phoneNumber);
 
-	Optional<RegistrationFrom> findByEmailAddress(String emailAddress);
+	Optional<RegistrationForm> findByEmailAddress(String emailAddress);
 	
-	List<RegistrationFrom> findByUserIdIn(List<String> userIds);
+	List<RegistrationForm> findByUserIdIn(List<String> userIds);
 
-	RegistrationFrom findTopByMembershipIdStartingWithOrderByMembershipIdDesc(String prefix);
+	RegistrationForm findTopByMembershipIdStartingWithOrderByMembershipIdDesc(String prefix);
 
 	
 }

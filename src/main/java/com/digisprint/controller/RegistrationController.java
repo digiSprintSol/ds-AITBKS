@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.EmailUpload;
 import com.digisprint.bean.ProgressBarReport;
-import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.bean.RegistrationForm;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
@@ -58,7 +58,7 @@ public class RegistrationController {
 
 	@Operation(summary = "This method is used for 1st level of Registration")
 	@PostMapping("/register")
-	public RegistrationFrom registerUser(@Validated @RequestBody RegistrationFrom from)
+	public RegistrationForm registerUser(@Validated @RequestBody RegistrationForm from)
 			throws IOException, MessagingException {
 
 		return this.registrationService.registerUser(from);
@@ -85,13 +85,13 @@ public class RegistrationController {
 
 	@Operation(summary = "This method is used to save Registration from 3")
 	@PostMapping(value = "/registrationThreeForm")
-	public RegistrationFrom userFillingRegistrationThreeForm(@RequestBody RegistrationFrom2 registrationFrom2) {
+	public RegistrationForm userFillingRegistrationThreeForm(@RequestBody RegistrationFrom2 registrationFrom2) {
 		return registrationService.userFillingRegistrationThreeForm(getToken(), registrationFrom2);
 	}
 
 	@Operation(summary = "This method is used to see account view for users")
 	@GetMapping(value = "/accountantFirstView")
-	public List<RegistrationFrom> accountFirstView() {
+	public List<RegistrationForm> accountFirstView() {
 		return registrationService.accountFirstView();
 	}
 

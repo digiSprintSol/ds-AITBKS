@@ -25,7 +25,7 @@ import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.EmailUpload;
 import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
-import com.digisprint.bean.RegistrationFrom;
+import com.digisprint.bean.RegistrationForm;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
@@ -88,9 +88,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
-	public RegistrationFrom registerUser(RegistrationFrom registrationForm) throws IOException, MessagingException {
+	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
-		Optional<RegistrationFrom> existingUser = registrationFromRepository
+		Optional<RegistrationForm> existingUser = registrationFromRepository
 				.findByEmailAddress(registrationForm.getEmailAddress());
 		if (existingUser.isPresent()) {
 			throw new IllegalArgumentException("The entered email id already exists. Please enter another email id.");
@@ -119,7 +119,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
-		RegistrationFrom userDeatils = registrationFromRepository.save(registrationForm);
+		RegistrationForm userDeatils = registrationFromRepository.save(registrationForm);
 		ProgressBarReport progressBarReport = new ProgressBarReport();
 		progressBarReport.setUserId(userDeatils.getUserId());
 		progressBarReport.setRegistrationOneFormCompleted(RegistrationFormConstants.TRUE);
@@ -141,7 +141,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 
-		List<RegistrationFrom> allUsersList = registrationFromRepository.findAll();
+		List<RegistrationForm> allUsersList = registrationFromRepository.findAll();
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else {
@@ -202,7 +202,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			userType = ApplicationConstants.ACCOUNTANT;
 		}
 
-		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
+		RegistrationForm specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
 			return new ResponseEntity("No user found with the user id", HttpStatus.NOT_FOUND);
 		}
@@ -404,7 +404,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public List<RegistrationFrom> committeePresidentAccountantViewListOfApplicants(String token) {
+	public List<RegistrationForm> committeePresidentAccountantViewListOfApplicants(String token) {
 
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
@@ -429,10 +429,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public RegistrationFrom userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2) {
+	public RegistrationForm userFillingRegistrationThreeForm(String token, RegistrationFrom2 registrationFrom2) {
 		JSONObject tokenObject = decodeToken(token);
 		String userId = tokenObject.getString("userId");
-		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
+		RegistrationForm specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
 			throw new IllegalArgumentException("No user found with the provided phone number");
 		}
@@ -454,7 +454,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public List<RegistrationFrom> accountFirstView() {
+	public List<RegistrationForm> accountFirstView() {
 		return registrationFromRepository.findAll().stream().filter(p -> p.getPaymentInfo() != null)
 				.collect(Collectors.toList());
 	}
@@ -463,7 +463,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	public ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId = tokenObject.getString("userId");
-		RegistrationFrom user = registrationFromRepository.findById(userId)
+		RegistrationForm user = registrationFromRepository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
 		IdentityCard card = new IdentityCard();
 		card.setImage(user.getProfilePic());
@@ -479,7 +479,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			throws IOException, MessagingException {
 		JSONObject tokenObject = decodeToken(token);
 		String userId = tokenObject.getString("userId");
-		RegistrationFrom user = registrationFromRepository.findById(userId).get();
+		RegistrationForm user = registrationFromRepository.findById(userId).get();
 
 		PaymentInfo paymentInfo = new PaymentInfo();
 		paymentInfo.setTransactionDate(LocalDate.now());
@@ -502,7 +502,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 	@Override
 	public ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException {
-		RegistrationFrom user = registrationFromRepository.findById(userId).get();
+		RegistrationForm user = registrationFromRepository.findById(userId).get();
 
 		if (user != null) {
 
@@ -516,7 +516,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	public ResponseEntity getUserDetails(String token) {
 		JSONObject tokenObject = decodeToken(token);
 		String userId = tokenObject.getString("userId");
-		RegistrationFrom specificUserDetails = registrationFromRepository.findById(userId).get();
+		RegistrationForm specificUserDetails = registrationFromRepository.findById(userId).get();
 		if (specificUserDetails == null) {
 			return new ResponseEntity("No user found", HttpStatus.NOT_FOUND);
 		} else {
@@ -531,9 +531,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		List<String> userIds = trueMembers.stream().map(ProgressBarReport::getUserId).collect(Collectors.toList());
 
-		List<RegistrationFrom> registrationForms = new ArrayList<>();
+		List<RegistrationForm> registrationForms = new ArrayList<>();
 		for (String userId : userIds) {
-			Optional<RegistrationFrom> optionalForm = registrationFromRepository.findById(userId);
+			Optional<RegistrationForm> optionalForm = registrationFromRepository.findById(userId);
 			if (optionalForm.isPresent()) {
 				registrationForms.add(optionalForm.get());
 			} else {
@@ -541,7 +541,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			}
 		}
 
-		List<String> memberNames = registrationForms.stream().map(RegistrationFrom::getFullName)
+		List<String> memberNames = registrationForms.stream().map(RegistrationForm::getFullName)
 				.collect(Collectors.toList());
 
 		return memberNames;
@@ -551,7 +551,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	@Override
 	public ResponseEntity getAllFilteredMembers(String categoryOfMember) {
 
-		List<RegistrationFrom> allUsers = registrationFromRepository.findAll();
+		List<RegistrationForm> allUsers = registrationFromRepository.findAll();
 		if (allUsers.size() == 0) {
 			return new ResponseEntity("No data found", HttpStatus.NOT_FOUND);
 		} else {
@@ -596,12 +596,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 	@Override
 	public ResponseEntity bulkEmailUpload(EmailUpload emailUpload) throws IOException, MessagingException {
 
-		List<RegistrationFrom> allusers = registrationFromRepository.findAll();
+		List<RegistrationForm> allusers = registrationFromRepository.findAll();
 
 		switch (emailUpload.getToEmail()) {
 		case EmailConstants.TRUSTEE:
 
-			List<RegistrationFrom> filterByTrustee = allusers.stream()
+			List<RegistrationForm> filterByTrustee = allusers.stream()
 			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
 			List<String> trusteeMails = filterByTrustee.stream().map((trustee) -> {
@@ -613,7 +613,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			break;
 		case EmailConstants.PATRON:
 
-			List<RegistrationFrom> filterByPatron = allusers.stream()
+			List<RegistrationForm> filterByPatron = allusers.stream()
 			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
 
@@ -626,7 +626,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			break;
 		case EmailConstants.LIFE_MEMBER:
 
-			List<RegistrationFrom> filterByLifeMember = allusers.stream().filter(
+			List<RegistrationForm> filterByLifeMember = allusers.stream().filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
 
@@ -642,14 +642,14 @@ public class RegistrationServiceImpl implements RegistrationService {
 			.filter(p -> p.getPresidentChoosenMembershipForApplicant() != null)
 			.collect(Collectors.toList());
 			
-			List<RegistrationFrom> filterByAll = allusers.stream()
+			List<RegistrationForm> filterByAll = allusers.stream()
 			.filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
 					|| EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
 					|| EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 			.collect(Collectors.toList());
 			System.out.println(filterByAll.size());
-			List<String> allEmails = filterByAll.stream().map(RegistrationFrom ::getEmailAddress)
+			List<String> allEmails = filterByAll.stream().map(RegistrationForm ::getEmailAddress)
 					.collect(Collectors.toList());
 
 			String[] userEmails = allEmails.toArray(String[]::new);

@@ -22,7 +22,7 @@ import lombok.Setter;
 
 @Data
 @Document(collection = "user_details")
-public class RegistrationFrom {
+public class RegistrationForm {
 
 	@Id
 	private String userId;
