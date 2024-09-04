@@ -275,6 +275,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
 				accessBean.setAccountant(false);
+				accessBean.setName(specificUserDetails.getFullName());
 				accessBean.setUser(true);
 				accessBean.setDeleted(false);
 				accessBean.setEmail(username);
@@ -326,6 +327,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
 				accessBean.setAccountant(false);
+				accessBean.setName(specificUserDetails.getFullName());
 				accessBean.setUser(true);
 				accessBean.setDeleted(false);
 				accessBean.setEmail(username);

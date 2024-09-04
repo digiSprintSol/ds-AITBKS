@@ -1,7 +1,6 @@
 com\digisprint\responseBody\EventsResponse.class
 com\digisprint\responseBody\IdentityCard.class
 com\digisprint\requestBean\RegistrationFrom2.class
-com\digisprint\bean\RegistrationFrom.class
 com\digisprint\responseBody\GalleryResponse.class
 com\digisprint\bean\Address.class
 com\digisprint\bean\Donation.class
@@ -47,6 +46,7 @@ com\digisprint\bean\FamilyDetails.class
 com\digisprint\EmailUtils\EmailService.class
 com\digisprint\exception\UserNotFoundException.class
 com\digisprint\filter\JwtTokenUtil.class
+com\digisprint\bean\RegistrationForm.class
 com\digisprint\utils\GeneratingCredentials.class
 com\digisprint\bean\InternalReviewForm.class
 com\digisprint\serviceImpl\FeedBackServiceImpl.class

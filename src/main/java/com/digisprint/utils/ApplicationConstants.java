@@ -87,6 +87,8 @@ public class ApplicationConstants {
 	public static final String QR_CODE = "qr-code";
 	
 	public static final String FEEDBACK = "feedback";
+
+	public static final String DONATIONS_QR_CODE = "donation-qr";
 	
 
 }

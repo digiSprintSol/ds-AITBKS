@@ -400,6 +400,11 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				eventsImagesAnnouncements.setQrCodeImageUrl(imageUrl);
 				eventsImagesAnnouncements.setQrCode(true);
 				break;
+			case ApplicationConstants.DONATIONS_QR_CODE:
+				eventsImagesAnnouncements.setId("3");
+				eventsImagesAnnouncements.setQrCodeImageUrl(imageUrl);
+				eventsImagesAnnouncements.setQrCode(true);
+				break;
 			default:
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid folder name");
 			}
@@ -508,12 +513,21 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	}
 
 	@Override
-	public ResponseEntity getQRCode() {
+	public ResponseEntity getQRCode(String id) {
 		
-		EventsImagesAnnouncements qrCode = eventsImagesAnnouncementsRepo.findById("2").get();
+		if(id.equals("2")) {
+		
+		EventsImagesAnnouncements qrCode = eventsImagesAnnouncementsRepo.findById(id).get();
 		GetDocumentURL documentURL = new GetDocumentURL();
 		documentURL.setPathOfDocumnet(qrCode.getQrCodeImageUrl());
 		return new ResponseEntity(documentURL,HttpStatus.OK);
+		}
+		else {
+			EventsImagesAnnouncements qrCode = eventsImagesAnnouncementsRepo.findById("3").get();
+			GetDocumentURL documentURL = new GetDocumentURL();
+			documentURL.setPathOfDocumnet(qrCode.getQrCodeImageUrl());
+			return new ResponseEntity(documentURL,HttpStatus.OK);
+		}
 	}
 
 }

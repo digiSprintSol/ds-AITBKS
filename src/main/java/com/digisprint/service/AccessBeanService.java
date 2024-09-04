@@ -38,5 +38,5 @@ public interface AccessBeanService {
 	ResponseEntity verifyEmail(String email) throws UserNotFoundException, IOException, MessagingException;
 	ResponseEntity verifyOtp(String email,String otp) throws UserNotFoundException ;
 	ResponseEntity forgotPassword(String email,String newPassword) throws UserNotFoundException;
-	ResponseEntity getQRCode();
+	ResponseEntity getQRCode(String id);
 }

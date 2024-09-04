@@ -171,9 +171,9 @@ public class AccessBeanController {
         return accessBeanService.getAllAwards();
     }
 	
-	@GetMapping("/getQRCode")
-	public ResponseEntity getQRcode() {
-		return accessBeanService.getQRCode();
+	@GetMapping("/getQRCode/{id}")
+	public ResponseEntity getQRcode(@PathVariable String id) {
+		return accessBeanService.getQRCode(id);
 	}
 	
 	@PostMapping("/verifyEmail")

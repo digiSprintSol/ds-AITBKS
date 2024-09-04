@@ -19,7 +19,6 @@ D:\test\ds-AITBKS\src\main\java\com\digisprint\bean\ProgressBarReport.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\controller\FeedBackController.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\service\CloudinaryService.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\RegistrationServiceImpl.java
-D:\test\ds-AITBKS\src\main\java\com\digisprint\bean\RegistrationFrom.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\AccessBeanServiceImpl.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\ImageServiceImpl.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\utils\FolderConstants.java
@@ -50,6 +49,7 @@ D:\test\ds-AITBKS\src\main\java\com\digisprint\controller\RegistrationController
 D:\test\ds-AITBKS\src\main\java\com\digisprint\utils\RegistrationFormConstants.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\requestBean\RegistrationFrom2.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\EmailUtils\EmailService.java
+D:\test\ds-AITBKS\src\main\java\com\digisprint\bean\RegistrationForm.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\requestBean\ApprovalFrom.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\filter\JwtTokenUtil.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\requestBean\UploadBean.java
