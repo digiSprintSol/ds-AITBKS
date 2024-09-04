@@ -441,14 +441,13 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity getAllAwards() {
 		List<EventsImagesAnnouncements> awardsItems = eventsImagesAnnouncementsRepo.findByAwardsTrue();
-		
 		if(awardsItems.size()==0) {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_NO_DATA_FOUND,HttpStatus.NOT_FOUND);
 		}
 		else {
 			List<AwardsResponse> awardsResponseList = awardsItems.stream().map(p->{
 				AwardsResponse awardsResponse = new AwardsResponse();
-				BeanUtils.copyProperties(p, awardsItems);
+				BeanUtils.copyProperties(p, awardsResponse);
 				return awardsResponse;
 			}).collect(Collectors.toList());
 			return  new ResponseEntity(awardsResponseList,HttpStatus.OK);
@@ -530,5 +529,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	
 }
 
