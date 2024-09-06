@@ -12,13 +12,15 @@ public class DonationResponse {
 
 	private LocalDateTime dob;
 
-	private int phoneNumber;
+	private String phoneNumber;
+	
+	private String status;
 
 	private String emailId;
 
 	private String transactionId;
 
-	private int amountPaid;
+	private String amountPaid;
 	
 	private LocalDate transactionDate;
 

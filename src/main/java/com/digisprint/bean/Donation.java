@@ -22,6 +22,8 @@ public class Donation {
 
 	private String phoneNumber;
 
+	private String status;
+	
 	private String emailId;
 
 	private String transactionId;
