@@ -36,7 +36,11 @@ public class RegistrationForm {
 
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
-	private String fullName;
+	private String firstName;
+	
+	@NotEmpty(message="Don't pass an empty String")
+	@NotNull(message="Requried")
+	private String lastName;
 
 	@NotNull(message="Required")
 	@Past(message="Date of birth must be in the past")
@@ -141,25 +145,25 @@ public class RegistrationForm {
 
 	private String committeeOneChoosenMembershipForApplicant;
 
-	private String committeeOneRemarksForApplicant;
+//	private String committeeOneRemarksForApplicant;
 
 	private String committeeTwoChoosenMembershipForApplicant;
 
-	private String committeeTwoRemarksForApplicant;
+//	private String committeeTwoRemarksForApplicant;
 
 	private String committeeThreeChoosenMembershipForApplicant;
 
-	private String committeeThreeRemarksForApplicant;
+//	private String committeeThreeRemarksForApplicant;
 
 	private String presidentChoosenMembershipForApplicant; //R2
 
 	private String presidentRemarksForApplicant; //R2
 	
-	private boolean committeeOneApproval;
+	private String committeeOneApproval;
 
-	private boolean committeeTwoApproval;
+	private String committeeTwoApproval;
 
-	private boolean committeeThreeApproval;	
+	private String committeeThreeApproval;	
 	
 	private boolean presidentApproval;
 	
@@ -170,6 +174,8 @@ public class RegistrationForm {
 	private String committeeMemberThreeId;
 	
 	private String presidentId;
+	
+	private String casteStatus; //oc/bc
 
 	/**
 	 * Membership id

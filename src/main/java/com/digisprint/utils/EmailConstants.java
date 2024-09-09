@@ -37,7 +37,8 @@ public class EmailConstants {
 	public static final String REPLACE_GENERATED_OTP = "[GENERATED_OTP]";
 
 	public static final String OTP_BODY = "Dear [NAME] Your OTP [GENERATED_OTP] to verify the email for changing password. OTPs are secret. DO NOT disclose it to anyone.";   
-
+	
+	
 
 
 }

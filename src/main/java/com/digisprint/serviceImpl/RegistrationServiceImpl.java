@@ -99,7 +99,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		// Sending mail to user.
 		List<String> membersList = new ArrayList<>();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getWelcomeMailAfterFillingFirstRegistrationFrom());
-		body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFullName());
+		body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFirstName());
 		membersList.add(registrationForm.getEmailAddress());
 		String[] newUser = new String[1];
 		newUser[0] = registrationForm.getEmailAddress();
@@ -147,15 +147,15 @@ public class RegistrationServiceImpl implements RegistrationService {
 		} else {
 			if (accessList.contains(ApplicationConstants.PRESIDENT)) {
 				allUsersList = allUsersList.stream()
-						.filter(p -> p.getCommitteeOneRemarksForApplicant() != null
-						&& p.getCommitteeTwoRemarksForApplicant() != null
-						&& p.getCommitteeThreeRemarksForApplicant() != null)
+						.filter(p -> p.getCommitteeOneApproval() != null
+						&& p.getCommitteeTwoApproval() != null
+						&& p.getCommitteeThreeApproval() != null)
 						.collect(Collectors.toList());
 
 				allUsersList = allUsersList.stream()
-						.filter(p -> !p.getCommitteeOneRemarksForApplicant().isEmpty()
-								&& !p.getCommitteeTwoRemarksForApplicant().isEmpty()
-								&& !p.getCommitteeThreeRemarksForApplicant().isEmpty())
+						.filter(p -> !p.getCommitteeOneApproval().isEmpty()
+								&& !p.getCommitteeTwoApproval().isEmpty()
+								&& !p.getCommitteeThreeApproval().isEmpty())
 						.collect(Collectors.toList());
 				if (allUsersList.size() == 0) {
 					return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
@@ -216,50 +216,50 @@ public class RegistrationServiceImpl implements RegistrationService {
 		user[0] = specificUserDetails.getEmailAddress();
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
 
-		boolean approvalStatus = false;
+		String approvalStatus = "";
 
 		switch (from.getStatusOfApproval()) {
 
 		case RegistrationFormConstants.APPROVAL:
-			approvalStatus = true;
+			approvalStatus = "accepted";
 			break;
 
 		case RegistrationFormConstants.REJECTED:
-			approvalStatus = false;
+			approvalStatus = "rejected";
 			break;
 
 		default:
-			approvalStatus = false;
+			approvalStatus = "";
 		}
 		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
 
 			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeOneRemarksForApplicant() == null
-					&& specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE) {
+					&& specificUserDetails.getCommitteeOneApproval() == null) {
+//					&& specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE) {
 				specificUserDetails.setCommitteeOneApproval(approvalStatus);
 				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeOneRemarksForApplicant(from.getRemarks());
+//				specificUserDetails.setCommitteeOneRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setCommitteeMemberOneId(accessBeanUser.getAccessId());
 
 			} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeOneRemarksForApplicant() != null
-					&& specificUserDetails.getCommitteeTwoRemarksForApplicant() == null
-					&& specificUserDetails.getCommitteeThreeRemarksForApplicant() == null) {
+					&& specificUserDetails.getCommitteeOneApproval() != null
+					&& specificUserDetails.getCommitteeTwoApproval() == null
+					&& specificUserDetails.getCommitteeThreeApproval() == null) {
 				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
 				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeTwoRemarksForApplicant(from.getRemarks());
+//				specificUserDetails.setCommitteeTwoRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setCommitteeMemberTwoId(accessBeanUser.getAccessId());
 			}
 			// best of 3 committee members should true
 			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-					&& specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeThreeRemarksForApplicant() == null) {
+					&& specificUserDetails.getCommitteeOneApproval() == RegistrationFormConstants.APPROVAL
+					&& specificUserDetails.getCommitteeTwoApproval() == RegistrationFormConstants.APPROVAL
+					&& specificUserDetails.getCommitteeThreeApproval() == null) {
 				System.out.println("inside c3 approvals");
-				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.TRUE);
+				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.APPROVAL);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
+//				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
 				progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
 				String body = null;
@@ -270,27 +270,27 @@ public class RegistrationServiceImpl implements RegistrationService {
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 				body = body.replace("[UserName]", username).replace("[Password]", passcode);
 				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-				specificUserDetails.setCommitteeThreeApproval(true);
+//				specificUserDetails.setCommitteeThreeApproval(true);
 
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
 				accessBean.setAccountant(false);
-				accessBean.setName(specificUserDetails.getFullName());
+				accessBean.setName(specificUserDetails.getFirstName() +" " +  specificUserDetails.getLastName());
 				accessBean.setUser(true);
 				accessBean.setDeleted(false);
 				accessBean.setEmail(username);
 				accessBean.setPassword(passcode);
 				accessBeanRepository.save(accessBean);
 			}
-			else if (specificUserDetails.isCommitteeOneApproval() == RegistrationFormConstants.FALSE ||
-					specificUserDetails.isCommitteeTwoApproval() == RegistrationFormConstants.FALSE ||
+			else if (specificUserDetails.getCommitteeOneApproval() == RegistrationFormConstants.REJECTED ||
+					specificUserDetails.getCommitteeTwoApproval() == RegistrationFormConstants.REJECTED ||
 					from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 
 				progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
-				specificUserDetails.setCommitteeThreeApproval(false);
+				specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.REJECTED);
 				specificUserDetails.setCommitteeThreeApproval(approvalStatus);
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
+//				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
 				specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
 				System.out.println("inside c3 rejection");
 				String body = null;
@@ -327,7 +327,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
 				accessBean.setAccountant(false);
-				accessBean.setName(specificUserDetails.getFullName());
+				accessBean.setName(specificUserDetails.getFirstName() +" " +  specificUserDetails.getLastName());
 				accessBean.setUser(true);
 				accessBean.setDeleted(false);
 				accessBean.setEmail(username);
@@ -470,7 +470,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		IdentityCard card = new IdentityCard();
 		card.setImage(user.getProfilePic());
 		card.setMembershipId(user.getMembershipId());
-		card.setNameofTheApplicant(user.getFullName());
+		card.setNameofTheApplicant(user.getFirstName() +" " + user.getLastName());
 		card.setTypeOfMemberShip(user.getPresidentChoosenMembershipForApplicant());
 
 		return new ResponseEntity(card, HttpStatus.OK);
@@ -543,7 +543,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			}
 		}
 
-		List<String> memberNames = registrationForms.stream().map(RegistrationForm::getFullName)
+		List<String> memberNames = registrationForms.stream().map(RegistrationForm::getFirstName)
 				.collect(Collectors.toList());
 
 		return memberNames;
