@@ -144,7 +144,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else {
-			if (accessList.contains(ApplicationConstants.PRESIDENT)) {
+			if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.ADMIN)) {
 				allUsersList = allUsersList.stream()
 						.filter(p -> p.getCommitteeOneApproval() != null
 						&& p.getCommitteeTwoApproval() != null
@@ -257,10 +257,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
 				sendEmail(specificUserDetails,progressBarReport);
 			}
-//			else {
-//				System.out.println("inside waiting rejection");
-//				// waiting email
-//			}
+			//			else {
+			//				System.out.println("inside waiting rejection");
+			//				// waiting email
+			//			}
 
 		} // if commitee not approved, prsident should send the email after approval
 		else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
@@ -293,9 +293,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				accessBean.setEmail(username);
 				accessBean.setPassword(passcode);
 				accessBeanRepository.save(accessBean);
-
 			}
-
 			else if (specificUserDetails != null && progressBarReport != null
 					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& progressBarReport.isCommitteeApproval() == RegistrationFormConstants.TRUE
