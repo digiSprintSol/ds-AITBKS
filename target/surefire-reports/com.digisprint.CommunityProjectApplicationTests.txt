@@ -1,4 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.digisprint.CommunityProjectApplicationTests
 -------------------------------------------------------------------------------
+<<<<<<< HEAD
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.73 s - in com.digisprint.CommunityProjectApplicationTests
+=======
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.494 s - in com.digisprint.CommunityProjectApplicationTests
+>>>>>>> origin/development
