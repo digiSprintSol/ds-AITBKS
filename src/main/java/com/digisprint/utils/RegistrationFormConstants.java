@@ -24,6 +24,5 @@ public class RegistrationFormConstants {
 	
 	public static final String COMMITTEETHREE = "66cc3510e549e83dc4cecf03";
 
-	public static final String COMMITEETHREE = null;
 
 }

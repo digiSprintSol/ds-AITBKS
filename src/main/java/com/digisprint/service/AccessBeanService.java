@@ -10,9 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.AccessBean;
-import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.CulturalEvents;
 import com.digisprint.bean.MarketPlaces;
 import com.digisprint.exception.UserNotFoundException;
+import com.digisprint.requestBean.UploadBean;
 import com.digisprint.responseBody.GetDocumentURL;
 
 public interface AccessBeanService {
@@ -32,11 +33,12 @@ public interface AccessBeanService {
 	List<String> getAllCategories();
 	List<String> getAllCities();
 	ResponseEntity deleteAnnouncement(String id);
-	ResponseEntity uploadEventsAnnouncementsGalleryAwardsQRCodeImages(String title, String description, String imageUrl)throws MalformedURLException;
+	ResponseEntity uploadEventsAnnouncementsGalleryAwardsQRCodeImages(UploadBean uploadBean)throws MalformedURLException;
 	ResponseEntity getAllGallery();
 	ResponseEntity getAllAwards();
 	ResponseEntity verifyEmail(String email) throws UserNotFoundException, IOException, MessagingException;
 	ResponseEntity verifyOtp(String email,String otp) throws UserNotFoundException ;
 	ResponseEntity forgotPassword(String email,String newPassword) throws UserNotFoundException;
 	ResponseEntity getQRCode(String id);
+	ResponseEntity<List<CulturalEvents>> getAllCulturalEvents();
 }
