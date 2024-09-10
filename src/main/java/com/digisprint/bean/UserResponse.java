@@ -22,6 +22,8 @@ public class UserResponse {
 	private boolean commitee;
 
 	private boolean user;
+	
+	private boolean admin;
 
 	private LocalDateTime dateOfAssignedPosition;
 

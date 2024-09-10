@@ -217,6 +217,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			userresponse.setCommitee(internalUsers.isCommitee());
 			userresponse.setAccountant(internalUsers.isAccountant());
 			userresponse.setUser(internalUsers.isUser());
+			userresponse.setAdmin(internalUsers.isAdmin());
 			userresponse.setEmail(internalUsers.getEmail());
 			userresponse.setToken(jwtTokenUtil.generateToken(internalUsers.getName(), internalUsers.getAccessId(), getAccessList(internalUsers),
 					String.valueOf(claims.get(ApplicationConstants.OID)).replace(ApplicationConstants.REPLACE_WITH_FORWARDSLASH, ApplicationConstants.EMPTY_QUOTATION_MARK).trim().toLowerCase()));
