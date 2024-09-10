@@ -14,8 +14,24 @@ public class ScholarShip {
 
 	@Id
 	private String id;
-
+	
+	private String profilePicUrl;
+	
+	private String firstName;
+	
+	private String surName;
+	
 	private String scholarShipName;
+	
+	private String sponser;
+	
+	private String education;
+	
+	private String email;
+	
+	private String phoneNumber;
+	
+	private String collegeName;
 
 	private Boolean deleted;
 

@@ -35,8 +35,6 @@ public class AccessBean {
 	
 	private boolean user;
 	
-	private boolean admin;
-	
 	private CharSequence otp;
 	
 	@CreatedDate
