@@ -144,7 +144,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else {
-			if (accessList.contains(ApplicationConstants.PRESIDENT)) {
+			if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
 				allUsersList = allUsersList.stream()
 						.filter(p -> p.getCommitteeOneApproval() != null
 						&& p.getCommitteeTwoApproval() != null
@@ -191,7 +191,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		List accessList = jwtTokenUtil.getAccessList(token);
 		String userType = null;
 
-		if (accessList.contains(ApplicationConstants.PRESIDENT)) {
+		if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE) || accessList.contains(ApplicationConstants.ADMIN)) {
 			userType = ApplicationConstants.PRESIDENT;
 		}
 
@@ -418,7 +418,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		List accessList = jwtTokenUtil.getAccessList(token);
 
-		if (accessList.contains(ApplicationConstants.COMMITEE) || accessList.contains(ApplicationConstants.PRESIDENT)) {
+		if (accessList.contains(ApplicationConstants.COMMITEE) || accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE) || accessList.contains(ApplicationConstants.ADMIN)) {
 			return registrationFromRepository.findAll();
 		} else if (accessList.contains(ApplicationConstants.ACCOUNTANT)) {
 			return registrationFromRepository.findAll().stream()

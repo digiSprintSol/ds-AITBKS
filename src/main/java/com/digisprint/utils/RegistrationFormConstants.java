@@ -17,5 +17,6 @@ public class RegistrationFormConstants {
 	public static final String PATRON = "patron";
 
 	public static final String LIFE_MEMBER = "lifemember";
+	
 
 }

@@ -27,6 +27,8 @@ public class AccessBean {
 	
 	private String phoneNumber;
 	
+	private boolean commiteeExecutive; //superadmin
+	
 	private boolean president;
 	
 	private boolean accountant;

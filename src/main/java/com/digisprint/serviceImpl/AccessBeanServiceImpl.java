@@ -289,7 +289,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 		List accessList = jwtTokenUtil.getAccessList(token);
 
-		if(accessList.contains(ApplicationConstants.PRESIDENT)){
+		if(accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE) || accessList.contains(ApplicationConstants.ADMIN)){
 
 			marketPlaces.setCreatedDate(LocalDateTime.now());
 

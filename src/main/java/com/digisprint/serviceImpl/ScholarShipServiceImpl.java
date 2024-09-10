@@ -112,7 +112,6 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
 		}
-
 		JSONObject jsonObject = decodeToken(token);
 		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
 			throw new IllegalArgumentException("Token must contain userId and access fields");
