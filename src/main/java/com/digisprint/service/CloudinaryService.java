@@ -6,5 +6,5 @@ import java.io.IOException;
 
 public interface CloudinaryService {
 
-    public String uploadFile(MultipartFile file, String folderName);
+    public String uploadFile(MultipartFile file, String folderPath);
 }

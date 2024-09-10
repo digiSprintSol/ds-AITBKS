@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface ImageService {
 
-    public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName);
+    public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName, String folderPath);
     
     public ResponseEntity deleteImage(String id);
     
