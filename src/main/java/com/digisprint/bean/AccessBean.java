@@ -33,6 +33,8 @@ public class AccessBean {
 	
 	private boolean commitee;
 	
+	private boolean admin;
+	
 	private boolean user;
 	
 	private CharSequence otp;
