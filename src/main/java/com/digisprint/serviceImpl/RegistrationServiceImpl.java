@@ -103,7 +103,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		membersList.add(registrationForm.getEmailAddress());
 		String[] newUser = new String[1];
 		newUser[0] = registrationForm.getEmailAddress();
-		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+//		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
 		// Sending mail to committee members
 		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
 
@@ -114,8 +114,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		for (int i = 0; i < emailOfCommittee.size(); i++) {
 			emailsForCommiteeArray[i] = emailOfCommittee.get(i);
 		}
-		email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body,
-				EmailConstants.NEW_USER_REGISTERED_SUBJECT);
+//		email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body,EmailConstants.NEW_USER_REGISTERED_SUBJECT);
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
@@ -322,7 +321,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 				body = body.replace("[UserName]", username).replace("[Password]", passcode);
 
-				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+//				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
@@ -349,7 +348,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
 
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
-				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+//				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
@@ -359,7 +358,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				// rejection mail from president
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
-				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_REJECTED_SUBJECT);
+//				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_REJECTED_SUBJECT);
 			} else {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
@@ -378,7 +377,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 				// send congratulations mail with generated memberID
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
-				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.MEMBERSHIP_APPROVED);
+//				email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.MEMBERSHIP_APPROVED);
 				specificUserDetails.setMembershipId(memberIdentityNumber);
 				specificUserDetails.setMember(RegistrationFormConstants.TRUE);
 
@@ -497,7 +496,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		sendEmail[0] = user.getEmailAddress();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getPaymentApprovalEmail());
 
-		email.MailSendingService(ADMIN_USERNAME, sendEmail, body, EmailConstants.PAYMENT_RECIEVED_SUBJECT);
+//		email.MailSendingService(ADMIN_USERNAME, sendEmail, body, EmailConstants.PAYMENT_RECIEVED_SUBJECT);
 
 		return new ResponseEntity("Recepit Uploaded successfully", HttpStatus.OK);
 	}
@@ -662,4 +661,51 @@ public class RegistrationServiceImpl implements RegistrationService {
 		return null;
 	}
 
+	private boolean sendEmail(RegistrationForm specificUserDetails, ProgressBarReport progressBarReport) throws IOException, MessagingException {
+		String[] user = new String[1];
+		user[0] = specificUserDetails.getEmailAddress();
+
+		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& specificUserDetails.getCommitteeOneApproval() == RegistrationFormConstants.APPROVAL
+				&& specificUserDetails.getCommitteeTwoApproval() == RegistrationFormConstants.APPROVAL
+				&& specificUserDetails.getCommitteeThreeApproval() == RegistrationFormConstants.APPROVAL) {
+			progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
+			String body = null;
+			// Sending credentials to the Applicant as Committee approved.
+			String username = specificUserDetails.getEmailAddress();
+			String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
+					specificUserDetails.getPhoneNumber());
+			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
+			body = body.replace("[UserName]", username).replace("[Password]", passcode);
+//			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+			//				specificUserDetails.setCommitteeThreeApproval(true);
+
+			AccessBean accessBean = new AccessBean();
+			accessBean.setAccessId(specificUserDetails.getUserId());
+			accessBean.setAccountant(false);
+			accessBean.setName(specificUserDetails.getFirstName() +" " +  specificUserDetails.getLastName());
+			accessBean.setUser(true);
+			accessBean.setDeleted(false);
+			accessBean.setEmail(username);
+			accessBean.setPassword(passcode);
+			accessBeanRepository.save(accessBean);
+			return true;
+		}
+		else if (specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED) &&
+				specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)&&
+				specificUserDetails.getCommitteeThreeApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+
+			progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
+			//				specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
+			System.out.println("inside c3 rejection");
+			String body = null;
+			body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
+
+//			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }
