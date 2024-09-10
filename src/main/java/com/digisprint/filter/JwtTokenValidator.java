@@ -110,11 +110,10 @@ public class JwtTokenValidator implements Filter {
 			admin.setEmail("admin@xyz.com");
 			admin.setName("Admin");
 			admin.setPassword("Admin123");
-			admin.setPresident(false);
-			admin.setCommitee(false);
-			admin.setAccountant(false);
-			admin.setUser(false);
-			admin.setAdmin(true);
+			admin.setPresident(true);
+			admin.setCommitee(true);
+			admin.setAccountant(true);
+			admin.setUser(true);
 			accessBeanRepository.save(admin);
 		}
 	}

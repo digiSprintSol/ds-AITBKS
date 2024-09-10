@@ -158,9 +158,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		if(accessBean.isCommitee()){
 			accessList.add(ApplicationConstants.COMMITEE);
 		}
-		if(accessBean.isCommitee()){
-			accessList.add(ApplicationConstants.ADMIN);
-		}
 		if(accessBean.isUser()){
 			accessList.clear();
 			accessList.add(ApplicationConstants.USER);
@@ -292,7 +289,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 		List accessList = jwtTokenUtil.getAccessList(token);
 
-		if(accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.ADMIN)){
+		if(accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE) || accessList.contains(ApplicationConstants.ADMIN)){
 
 			marketPlaces.setCreatedDate(LocalDateTime.now());
 
@@ -360,7 +357,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(UploadBean uploadBean) throws MalformedURLException {
-
 		try {
 			if (uploadBean.getImageUrl() == null) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or missing image URL");

@@ -1,8 +1,12 @@
 package com.digisprint.utils;
 
 public class ApplicationConstants {
+	
+	public static final String COMMITTEE_EXECUTIVE = "COMMITTEE EXECUTIVE";
 
 	public static final String PRESIDENT = "PRESIDENT";
+	
+	public static final String ADMIN = "ADMIN";
 
 	public static final String ACCOUNTANT = "ACCOUNTANT";
 
@@ -89,8 +93,8 @@ public class ApplicationConstants {
 	public static final String FEEDBACK = "feedback";
 
 	public static final String DONATIONS_QR_CODE = "donation-qr";
-
-	public static final String ADMIN = "ADMIN";
+	
+	public static final String SCHOLARSHIP = "scholarship";
 	
 
 }
