@@ -13,6 +13,7 @@ import com.digisprint.repository.MarketPlaceRepository;
 import com.digisprint.service.CloudinaryService;
 import com.digisprint.service.ImageService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class ImageServiceImpl implements ImageService {
 
 
 	@Override
-	public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName) {
+	public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName,String folderPath) {
 
 		try {
 			if (file.getOriginalFilename().isEmpty()) {
@@ -56,9 +57,10 @@ public class ImageServiceImpl implements ImageService {
 			}
 
 			image.setName(file.getOriginalFilename()+"_"+formattedDateTime);
-			image.setUrl(cloudinaryService.uploadFile(file, folderName));
+			image.setUrl(cloudinaryService.uploadFile(file, folderPath));
 			image.setFolderName(folderName);
-
+			image.setFolderPath(folderPath);
+			image.setCreatedDate(LocalDate.now());
 			if(image.getUrl() == null) {
 				return ResponseEntity.badRequest().build();
 			}
