@@ -162,6 +162,12 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			accessList.clear();
 			accessList.add(ApplicationConstants.USER);
 		}
+		if(accessBean.isAdmin()) {
+			accessList.add(ApplicationConstants.ADMIN);
+		}
+		if(accessBean.isCommiteeExecutive()) {
+			accessList.add(ApplicationConstants.COMMITTEE_EXECUTIVE);
+		}
 
 		return accessList;
 

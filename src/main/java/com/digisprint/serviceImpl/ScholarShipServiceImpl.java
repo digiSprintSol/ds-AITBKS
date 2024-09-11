@@ -1,4 +1,4 @@
-package com.digisprint.serviceImpl;
+	package com.digisprint.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,7 +56,6 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 
 	@Override
 	public ResponseEntity<String> getScholarShip(String scholarShipId, String token) throws UserNotFoundException {
-		AccessBean accessBean = getTokenVerified(token);
 		Optional<ScholarShip> optionalScholarShip = scholarShipRepository.findById(scholarShipId);
 		if (optionalScholarShip.isPresent()) {
 			ScholarShip scholarShipBean = optionalScholarShip.get();
@@ -94,7 +93,6 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 
 	@Override
 	public ResponseEntity<String> getAllScholarShips(String token) throws UserNotFoundException {
-		AccessBean accessBean = getTokenVerified(token);
 		List<ScholarShip> scholarShipLists = scholarShipRepository.findAll();
 		List<ScholarShipResponse> scholarShipResponses = new ArrayList<>();
 		if (scholarShipLists.size() > 0) {

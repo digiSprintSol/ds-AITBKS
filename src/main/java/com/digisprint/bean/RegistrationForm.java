@@ -105,10 +105,6 @@ public class RegistrationForm {
 	@NotNull(message="Requried")
 	private String reference1;
 
-	@NotEmpty(message="Don't pass an empty String")
-	@NotNull(message="Requried")
-	private String reference2;
-
 	private String categoryOfMembership;
 
 	/**

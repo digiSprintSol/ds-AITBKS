@@ -143,7 +143,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 		List<RegistrationForm> allUsersList = registrationFromRepository.findAll();
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
-		} else {
+		}
+		else if (accessList.contains(ApplicationConstants.ADMIN)) {
+			return new ResponseEntity("Unauthorized access", HttpStatus.UNAUTHORIZED);
+		}
+		else {
 			if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
 				allUsersList = allUsersList.stream()
 						.filter(p -> p.getCommitteeOneApproval() != null
