@@ -117,10 +117,10 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 		AccessBean accessBeanUser = new AccessBean();
-		if (accessList.contains(ApplicationConstants.PRESIDENT)) {
-			accessBeanUser = accessBeanRepository.findById(identityNumber)
-					.orElseThrow(() -> new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
+		if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE) || accessList.contains(ApplicationConstants.ADMIN)) {
+			accessBeanUser = accessBeanRepository.findById(identityNumber).get();
+			return accessBeanUser;			
 		}
-		return accessBeanUser;
+		throw new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND);
 	}
 }
