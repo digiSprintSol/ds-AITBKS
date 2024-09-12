@@ -48,12 +48,6 @@ public class AccessBeanController {
 
 	@Autowired
 	private HttpServletRequest request;
-
-	@GetMapping("/hello")
-    public String getMessage()
-    {
-        return "Hello World!";
-    }
 	
 	public String getToken() {
 		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
@@ -176,6 +170,11 @@ public class AccessBeanController {
 //        
 //        return accessBeanService.getAllAwards();
 //    }
+	
+	@GetMapping("/getAllFolderName")
+	public ResponseEntity getAllFolderName() {
+		return accessBeanService.getAllFolderName();
+	}
 	
 	@GetMapping("/getQRCode/{id}")
 	public ResponseEntity getQRcode(@PathVariable String id) {

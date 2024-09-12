@@ -553,6 +553,18 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	@Override
+	public ResponseEntity getAllFolderName() {
+
+		List<String> folderName= imageRepository.findAll().stream().map(Image::getFolderPath).distinct().collect(Collectors.toList());
+		if(folderName.size()==0) {
+			return new ResponseEntity("No folders present",HttpStatus.NOT_FOUND);
+		}
+		else {
+			return new ResponseEntity(folderName,HttpStatus.OK);
+		}
+	}
+
 
 }
 

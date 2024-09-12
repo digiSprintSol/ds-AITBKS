@@ -41,4 +41,5 @@ public interface AccessBeanService {
 	ResponseEntity forgotPassword(String email,String newPassword) throws UserNotFoundException;
 	ResponseEntity getQRCode(String id);
 	ResponseEntity<List<CulturalEvents>> getAllCulturalEvents();
+	ResponseEntity getAllFolderName();
 }
