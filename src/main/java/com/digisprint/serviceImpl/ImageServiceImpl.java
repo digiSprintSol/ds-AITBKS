@@ -131,6 +131,8 @@ public class ImageServiceImpl implements ImageService {
 				image.setName(imageName);
 				image.setUrl(imageUrl);
 				image.setFolderName(folderName);
+				image.setFolderPath(folderPath);
+				image.setCreatedDate(LocalDate.now());
 				imageRepository.save(image);
 
 				uploadedImages.add(Map.of("file", file.getOriginalFilename(), "status", "success", "url", imageUrl));
