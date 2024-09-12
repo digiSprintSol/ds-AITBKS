@@ -14,6 +14,6 @@ public interface ImageService {
     
     public ResponseEntity deleteImage(String id);
     
-    public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName);
+    public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName,String folderPath);
     
 }

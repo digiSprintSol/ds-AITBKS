@@ -364,11 +364,11 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(UploadBean uploadBean) throws MalformedURLException {
 		try {
-			if (uploadBean.getImageUrl() == null) {
+			if (uploadBean.getImageURLs() == null) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or missing image URL");
 			}
 
-			Image image = imageRepository.findByUrl(uploadBean.getImageUrl().get(0));
+			Image image = imageRepository.findByUrl(uploadBean.getImageURLs().get(0));
 
 			if (image == null) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
@@ -385,7 +385,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			eventsImagesAnnouncements.setTitle(uploadBean.getTitle());
 			eventsImagesAnnouncements.setDescription(uploadBean.getDescription());
 			eventsImagesAnnouncements.setCreatedDate(LocalDate.now());
-			eventsImagesAnnouncements.setImageURLs(uploadBean.getImageUrl());
+			eventsImagesAnnouncements.setImageURLs(uploadBean.getImageURLs());
 			eventsImagesAnnouncements.setEventDate(uploadBean.getEventDate());
 			//token code
 
@@ -401,12 +401,12 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				break;
 			case ApplicationConstants.QR_CODE:
 				eventsImagesAnnouncements.setId("2");
-				eventsImagesAnnouncements.setQrCodeImageUrl(uploadBean.getImageUrl().get(0));
+				eventsImagesAnnouncements.setQrCodeImageUrl(uploadBean.getImageURLs().get(0));
 				eventsImagesAnnouncements.setQrCode(true);
 				break;
 			case ApplicationConstants.DONATIONS_QR_CODE:
 				eventsImagesAnnouncements.setId("3");
-				eventsImagesAnnouncements.setQrCodeImageUrl(uploadBean.getImageUrl().get(0));
+				eventsImagesAnnouncements.setQrCodeImageUrl(uploadBean.getImageURLs().get(0));
 				eventsImagesAnnouncements.setQrCode(true);
 				break;
 			default:

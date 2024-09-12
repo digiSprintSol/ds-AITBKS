@@ -59,8 +59,9 @@ public class ImageController {
     @PostMapping(value="/uploadMultipleImages",consumes = { "multipart/form-data" })
     public ResponseEntity<Map> uploadMultipleImages(
         @RequestParam("files") List<MultipartFile> files,
-        @RequestParam("folderName") String folderName){    
-        return imageService.uploadImages(files, folderName);
+        @RequestParam("folderName") String folderName,
+        @RequestParam(name="folderPath",required =false) String folderPath){    
+        return imageService.uploadImages(files, folderName,folderPath);
     }
     
 }

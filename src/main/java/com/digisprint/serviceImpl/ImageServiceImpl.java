@@ -96,7 +96,7 @@ public class ImageServiceImpl implements ImageService {
 
 
 	@Override
-	public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName) {
+	public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName,String folderPath) {
 		try {
 			if (files.isEmpty()) {
 				return ResponseEntity.badRequest().body(Map.of("error", "No files uploaded."));
@@ -120,7 +120,7 @@ public class ImageServiceImpl implements ImageService {
 					continue;
 				}
 
-				String imageUrl = cloudinaryService.uploadFile(file, folderName);
+				String imageUrl = cloudinaryService.uploadFile(file, folderPath);
 
 				if (imageUrl == null) {
 					uploadedImages.add(Map.of("file", file.getOriginalFilename(), "status", "failed", "message", "Failed to upload to Cloudinary."));
