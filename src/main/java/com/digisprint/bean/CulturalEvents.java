@@ -38,4 +38,6 @@ public class CulturalEvents {
 	
 	private String sponsoredBy;
 	
+	private String place;
+
 }

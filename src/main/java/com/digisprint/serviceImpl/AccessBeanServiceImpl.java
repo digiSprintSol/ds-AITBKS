@@ -382,11 +382,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 			CulturalEvents eventsImagesAnnouncements = new CulturalEvents();
 
-			eventsImagesAnnouncements.setTitle(uploadBean.getTitle());
-			eventsImagesAnnouncements.setDescription(uploadBean.getDescription());
-			eventsImagesAnnouncements.setCreatedDate(LocalDate.now());
-			eventsImagesAnnouncements.setImageURLs(uploadBean.getImageURLs());
-			eventsImagesAnnouncements.setEventDate(uploadBean.getEventDate());
+			BeanUtils.copyProperties(uploadBean, eventsImagesAnnouncements);
 			//token code
 
 			switch (folderName) {

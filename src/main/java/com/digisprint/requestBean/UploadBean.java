@@ -25,5 +25,7 @@ public class UploadBean {
 	private LocalDate eventDate;
 
 	private String sponsoredBy;
+	
+	private String place;
 
 }
