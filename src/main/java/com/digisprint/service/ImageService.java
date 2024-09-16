@@ -12,7 +12,7 @@ public interface ImageService {
 
     public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName, String folderPath);
     
-    public ResponseEntity deleteImage(String id);
+    public ResponseEntity deleteImage(String id , String filePath);
     
     public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName,String folderPath);
     
