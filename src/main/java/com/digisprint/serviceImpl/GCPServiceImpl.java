@@ -1,11 +1,10 @@
 package com.digisprint.serviceImpl;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,8 +27,7 @@ public class GCPServiceImpl {
 
 	public Storage getCloudStorageService() throws IOException {
 		Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
-				.setCredentials(ServiceAccountCredentials.fromStream(Files
-						.newInputStream(Paths.get("D:/Community-Portal/cloudstoragejson/aitbks-27bc16506a9b.json"))))
+				.setCredentials(ServiceAccountCredentials.fromStream(new ClassPathResource("aitbks-27bc16506a9b.json").getInputStream()))
 				.build().getService();
 		return storage;
 	}
@@ -39,7 +37,6 @@ public class GCPServiceImpl {
 
 		String fileName = null;
 		fileName = "culturalevents" + "/" + folderpath + "/" + culturalEventImage.getOriginalFilename();
-		System.out.println(fileName);
 		BlobId blobId = BlobId.of(bucketName, fileName);
 		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(culturalEventImage.getContentType())
 				.setAcl(Collections.singletonList(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER))).build();
