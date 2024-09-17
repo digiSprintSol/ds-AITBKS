@@ -30,9 +30,9 @@ public class CulturalEvents {
 	
 	private boolean qrCode;
 	
-	private LocalDate eventDate;
+	private LocalDateTime eventDate;
 	
-	private LocalDate createdDate;
+	private LocalDateTime createdDate;
 	
 	private String createdBy;
 	
