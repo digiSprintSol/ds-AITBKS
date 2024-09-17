@@ -1,6 +1,6 @@
 package com.digisprint.requestBean;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Data;
@@ -22,7 +22,7 @@ public class UploadBean {
 
 	private boolean qrCode;
 
-	private LocalDate eventDate;
+	private LocalDateTime eventDate;
 
 	private String sponsoredBy;
 	

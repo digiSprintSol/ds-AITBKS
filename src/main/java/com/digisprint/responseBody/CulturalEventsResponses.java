@@ -23,9 +23,11 @@ public class CulturalEventsResponses {
 	
 	private boolean qrCode;
 	
-	private LocalDate eventDate;
+	private LocalDateTime eventDate;
 	
 	private String createdBy;
 	
 	private String sponsoredBy;
+	
+	private String place;
 }
