@@ -1,6 +1,8 @@
 package com.digisprint.serviceImpl;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +29,8 @@ public class GCPServiceImpl {
 
 	public Storage getCloudStorageService() throws IOException {
 		Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
-				.setCredentials(ServiceAccountCredentials.fromStream(new ClassPathResource("aitbks-27bc16506a9b.json").getInputStream()))
+				.setCredentials(ServiceAccountCredentials.fromStream(Files
+						.newInputStream(Paths.get("D:/Community-Portal/cloudstoragejson/aitbks-ad514bb0822d.json"))))
 				.build().getService();
 		return storage;
 	}
