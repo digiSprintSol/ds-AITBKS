@@ -533,7 +533,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	public ResponseEntity getAllCulturalEvents() {
 
 		List<CulturalEvents> getAllevents = culturalEventRepo.findAll();
-
+		
 		if(getAllevents.size()==0) {
 			return new ResponseEntity("No Events yet",HttpStatus.NO_CONTENT);
 		}

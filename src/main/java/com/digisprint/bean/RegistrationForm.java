@@ -3,7 +3,6 @@ package com.digisprint.bean;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -12,16 +11,18 @@ import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Data
 @Document(collection = "user_details")
+@CompoundIndexes({
+    @CompoundIndex(name = "name_lastModifiedDate_index", def = "{'firstName': 1, 'lastModifiedDate': -1}")
+})
 public class RegistrationForm {
 
 	@Id
@@ -34,6 +35,7 @@ public class RegistrationForm {
 	@NotNull(message="Requried")
 	private String profilePic;
 
+	@Indexed
 	@NotEmpty(message="Don't pass an empty String")
 	@NotNull(message="Requried")
 	private String firstName;
@@ -119,6 +121,7 @@ public class RegistrationForm {
 	@CreatedDate
 	private LocalDateTime createdDate;	
 
+	@Indexed
 	private LocalDateTime lastModifiedDate;
 
 	private String nativePlace; //R3
