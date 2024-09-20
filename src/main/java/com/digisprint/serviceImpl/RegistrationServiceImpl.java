@@ -93,7 +93,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
-    @CachePut(key = "#registrationForm.getUserId", cacheNames = {"user"})
+	@CachePut(key = "#registrationForm.getUserId", cacheNames = {"user"})
 	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationForm> existingUser = registrationFromRepository
@@ -109,10 +109,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 		membersList.add(registrationForm.getEmailAddress());
 		String[] newUser = new String[1];
 		newUser[0] = registrationForm.getEmailAddress();
-				email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+		newUser[0] = registrationForm.getEmailAddress();
+		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
 		// Sending mail to committee members
 		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
-
+		
 		List<AccessBean> committeList = accessBeanRepository.findByCommitee(true);
 		List<String> emailOfCommittee = committeList.stream().map(object -> object.getEmail())
 				.collect(Collectors.toList());
@@ -120,7 +121,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		for (int i = 0; i < emailOfCommittee.size(); i++) {
 			emailsForCommiteeArray[i] = emailOfCommittee.get(i);
 		}
-				email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body,EmailConstants.NEW_USER_REGISTERED_SUBJECT);
+		email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body,EmailConstants.NEW_USER_REGISTERED_SUBJECT);
 
 		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());

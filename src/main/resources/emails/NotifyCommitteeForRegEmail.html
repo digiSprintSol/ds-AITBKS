@@ -1,246 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
- 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New User Register</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        /* Global styles */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            /* Adjust container width */
+            .container {
+                width: 90% !important;
+            }
+            /* Adjust logo size */
+            .logo-section img {
+                width: 60% !important; /* Reduce the size for smaller screens */
+                height: auto !important;
+            }
+            /* Adjust header font size */
+            .header-title {
+                font-size: 22px !important; /* Reduce font size for mobile */
+            }
+            /* Reduce padding for main content */
+            .content-section {
+                padding: 15px !important;
+            }
+            /* Adjust button size */
+            .cta-button {
+                font-size: 16px !important;
+                padding: 0 15px !important;
+                height: 40px !important;
+            }
         }
- 
-        .wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+
+        @media (max-width: 480px) {
+            .container {
+                width: 100% !important;
+            }
+            .logo-section img {
+                width: 50% !important; /* Further reduce logo size for very small screens */
+            }
+            .header-title {
+                font-size: 20px !important; /* Further reduce header font size */
+            }
+            .cta-button {
+                font-size: 14px !important;
+                padding: 0 10px !important;
+                height: 36px !important;
+            }
         }
- 
-        .logo-header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
- 
-        .logo-header>:nth-child(2){
-            margin-left: -20px;
-        }
- 
-        .logo img {
-            width: 180px;
-            height: auto;
-        }
- 
-        .title img {
-            width: 430px;
-            height: auto;
-        }
- 
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            align-items: center;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
- 
-        .header {
-            position: relative;
-        }
- 
-        .cover {
-            position: relative;
-            width: 100%;
-            height: 280px;
-            overflow: hidden;
-        }
- 
-        .cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
-        }
- 
-        .imagepart{
-            opacity: 0.8;
-            text-align: center;
-        }
- 
-        .mainpart{
-            text-align: center;
-            width: 50%;
-            /* height: 60%; */
-            padding: 20px;
-            transform: translate(0,-110%);
-            
-        }
- 
-        .mainpartinside{
-            display: flex;
-            justify-content: center;
-        }
- 
-        .mainpartinside img{
-            margin-top: 4.5%;
-        }
- 
-        .heading {
-            font-size: large;
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            /* align-items: center; */
-            /* justify-content: center; */
-            transform: translate(-50%, -50%);
-            /* padding: 10px; */
-        }
- 
-        .message {
-            font-size:medium;
-            position: absolute;
-            top: 55%;
-            left: 40%;
-            align-items: center;
-            justify-content: center;
-            transform: translate(-50%, -50%);
-            /* padding: 5px; */
-        }
- 
-        .footer {
-            text-align: center;
-            transform: translate(0,-110%);
-        }
- 
-        .divider {
-            height: 1px;
-            background-color: #e0e0e0;
-            margin: 25px -250px;
-        }
- 
-        .signature {
-            text-align: center;
-            margin-top: 20px;
-        }
- 
-        .signature a img{
-            display: inline-block;
-            margin: 0 15px;
-            color: black; /* Adjust icon color */
-            font-size: 24px; /* Adjust icon size */
-            width: 40px; /* Adjust width */
-            height: 40px; /* Adjust height */
-            line-height: 40px; /* Center the icon vertically */
-            border-radius: 50%; /* Rounded shape */
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
-        }
- 
-        .signature a:hover {
-            background-color: #1F735B; /* Adjust hover background color */
-            color: black; /* Adjust hover icon color */
-        }
- 
-        .regards {
-            color: grey;
-            margin-top: 10px;
-            line-height: 0.5;
-        }
- 
-        /* ------------------------- */
-        .button-name {
-        align-items: center;
-        appearance: none;
-        background-color: #1B7DA6;
-        border-radius: 4px;
-        border-width: 0;
-        box-shadow: rgba(45, 35, 66, 0.2) 0 2px 4px,rgba(45, 35, 66, 0.15) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
-        box-sizing: border-box;
-        color: white;
-        cursor: pointer;
-        display: inline-flex;
-        font-family: "JetBrains Mono",monospace;
-        height: 48px;
-        justify-content: center;
-        line-height: 1;
-        list-style: none;
-        overflow: hidden;
-        padding-left: 12px;
-        padding-right: 12px;
-        position: relative;
-        text-align: left;
-        text-decoration: none;
-        transition: box-shadow .15s,transform .15s;
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: manipulation;
-        white-space: nowrap;
-        will-change: box-shadow,transform;
-        font-size: 18px;
-        }
- 
-        .button-name:focus {
-        box-shadow: black 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, black 0 -3px 0 inset;
-        }
- 
-        .button-name:hover {
-        box-shadow: rgba(45, 35, 66, 0.3) 0 4px 8px, rgba(45, 35, 66, 0.2) 0 7px 13px -3px, black 0 -3px 0 inset;
-        transform: translateY(-2px);
-        }
- 
-        .button-name:active {
-        box-shadow: black 0 3px 7px inset;
-        transform: translateY(2px);
-        }
- 
     </style>
 </head>
- 
-<body>
-    <div class="wrapper">
-        <div class="logo-header">
-            <div class="logo">
-                <img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/zibrxrzob4nzhrforqk5" alt="Logo">
+<body style="font-family: Proxima Nova; color: #333; margin: 0; padding: 0; text-align: justify; text-justify: inter-word; overflow-x: auto;">
+    <center>
+        <div class="container" style="padding: 20px; background-color: #7671711b; width: 60%; margin: 30px auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 10px;">
+            <!-- Logo and Title Section -->
+            <div class="logo-section" style="width: 80%; padding: 17px; margin: 0 auto; text-align: center;">
+                <img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/rniqfu6uczortlmqkbj6" width="24%" height="24%">
+                <img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/heltigkphqur2sd11vs8" width="67%" height="67%" style="margin-bottom: 9%;">
             </div>
-            <div class="title">
-                <img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/khbguqhxhbeskxakzmiy" alt="Title">
+            
+            <!-- Main Content Section -->
+            <div class="content-section" style="width: 85%; margin: 0 auto;">
+                <div style="padding: 30px; text-align: left; background-color: #D4E9DA; border-radius: 1px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); color: #333;">
+                    <div style="display: flex; align-items: center;">
+                        <img width="41" height="46" src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/rfaxgzf8pdckno1jar3w" style="border-radius: 5%; margin-right: 15px;">
+                        <h1 class="header-title" style="margin: 0; text-align:center; font-size: 28px;">New User Registered</h1>
+                    </div>
+                    <p>[NAME] has registered successfully in our portal. For more details, click the button below:</p>
+                    <!-- Button -->
+                <a href='https://www.aitbks.org'target="_blank" style="background-color:#23A380;; border-radius: 4px; border: none; color: white; cursor: pointer; display: inline-flex; font-family: 'JetBrains Mono', monospace; height: 48px; justify-content: center; line-height: 2.3; padding: 0 24px; font-size: 20px; transition: box-shadow 0.15s, transform 0.15s; margin-top: 20px; text-decoration: none;">Redirect To Profile</a>
+                </div>
+                <br>
             </div>
-        </div>
- 
-        <div class="imagepart">
-            <img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/gh6xmu85tpkk9rubqlpy" width="80%"/>
-        </div>
-        <div class="mainpart">
-            <div class="mainpartinside">
-                <img src="user.png" height="5%" width="5%"/>
-                <h1>New user registered</h1>
+
+            <!-- Social Media Icons Section -->
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="https://www.facebook.com/yourpage" target="_blank" style="display: inline-block; margin: 0 15px; width: 40px; height: 40px; border-radius: 50%;"><img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/htkmosmhs3wdtcsvozcw" style="width: 100%; height: 100%;"></a>
+                <a href="https://www.instagram.com/yourpage" target="_blank" style="display: inline-block; margin: 0 15px; width: 40px; height: 40px; border-radius: 50%;"><img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/if7qymzf2ecqm2sjktss" style="width: 100%; height: 100%;"></a>
+                <a href="https://twitter.com/yourhandle" target="_blank" style="display: inline-block; margin: 0 15px; width: 40px; height: 40px; border-radius: 50%;"><img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/fxyag3f0bbtvn2jnttnh" style="width: 100%; height: 100%;"></a>
             </div>
-            <p>New user has registered successfully in our portal, for more details choose the below option.</p>
-            <button role="button" class="button-name">Redirect to Profile</button>
-        </div>
-        
-        <div class="footer">
-            <div class="signature">
-                <a href="https://www.facebook.com/yourpage" target="_blank"><img src= "https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/azyiqlusptgjwj41gqjl"></a>
-                <a href="https://www.instagram.com/yourpage" target="_blank"><img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/vfp5oqflukkage7rxxxs"></a>
-                <a href="https://twitter.com/yourhandle" target="_blank"><img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/xwwomfvdlrcffehxc0km"></a>
-            </div>
-            <div class="divider"></div>
-            <div class="regards">
+
+            <!-- Footer Section -->
+            <div style="margin-top: 20px; font-family: Proxima Nova; color: #333;">
                 <p>Thank you & Regards</p>
                 <p>All India Telega Balija Kapu Sangham Team</p>
             </div>
         </div>
-    </div>
+    </center>
 </body>
- 
 </html>
