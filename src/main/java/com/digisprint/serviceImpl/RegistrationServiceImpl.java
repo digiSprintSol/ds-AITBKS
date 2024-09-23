@@ -136,7 +136,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	@Cacheable
 	public ResponseEntity getAllRegisteredUsers(String token) {
 
 		if (token == null || token.isEmpty()) {
@@ -181,7 +180,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	@CachePut(key = "##registrationForm.getUserId", cacheNames = { "user" })
 	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
 			throws Exception {
 
@@ -505,23 +503,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 	@Override
 	public List<String> referenceOneDropdown() {
 
-		List<ProgressBarReport> trueMembers = progressBarRepository.findByMemberTrue();
-
-		List<String> userIds = trueMembers.stream().map(ProgressBarReport::getUserId).collect(Collectors.toList());
-
-		List<RegistrationForm> registrationForms = new ArrayList<>();
-		for (String userId : userIds) {
-			Optional<RegistrationForm> optionalForm = registrationFromRepository.findById(userId);
-			if (optionalForm.isPresent()) {
-				registrationForms.add(optionalForm.get());
-			} else {
-				System.out.println("No RegistrationForm found for User ID: " + userId);
-			}
-		}
-
-		List<String> memberNames = registrationForms.stream().map(RegistrationForm::getFirstName)
+		List<RegistrationForm> trueMembers = registrationFromRepository.findByMemberTrue();
+		
+		List<String> memberNames = trueMembers.stream().map(RegistrationForm::getFirstName)
 				.collect(Collectors.toList());
-
+		System.out.println(memberNames);
 		return memberNames;
 
 	}
@@ -655,8 +641,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 			body = body.replace("[UserName]", username).replace("[Password]", passcode);
 			 email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-			 specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.APPROVAL);
-
+			 
 			AccessBean accessBean = new AccessBean();
 			accessBean.setAccessId(specificUserDetails.getUserId());
 			accessBean.setAccountant(false);

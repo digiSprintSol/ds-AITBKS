@@ -214,7 +214,6 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			}
 
 			String userName = String.valueOf(claims.get(ApplicationConstants.USERNAME));
-			System.out.println(userName);
 			internalUsers = accessBeanRepository.findByEmail(userName).orElseThrow(()-> new  UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
 			userresponse.setAccessId(internalUsers.getAccessId());
 			userresponse.setName(internalUsers.getName());
