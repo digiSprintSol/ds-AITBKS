@@ -176,7 +176,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), "");
 		Cookie cookie1 = new Cookie("token",cookie);
 		cookie1.setHttpOnly(true); // Make the coo kie HTTP-only
 		cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS

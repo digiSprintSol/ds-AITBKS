@@ -149,11 +149,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		}
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
-		StopWatch stopWatch = new StopWatch();
-		stopWatch.start();
 		List<RegistrationForm> allUsersList = registrationFromRepository.findAll();
-		stopWatch.stop();
-		System.out.println(stopWatch.getTotalTimeMillis());
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else if (accessList.contains(ApplicationConstants.ADMIN)) {
@@ -168,11 +164,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 				allUsersList = allUsersList
 						.stream().filter(p -> !p.getCommitteeOneApproval().isEmpty()
 								&& !p.getCommitteeTwoApproval().isEmpty() && !p.getCommitteeThreeApproval().isEmpty())
-						.collect(Collectors.toList()).reversed();
+						.collect(Collectors.toList());
 				if (allUsersList.size() == 0) {
 					return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 				} else {
-					return new ResponseEntity(allUsersList, HttpStatus.OK);
+					return new ResponseEntity(allUsersList.reversed(), HttpStatus.OK);
 				}
 			} else {
 				return new ResponseEntity(allUsersList.reversed(), HttpStatus.OK);
@@ -292,8 +288,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 				body = body.replace("[UserName]", username).replace("[Password]", passcode);
 
-				// email.MailSendingService(ADMIN_USERNAME, user, body,
-				// EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+				 email.MailSendingService(ADMIN_USERNAME, user, body,
+				 EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
@@ -320,8 +316,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
 
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
-				// email.MailSendingService(ADMIN_USERNAME, user, body,
-				// EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+				 email.MailSendingService(ADMIN_USERNAME, user, body,
+				 EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
@@ -331,8 +327,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				// rejection mail from president
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
-				// email.MailSendingService(ADMIN_USERNAME, user, body,
-				// EmailConstants.PRESIDENT_REJECTED_SUBJECT);
+				 email.MailSendingService(ADMIN_USERNAME, user, body,
+				 EmailConstants.PRESIDENT_REJECTED_SUBJECT);
 			} else {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
@@ -351,8 +347,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 				// send congratulations mail with generated memberID
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
-				// email.MailSendingService(ADMIN_USERNAME, user, body,
-				// EmailConstants.MEMBERSHIP_APPROVED);
+				body = body.replace(EmailConstants.REPLACE_MEMEBER_ID, memberIdentityNumber);
+				 email.MailSendingService(ADMIN_USERNAME, user, body,
+				 EmailConstants.MEMBERSHIP_APPROVED);
 				specificUserDetails.setMembershipId(memberIdentityNumber);
 				specificUserDetails.setMember(RegistrationFormConstants.TRUE);
 
@@ -475,8 +472,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		sendEmail[0] = user.getEmailAddress();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getPaymentApprovalEmail());
 
-		// email.MailSendingService(ADMIN_USERNAME, sendEmail, body,
-		// EmailConstants.PAYMENT_RECIEVED_SUBJECT);
+		 email.MailSendingService(ADMIN_USERNAME, sendEmail, body,
+		 EmailConstants.PAYMENT_RECIEVED_SUBJECT);
 
 		return new ResponseEntity("Recepit Uploaded successfully", HttpStatus.OK);
 	}
@@ -562,7 +559,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		else {
 			List<FilterMemberResponse> filterMemberResponsesList = allUsers.stream().map(eachUser -> {
-				System.out.println(":::::::" + eachUser.getPresidentChoosenMembershipForApplicant());
 				FilterMemberResponse filteredResponseBean = new FilterMemberResponse();
 				BeanUtils.copyProperties(eachUser, filteredResponseBean);
 				return filteredResponseBean;
@@ -658,9 +654,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 					specificUserDetails.getPhoneNumber());
 			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
 			body = body.replace("[UserName]", username).replace("[Password]", passcode);
-			// email.MailSendingService(ADMIN_USERNAME, user, body,
-			// EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-			// specificUserDetails.setCommitteeThreeApproval(true);
+			 email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+			 specificUserDetails.setCommitteeThreeApproval(RegistrationFormConstants.APPROVAL);
 
 			AccessBean accessBean = new AccessBean();
 			accessBean.setAccessId(specificUserDetails.getUserId());
@@ -679,12 +674,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
 			// specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
-			System.out.println("inside c3 rejection");
 			String body = null;
 			body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
-
-			// email.MailSendingService(ADMIN_USERNAME, user, body,
-			// EmailConstants.COMMITTEE_REJECTED_SUBJECT);
+			 email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
 			return true;
 		} else {
 			return false;
@@ -692,17 +684,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public ResponseEntity updateUser(UserRequest user, String token) {
-		
-		if (token == null || token.isEmpty()) {
-			throw new IllegalArgumentException("Token cannot be null or empty");
-		}
-		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
-			throw new IllegalArgumentException("Token must contain userId and access fields");
-		}
-		String userId = jsonObject.getString("userId");
-		
+	public ResponseEntity updateUser(UserRequest user, String userId) {
 		Optional<AccessBean> OptionalAccessBean = accessBeanRepository.findById(userId);
 		if (OptionalAccessBean.isPresent()) {
 			RegistrationForm registrationForm = new RegistrationForm();

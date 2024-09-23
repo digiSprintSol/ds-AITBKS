@@ -97,14 +97,12 @@ public class UserRequest {
 	@NotNull(message = "Requried")
 	private String reasonToJoinAITBKS;
 
-	@NotEmpty(message = "Don't pass an empty String")
-	@NotNull(message = "Requried")
-	private String reference1;
-
 	private String categoryOfMembership;
 
-	private boolean member;
-
+	private String nativePlace; 
+	
+	private String casteStatus;
+	
 	private String membershipId;
 
 }
