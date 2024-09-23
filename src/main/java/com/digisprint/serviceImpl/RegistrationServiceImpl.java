@@ -168,10 +168,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 				if (allUsersList.size() == 0) {
 					return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 				} else {
-					return new ResponseEntity(allUsersList.reversed(), HttpStatus.OK);
+					return new ResponseEntity(allUsersList, HttpStatus.OK);
 				}
 			} else {
-				return new ResponseEntity(allUsersList.reversed(), HttpStatus.OK);
+				return new ResponseEntity(allUsersList, HttpStatus.OK);
 			}
 		}
 	}
