@@ -49,6 +49,6 @@ public interface RegistrationService {
 	ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt)
 			throws IOException, MessagingException;
 
-	ResponseEntity updateUser(UserRequest user, String userId);
+	ResponseEntity updateUser(UserRequest user, String token);
 
 }
