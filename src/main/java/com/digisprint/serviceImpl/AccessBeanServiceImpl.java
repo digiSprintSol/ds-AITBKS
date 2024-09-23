@@ -175,6 +175,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity  login(String userName, String password) {
+
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
 		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), "");
 		Cookie cookie1 = new Cookie("token",cookie);
@@ -212,7 +213,8 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				throw new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND);
 			}
 
-			String userName = String.valueOf(claims.get(ApplicationConstants.USERNAME)).replace(ApplicationConstants.REPLACE_WITH_FORWARDSLASH, ApplicationConstants.EMPTY_QUOTATION_MARK).trim().toLowerCase();
+			String userName = String.valueOf(claims.get(ApplicationConstants.USERNAME));
+			System.out.println(userName);
 			internalUsers = accessBeanRepository.findByEmail(userName).orElseThrow(()-> new  UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
 			userresponse.setAccessId(internalUsers.getAccessId());
 			userresponse.setName(internalUsers.getName());
