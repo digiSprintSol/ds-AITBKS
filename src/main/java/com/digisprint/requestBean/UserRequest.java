@@ -11,14 +11,16 @@ import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.stereotype.Component;
 
 import com.digisprint.bean.Address;
 import com.digisprint.bean.FamilyDetails;
 
-public class UserRequest {
+import lombok.Data;
 
-	@Id
-	private String userId;
+@Data
+@Component
+public class UserRequest {
 
 	/**
 	 * PERSONAL DETAILS
