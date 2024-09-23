@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +28,7 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
+import com.digisprint.requestBean.UserRequest;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -62,6 +64,13 @@ public class RegistrationController {
 			throws IOException, MessagingException {
 
 		return this.registrationService.registerUser(from);
+	}
+
+	@Operation(summary = "This method is used to edit the existing user information")
+	@PutMapping("/update/{userId}")
+	public ResponseEntity updateUser(@RequestBody UserRequest user) throws IOException, MessagingException {
+
+		return this.registrationService.updateUser(user, getToken());
 	}
 
 	@Operation(summary = "This method is used to get all users ")

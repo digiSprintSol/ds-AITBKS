@@ -13,6 +13,7 @@ import com.digisprint.repository.MarketPlaceRepository;
 import com.digisprint.service.CloudinaryService;
 import com.digisprint.service.ImageService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class ImageServiceImpl implements ImageService {
 
 
 	@Override
-	public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName) {
+	public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName,String folderPath) {
 
 		try {
 			if (file.getOriginalFilename().isEmpty()) {
@@ -56,9 +57,10 @@ public class ImageServiceImpl implements ImageService {
 			}
 
 			image.setName(file.getOriginalFilename()+"_"+formattedDateTime);
-			image.setUrl(cloudinaryService.uploadFile(file, folderName));
+			image.setUrl(cloudinaryService.uploadFile(file, folderPath));
 			image.setFolderName(folderName);
-
+			image.setFolderPath(folderPath);
+			image.setCreatedDate(LocalDate.now());
 			if(image.getUrl() == null) {
 				return ResponseEntity.badRequest().build();
 			}
@@ -94,7 +96,7 @@ public class ImageServiceImpl implements ImageService {
 
 
 	@Override
-	public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName) {
+	public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName,String folderPath) {
 		try {
 			if (files.isEmpty()) {
 				return ResponseEntity.badRequest().body(Map.of("error", "No files uploaded."));
@@ -118,7 +120,7 @@ public class ImageServiceImpl implements ImageService {
 					continue;
 				}
 
-				String imageUrl = cloudinaryService.uploadFile(file, folderName);
+				String imageUrl = cloudinaryService.uploadFile(file, folderPath);
 
 				if (imageUrl == null) {
 					uploadedImages.add(Map.of("file", file.getOriginalFilename(), "status", "failed", "message", "Failed to upload to Cloudinary."));
@@ -129,6 +131,8 @@ public class ImageServiceImpl implements ImageService {
 				image.setName(imageName);
 				image.setUrl(imageUrl);
 				image.setFolderName(folderName);
+				image.setFolderPath(folderPath);
+				image.setCreatedDate(LocalDate.now());
 				imageRepository.save(image);
 
 				uploadedImages.add(Map.of("file", file.getOriginalFilename(), "status", "success", "url", imageUrl));

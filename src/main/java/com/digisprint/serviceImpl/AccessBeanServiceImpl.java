@@ -2,6 +2,7 @@ package com.digisprint.serviceImpl;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +26,20 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.bean.AccessBean;
-import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.CulturalEvents;
 import com.digisprint.bean.Image;
 import com.digisprint.bean.MarketPlaces;
-import com.digisprint.bean.RegistrationForm;
 import com.digisprint.bean.UserResponse;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.filter.JwtTokenUtil;
 import com.digisprint.repository.AccessBeanRepository;
-import com.digisprint.repository.EventsImagesAnnouncementsRepo;
+import com.digisprint.repository.CulturalEventRepo;
 import com.digisprint.repository.ImageRepository;
 import com.digisprint.repository.MarketPlaceRepository;
+import com.digisprint.requestBean.UploadBean;
 import com.digisprint.responseBody.AwardsResponse;
+import com.digisprint.responseBody.CulturalEventsResponses;
 import com.digisprint.responseBody.EventsResponse;
-import com.digisprint.responseBody.FilterMemberResponse;
 import com.digisprint.responseBody.GalleryResponse;
 import com.digisprint.responseBody.GetDocumentURL;
 import com.digisprint.responseBody.LoginResponse;
@@ -46,7 +47,6 @@ import com.digisprint.service.AccessBeanService;
 import com.digisprint.utils.ApplicationConstants;
 import com.digisprint.utils.EmailConstants;
 import com.digisprint.utils.ErrorResponseConstants;
-import com.digisprint.utils.RegistrationFormConstants;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -58,7 +58,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	private AccessBeanRepository accessBeanRepository;
 
-	private	EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo; 
+	private	CulturalEventRepo culturalEventRepo; 
 
 	private JwtTokenUtil jwtTokenUtil;
 
@@ -69,11 +69,11 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	private EmailService email;
 
 	public AccessBeanServiceImpl(AccessBeanRepository accessBeanRepository,
-			EventsImagesAnnouncementsRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil,
+			CulturalEventRepo eventsImagesAnnouncementsRepo, JwtTokenUtil jwtTokenUtil,
 			MarketPlaceRepository marketPlaceRepository, ImageRepository imageRepository, EmailService email) {
 		super();
 		this.accessBeanRepository = accessBeanRepository;
-		this.eventsImagesAnnouncementsRepo = eventsImagesAnnouncementsRepo;
+		this.culturalEventRepo = eventsImagesAnnouncementsRepo;
 		this.jwtTokenUtil = jwtTokenUtil;
 		this.marketPlaceRepository = marketPlaceRepository;
 		this.imageRepository = imageRepository;
@@ -82,7 +82,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Value("${config.secretKey}")
 	private  String secretKey;
-	
+
 	@Value("${spring.mail.username}")
 	private String ADMIN_USERNAME;
 
@@ -158,12 +158,15 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		if(accessBean.isCommitee()){
 			accessList.add(ApplicationConstants.COMMITEE);
 		}
-		if(accessBean.isCommitee()){
-			accessList.add(ApplicationConstants.ADMIN);
-		}
 		if(accessBean.isUser()){
 			accessList.clear();
 			accessList.add(ApplicationConstants.USER);
+		}
+		if(accessBean.isAdmin()) {
+			accessList.add(ApplicationConstants.ADMIN);
+		}
+		if(accessBean.isCommiteeExecutive()) {
+			accessList.add(ApplicationConstants.COMMITTEE_EXECUTIVE);
 		}
 
 		return accessList;
@@ -173,7 +176,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity  login(String userName, String password) {
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), "");
 		Cookie cookie1 = new Cookie("token",cookie);
 		cookie1.setHttpOnly(true); // Make the coo kie HTTP-only
 		cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
@@ -217,6 +220,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 			userresponse.setCommitee(internalUsers.isCommitee());
 			userresponse.setAccountant(internalUsers.isAccountant());
 			userresponse.setUser(internalUsers.isUser());
+			userresponse.setAdmin(internalUsers.isAdmin());
 			userresponse.setEmail(internalUsers.getEmail());
 			userresponse.setToken(jwtTokenUtil.generateToken(internalUsers.getName(), internalUsers.getAccessId(), getAccessList(internalUsers),
 					String.valueOf(claims.get(ApplicationConstants.OID)).replace(ApplicationConstants.REPLACE_WITH_FORWARDSLASH, ApplicationConstants.EMPTY_QUOTATION_MARK).trim().toLowerCase()));
@@ -237,11 +241,11 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	public ResponseEntity postingAnnouncements(String title, String description) {
 
 		if(title!=null && description !=null) {
-			EventsImagesAnnouncements announcement = new EventsImagesAnnouncements();
-			announcement.setAnnouncementTitle(title);
-			announcement.setAnnouncementDescription(description);
+			CulturalEvents announcement = new CulturalEvents();
+			announcement.setTitle(title);
+			announcement.setDescription(description);
 			announcement.setAnnouncement(true);
-			eventsImagesAnnouncementsRepo.save(announcement);
+			culturalEventRepo.save(announcement);
 			return new ResponseEntity("Announcements created",HttpStatus.OK);
 		}
 		else {
@@ -252,7 +256,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllAnnouncement() {
-		List<EventsImagesAnnouncements>announcements =eventsImagesAnnouncementsRepo.findByAnnouncement(true);
+		List<CulturalEvents>announcements =culturalEventRepo.findByAnnouncement(true);
 		if(announcements.size()==0) {
 			return new ResponseEntity("No Announcements found",HttpStatus.NOT_FOUND);
 		}
@@ -263,7 +267,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getEvents() throws MalformedURLException {
-		EventsImagesAnnouncements event= eventsImagesAnnouncementsRepo.findById("1").get();
+		CulturalEvents event= culturalEventRepo.findById("1").get();
 		EventsResponse eventsResponse = new EventsResponse();
 		BeanUtils.copyProperties(event, eventsResponse);
 		return new ResponseEntity (eventsResponse,HttpStatus.OK);
@@ -291,11 +295,11 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 		List accessList = jwtTokenUtil.getAccessList(token);
 
-		if(accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.ADMIN)){
+		if(accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE) || accessList.contains(ApplicationConstants.ADMIN)){
 
 			marketPlaces.setCreatedDate(LocalDateTime.now());
 
-			 MarketPlaces marketPlace = marketPlaceRepository.save(marketPlaces);
+			MarketPlaces marketPlace = marketPlaceRepository.save(marketPlaces);
 			return new ResponseEntity(marketPlace,HttpStatus.OK);
 		}
 		else {
@@ -341,10 +345,10 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	@Override
 	public ResponseEntity deleteAnnouncement(String id) {
 		try {
-			Optional<EventsImagesAnnouncements> imageOptional = eventsImagesAnnouncementsRepo.findById(id);
+			Optional<CulturalEvents> imageOptional = culturalEventRepo.findById(id);
 
 			if (imageOptional.isPresent()) {
-				eventsImagesAnnouncementsRepo.deleteById(id);
+				culturalEventRepo.deleteById(id);
 
 				return ResponseEntity.ok("Image with id " + id + " has been successfully deleted.");
 			} else {
@@ -358,14 +362,13 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 	}
 
 	@Override
-	public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(String title, String description, String imageUrl) throws MalformedURLException {
-		
+	public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(UploadBean uploadBean) throws MalformedURLException {
 		try {
-			if (imageUrl == null) {
+			if (uploadBean.getImageURLs() == null) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid or missing image URL");
 			}
 
-			Image image = imageRepository.findByUrl(imageUrl);
+			Image image = imageRepository.findByUrl(uploadBean.getImageURLs().get(0));
 
 			if (image == null) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
@@ -377,43 +380,36 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Folder name is missing or invalid");
 			}
 
-			EventsImagesAnnouncements eventsImagesAnnouncements = new EventsImagesAnnouncements();
+			CulturalEvents eventsImagesAnnouncements = new CulturalEvents();
+
+			BeanUtils.copyProperties(uploadBean, eventsImagesAnnouncements);
+			//token code
 
 			switch (folderName) {
 			case ApplicationConstants.EVENTS:
-				eventsImagesAnnouncements.setId("1");
-				eventsImagesAnnouncements.setEventDescription(description);
-				eventsImagesAnnouncements.setEventTitle(title);
-				eventsImagesAnnouncements.setEventImageURL(imageUrl);
-				eventsImagesAnnouncements.setEvents(true);
+				eventsImagesAnnouncements.setEventType(ApplicationConstants.EVENTS); 
 				break;
 			case ApplicationConstants.GALLERY:
-				eventsImagesAnnouncements.setGalleryDescription(description);
-				eventsImagesAnnouncements.setGalleryTitle(title);
-				eventsImagesAnnouncements.setGalleryURL(imageUrl);
-				eventsImagesAnnouncements.setGallery(true);
+				eventsImagesAnnouncements.setEventType(ApplicationConstants.GALLERY);
 				break;
 			case ApplicationConstants.AWARDS:
-				eventsImagesAnnouncements.setAwardDescription(description);
-				eventsImagesAnnouncements.setAwardsTitle(title);
-				eventsImagesAnnouncements.setAwardImageURL(imageUrl);
-				eventsImagesAnnouncements.setAwards(true);
+				eventsImagesAnnouncements.setEventType(ApplicationConstants.AWARDS);
 				break;
 			case ApplicationConstants.QR_CODE:
 				eventsImagesAnnouncements.setId("2");
-				eventsImagesAnnouncements.setQrCodeImageUrl(imageUrl);
+				eventsImagesAnnouncements.setQrCodeImageUrl(uploadBean.getImageURLs().get(0));
 				eventsImagesAnnouncements.setQrCode(true);
 				break;
 			case ApplicationConstants.DONATIONS_QR_CODE:
 				eventsImagesAnnouncements.setId("3");
-				eventsImagesAnnouncements.setQrCodeImageUrl(imageUrl);
+				eventsImagesAnnouncements.setQrCodeImageUrl(uploadBean.getImageURLs().get(0));
 				eventsImagesAnnouncements.setQrCode(true);
 				break;
 			default:
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid folder name");
 			}
 
-			eventsImagesAnnouncementsRepo.save(eventsImagesAnnouncements);
+			culturalEventRepo.save(eventsImagesAnnouncements);
 
 			return new ResponseEntity<>("Files Uploaded Successfully", HttpStatus.OK);
 
@@ -428,23 +424,23 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllGallery() {
-		List<EventsImagesAnnouncements> galleryItems = eventsImagesAnnouncementsRepo.findByGalleryTrue();
+		List<CulturalEvents> galleryItems = culturalEventRepo.findAll();
 		if(galleryItems.size()==0) {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_NO_DATA_FOUND,HttpStatus.NOT_FOUND);
 		}
 		else {
-		List<GalleryResponse> galleryResponsesList = galleryItems.stream().map(p->{
-			GalleryResponse galleryResponse = new GalleryResponse();
-			BeanUtils.copyProperties(p, galleryResponse);
-			return galleryResponse;
-		}).collect(Collectors.toList());
-		return  new ResponseEntity(galleryResponsesList,HttpStatus.OK);
+			List<GalleryResponse> galleryResponsesList = galleryItems.stream().map(p->{
+				GalleryResponse galleryResponse = new GalleryResponse();
+				BeanUtils.copyProperties(p, galleryResponse);
+				return galleryResponse;
+			}).collect(Collectors.toList());
+			return  new ResponseEntity(galleryResponsesList,HttpStatus.OK);
 		}
 	}
 
 	@Override
 	public ResponseEntity getAllAwards() {
-		List<EventsImagesAnnouncements> awardsItems = eventsImagesAnnouncementsRepo.findByAwardsTrue();
+		List<CulturalEvents> awardsItems = culturalEventRepo.findAll();
 		if(awardsItems.size()==0) {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_NO_DATA_FOUND,HttpStatus.NOT_FOUND);
 		}
@@ -517,22 +513,54 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getQRCode(String id) {
-		
+
 		if(id.equals("2")) {
-		
-		EventsImagesAnnouncements qrCode = eventsImagesAnnouncementsRepo.findById(id).get();
-		GetDocumentURL documentURL = new GetDocumentURL();
-		documentURL.setPathOfDocumnet(qrCode.getQrCodeImageUrl());
-		return new ResponseEntity(documentURL,HttpStatus.OK);
+
+			CulturalEvents qrCode = culturalEventRepo.findById(id).get();
+			GetDocumentURL documentURL = new GetDocumentURL();
+			documentURL.setPathOfDocumnet(qrCode.getQrCodeImageUrl());
+			return new ResponseEntity(documentURL,HttpStatus.OK);
 		}
 		else {
-			EventsImagesAnnouncements qrCode = eventsImagesAnnouncementsRepo.findById("3").get();
+			CulturalEvents qrCode = culturalEventRepo.findById("3").get();
 			GetDocumentURL documentURL = new GetDocumentURL();
 			documentURL.setPathOfDocumnet(qrCode.getQrCodeImageUrl());
 			return new ResponseEntity(documentURL,HttpStatus.OK);
 		}
 	}
 
-	
+	@Override
+	public ResponseEntity getAllCulturalEvents() {
+
+		List<CulturalEvents> getAllevents = culturalEventRepo.findAll();
+		
+		if(getAllevents.size()==0) {
+			return new ResponseEntity("No Events yet",HttpStatus.NO_CONTENT);
+		}
+
+		else {
+			List<CulturalEventsResponses> culturalEventsResponsesList=getAllevents.stream()
+					.map(p->{
+						CulturalEventsResponses culturalEventsResponses = new CulturalEventsResponses();
+						BeanUtils.copyProperties(p, culturalEventsResponses);
+						return culturalEventsResponses;
+					}).collect(Collectors.toList());
+			return new ResponseEntity(culturalEventsResponsesList,HttpStatus.OK);
+		}
+	}
+
+	@Override
+	public ResponseEntity getAllFolderName() {
+
+		List<String> folderName= imageRepository.findAll().stream().map(Image::getFolderPath).distinct().collect(Collectors.toList());
+		if(folderName.size()==0) {
+			return new ResponseEntity("No folders present",HttpStatus.NOT_FOUND);
+		}
+		else {
+			return new ResponseEntity(folderName,HttpStatus.OK);
+		}
+	}
+
+
 }
 

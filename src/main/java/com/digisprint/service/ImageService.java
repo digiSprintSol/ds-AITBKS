@@ -10,10 +10,10 @@ import java.util.Map;
 
 public interface ImageService {
 
-    public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName);
+    public ResponseEntity<Map> uploadImage(MultipartFile file, String folderName, String folderPath);
     
     public ResponseEntity deleteImage(String id);
     
-    public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName);
+    public ResponseEntity<Map> uploadImages(List<MultipartFile> files, String folderName,String folderPath);
     
 }

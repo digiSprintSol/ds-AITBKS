@@ -6,31 +6,30 @@ import java.util.List;
 
 import javax.mail.MessagingException;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.digisprint.bean.EmailUpload;
-import com.digisprint.bean.PaymentInfo;
 import com.digisprint.bean.ProgressBarReport;
 import com.digisprint.bean.RegistrationForm;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
+import com.digisprint.requestBean.UserRequest;
 
 public interface RegistrationService {
 
 	RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException;
-	
+
 	ResponseEntity getAllRegisteredUsers(String token);
-	
-	ResponseEntity committeePresidentAccountantApproval(String token, String userId,ApprovalFrom approvalFrom) throws UserNotFoundException, Exception;
-	
+
+	ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom approvalFrom)
+			throws UserNotFoundException, Exception;
+
 	ProgressBarReport progressBarForAUser(String id);
-	
+
 	List<RegistrationForm> committeePresidentAccountantViewListOfApplicants(String token);
-	
+
 	List<RegistrationForm> accountFirstView();
 
 	ResponseEntity getIDOfUser(String token) throws MalformedURLException, UserNotFoundException;
@@ -40,13 +39,16 @@ public interface RegistrationService {
 	ResponseEntity getPaymentReceipt(String userId) throws MalformedURLException;
 
 	ResponseEntity getUserDetails(String token);
-	
+
 	List<String> referenceOneDropdown();
-	
-	ResponseEntity bulkEmailUpload(EmailUpload emailUpload)throws IOException, MessagingException;
-	
+
+	ResponseEntity bulkEmailUpload(EmailUpload emailUpload) throws IOException, MessagingException;
+
 	ResponseEntity getAllFilteredMembers(String categoryOfMember);
 
-	ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt) throws IOException, MessagingException;
+	ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt)
+			throws IOException, MessagingException;
+
+	ResponseEntity updateUser(UserRequest user, String token);
 
 }

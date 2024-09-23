@@ -1,6 +1,7 @@
 package com.digisprint.requestBean;
 
-import org.springframework.web.bind.annotation.RequestParam;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Data;
 
@@ -8,6 +9,23 @@ import lombok.Data;
 public class UploadBean {
 
 	private String title;
+
+	private List<String> imageURLs;
+
 	private String description;
-	private String imageUrl;
+
+	private String qrCodeImageUrl;
+
+	private String eventType;  // gallery schloarship awards and events
+
+	private boolean announcement;
+
+	private boolean qrCode;
+
+	private LocalDateTime eventDate;
+
+	private String sponsoredBy;
+	
+	private String place;
+
 }

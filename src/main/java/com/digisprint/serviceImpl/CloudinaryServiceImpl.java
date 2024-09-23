@@ -1,6 +1,7 @@
 package com.digisprint.serviceImpl;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.digisprint.service.CloudinaryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,10 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     private Cloudinary cloudinary;
 
     @Override
-    public String uploadFile(MultipartFile file, String folderName) {
+    public String uploadFile(MultipartFile file, String folderPath) {
         try{
             HashMap<Object, Object> options = new HashMap<>();
-            options.put("folder", folderName);
+            options.put("folder",folderPath );
             Map uploadedFile = cloudinary.uploader().upload(file.getBytes(), options);
             String publicId = (String) uploadedFile.get("public_id");
             return cloudinary.url().secure(true).generate(publicId);

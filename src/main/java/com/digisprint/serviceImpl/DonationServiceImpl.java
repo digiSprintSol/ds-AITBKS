@@ -111,10 +111,11 @@ public class DonationServiceImpl implements DonationService {
 		List accessList = jwtTokenUtil.getAccessList(token);
 		AccessBean accessBeanUser = new AccessBean();
 		if (accessList.contains(ApplicationConstants.ACCOUNTANT)) {
-			accessBeanUser = accessBeanRepository.findById(identityNumber)
-					.orElseThrow(() -> new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
+			accessBeanUser = accessBeanRepository.findById(identityNumber).get();
+			return accessBeanUser;
+					
 		}
-		return accessBeanUser;
+	    throw new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND);
 	}
 
 	public JSONObject decodeToken(String jwtToken) {

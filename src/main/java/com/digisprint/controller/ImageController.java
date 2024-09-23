@@ -32,9 +32,10 @@ public class ImageController {
 
     @PostMapping(value="/upload",consumes = { "multipart/form-data" })
     public ResponseEntity<Map> upload(@RequestParam(name="file",required =false) MultipartFile file,
-    		@RequestParam(name="folderName",required =false) String folderName) {
+    		@RequestParam(name="folderName",required =false) String folderName,
+    		@RequestParam(name="folderPath",required =false) String folderPath) {
         try {
-           return imageService.uploadImage(file, folderName);
+           return imageService.uploadImage(file, folderName,folderPath);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -58,9 +59,9 @@ public class ImageController {
     @PostMapping(value="/uploadMultipleImages",consumes = { "multipart/form-data" })
     public ResponseEntity<Map> uploadMultipleImages(
         @RequestParam("files") List<MultipartFile> files,
-        @RequestParam("folderName") String folderName) {
-        
-        return imageService.uploadImages(files, folderName);
+        @RequestParam("folderName") String folderName,
+        @RequestParam(name="folderPath",required =false) String folderPath){    
+        return imageService.uploadImages(files, folderName,folderPath);
     }
     
 }

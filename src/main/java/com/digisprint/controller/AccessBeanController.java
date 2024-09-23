@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.AccessBean;
-import com.digisprint.bean.EventsImagesAnnouncements;
+import com.digisprint.bean.CulturalEvents;
 import com.digisprint.bean.MarketPlaces;
 import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.LoginPayload;
@@ -48,12 +48,6 @@ public class AccessBeanController {
 
 	@Autowired
 	private HttpServletRequest request;
-
-	@GetMapping("/hello")
-    public String getMessage()
-    {
-        return "Hello World!";
-    }
 	
 	public String getToken() {
 		String requestHeaders= request.getHeader(ApplicationConstants.TOKEN);	        
@@ -109,11 +103,11 @@ public class AccessBeanController {
 		return accessBeanService.getAllAnnouncement();
 	}
 
-	@Operation(summary = "This method is used to get events")
-	@GetMapping(value="/getEvents")
-	public ResponseEntity getEvents() throws MalformedURLException {
-		return accessBeanService.getEvents();
-	}
+//	@Operation(summary = "This method is used to get events")
+//	@GetMapping(value="/getEvents")
+//	public ResponseEntity getEvents() throws MalformedURLException {
+//		return accessBeanService.getEvents();
+//	}
 	
 	@Operation(summary="This method is used for posting market places")
 	@PostMapping(value="/postMarketPlace")
@@ -157,19 +151,30 @@ public class AccessBeanController {
 	
 	@PostMapping("/uploadEventsAnnouncementsGalleryAwardsQRCodeImages")
     public ResponseEntity<String> uploadEventsAnnouncementsGalleryAwardsQRCodeImages(@RequestBody UploadBean uploadBean) throws MalformedURLException {
-		return accessBeanService.uploadEventsAnnouncementsGalleryAwardsQRCodeImages(uploadBean.getTitle(), uploadBean.getDescription(), uploadBean.getImageUrl());
+		return accessBeanService.uploadEventsAnnouncementsGalleryAwardsQRCodeImages(uploadBean);
 	}
 	
-	@GetMapping("/gallery-urls")
-    public ResponseEntity<List<EventsImagesAnnouncements>> getGalleryURLs() {
-        return accessBeanService.getAllGallery();
-    }
 	
-	@GetMapping("/award-urls")
-    public ResponseEntity<List<EventsImagesAnnouncements>> getAwardURLs() {
-        
-        return accessBeanService.getAllAwards();
-    }
+	@GetMapping("/getCulturalEvents")
+	public ResponseEntity<List<CulturalEvents>> getAllCulturalEvents(){
+		return accessBeanService.getAllCulturalEvents();
+	}
+	
+//	@GetMapping("/gallery-urls")
+//    public ResponseEntity<List<CulturalEvents>> getGalleryURLs() {
+//        return accessBeanService.getAllGallery();
+//    }
+	
+//	@GetMapping("/award-urls")
+//    public ResponseEntity<List<CulturalEvents>> getAwardURLs() {
+//        
+//        return accessBeanService.getAllAwards();
+//    }
+	
+	@GetMapping("/getAllFolderName")
+	public ResponseEntity getAllFolderName() {
+		return accessBeanService.getAllFolderName();
+	}
 	
 	@GetMapping("/getQRCode/{id}")
 	public ResponseEntity getQRcode(@PathVariable String id) {

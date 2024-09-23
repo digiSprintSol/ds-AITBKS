@@ -27,15 +27,17 @@ public class AccessBean {
 	
 	private String phoneNumber;
 	
+	private boolean commiteeExecutive; //superadmin
+	
 	private boolean president;
 	
 	private boolean accountant;
 	
 	private boolean commitee;
 	
-	private boolean user;
-	
 	private boolean admin;
+	
+	private boolean user;
 	
 	private CharSequence otp;
 	
