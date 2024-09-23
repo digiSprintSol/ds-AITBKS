@@ -693,10 +693,17 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 	@Override
 	public ResponseEntity updateUser(UserRequest user, String userId) {
-		Optional<AccessBean> accessBean = accessBeanRepository.findById(userId);
-		if (accessBean.isPresent()) {
+		Optional<AccessBean> OptionalAccessBean = accessBeanRepository.findById(userId);
+		if (OptionalAccessBean.isPresent()) {
 			RegistrationForm registrationForm = new RegistrationForm();
+			AccessBean accessBean= OptionalAccessBean.get();
+			if(!user.getEmailAddress().isBlank())
+			{
+				accessBean.setEmail(user.getEmailAddress());	
+				accessBeanRepository.save(accessBean);
+			}
 			BeanUtils.copyProperties(user, registrationForm);
+			registrationForm.setUserId(userId);
 			RegistrationForm registrationFormresponse = registrationFromRepository.save(registrationForm);
 			return new ResponseEntity(registrationFormresponse, HttpStatus.OK);
 		}
