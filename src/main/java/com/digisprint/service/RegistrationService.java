@@ -15,6 +15,7 @@ import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
+import com.digisprint.requestBean.UserRequest;
 
 public interface RegistrationService {
 
@@ -48,6 +49,6 @@ public interface RegistrationService {
 	ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt)
 			throws IOException, MessagingException;
 
-	ResponseEntity updateUser(RegistrationForm form);
+	ResponseEntity updateUser(UserRequest user, String userId);
 
 }

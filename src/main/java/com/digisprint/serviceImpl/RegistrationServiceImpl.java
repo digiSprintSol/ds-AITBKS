@@ -39,6 +39,7 @@ import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
+import com.digisprint.requestBean.UserRequest;
 import com.digisprint.responseBody.FilterMemberResponse;
 import com.digisprint.responseBody.IdentityCard;
 import com.digisprint.service.RegistrationService;
@@ -691,11 +692,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public ResponseEntity updateUser(RegistrationForm form) {
-		Optional<AccessBean> accessBean = accessBeanRepository.findById(form.getUserId());
+	public ResponseEntity updateUser(UserRequest user, String userId) {
+		Optional<AccessBean> accessBean = accessBeanRepository.findById(userId);
 		if (accessBean.isPresent()) {
-			RegistrationForm registrationForm = registrationFromRepository.save(form);
-			return new ResponseEntity(registrationForm, HttpStatus.OK);
+			RegistrationForm registrationForm = new RegistrationForm();
+			BeanUtils.copyProperties(user, registrationForm);
+			RegistrationForm registrationFormresponse = registrationFromRepository.save(registrationForm);
+			return new ResponseEntity(registrationFormresponse, HttpStatus.OK);
 		}
 		return new ResponseEntity("User not found", HttpStatus.OK);
 	}

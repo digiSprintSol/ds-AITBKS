@@ -27,6 +27,7 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
+import com.digisprint.requestBean.UserRequest;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -66,9 +67,9 @@ public class RegistrationController {
 
 	@Operation(summary = "This method is used to edit the existing user information")
 	@PostMapping("/update")
-	public ResponseEntity updateUser(@RequestBody RegistrationForm form) throws IOException, MessagingException {
+	public ResponseEntity updateUser(@RequestBody UserRequest user, @PathVariable String userId) throws IOException, MessagingException {
 
-		return this.registrationService.updateUser(form);
+		return this.registrationService.updateUser(user, userId);
 	}
 
 	@Operation(summary = "This method is used to get all users ")
