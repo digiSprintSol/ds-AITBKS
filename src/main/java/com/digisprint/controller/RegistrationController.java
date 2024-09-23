@@ -64,6 +64,13 @@ public class RegistrationController {
 		return this.registrationService.registerUser(from);
 	}
 
+	@Operation(summary = "This method is used to edit the existing user information")
+	@PostMapping("/update")
+	public ResponseEntity updateUser(@RequestBody RegistrationForm form) throws IOException, MessagingException {
+
+		return this.registrationService.updateUser(form);
+	}
+
 	@Operation(summary = "This method is used to get all users ")
 	@GetMapping(value = "/getAllUsers")
 	public ResponseEntity getAllRegisteredUsers() {
