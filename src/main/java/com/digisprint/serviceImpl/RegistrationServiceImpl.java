@@ -95,7 +95,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
-	@CachePut(key = "#registrationForm.getUserId", cacheNames = { "user" })
 	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationForm> existingUser = registrationFromRepository
@@ -137,7 +136,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	@Cacheable(cacheNames = { "user" })
 	public ResponseEntity getAllRegisteredUsers(String token) {
 
 		if (token == null || token.isEmpty()) {
@@ -182,7 +180,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	@CachePut(key = "#userId", cacheNames = { "user" })
 	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
 			throws Exception {
 
