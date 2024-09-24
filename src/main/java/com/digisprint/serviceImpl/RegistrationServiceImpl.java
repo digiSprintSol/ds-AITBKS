@@ -125,7 +125,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 		email.MailSendingService(ADMIN_USERNAME, emailsForCommiteeArray, body,
 				EmailConstants.NEW_USER_REGISTERED_SUBJECT);
 
-		registrationForm.setApplicantChoosenMembership(registrationForm.getCategoryOfMembership());
 		registrationForm.setCreatedDate(LocalDateTime.now());
 		RegistrationForm userDeatils = registrationFromRepository.save(registrationForm);
 		ProgressBarReport progressBarReport = new ProgressBarReport();
@@ -200,8 +199,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		String userType = null;
 
 		if (accessList.contains(ApplicationConstants.PRESIDENT)
-				|| accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)
-				|| accessList.contains(ApplicationConstants.ADMIN)) {
+				|| accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
 			userType = ApplicationConstants.PRESIDENT;
 		}
 
@@ -247,7 +245,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeOneApproval(approvalStatus);
 				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeMemberOneId(accessBeanUser.getAccessId());
+				specificUserDetails.setStatus(from.getStatusOfApproval());
+				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+				registrationFromRepository.save(specificUserDetails);
+				progressBarRepository.save(progressBarReport);
 				sendEmail(specificUserDetails, progressBarReport);
+				return new ResponseEntity("Status updated", HttpStatus.OK);
 
 			} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 					&& specificUserDetails.getCommitteeTwoApproval() == null
@@ -255,7 +258,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
 				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeMemberTwoId(accessBeanUser.getAccessId());
+				specificUserDetails.setStatus(from.getStatusOfApproval());
+				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+				registrationFromRepository.save(specificUserDetails);
+				progressBarRepository.save(progressBarReport);
 				sendEmail(specificUserDetails, progressBarReport);
+				return new ResponseEntity("Status updated", HttpStatus.OK);
 			}
 			// best of 3 committee members should true
 			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
@@ -265,6 +273,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
 				specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
 				sendEmail(specificUserDetails, progressBarReport);
+				specificUserDetails.setStatus(from.getStatusOfApproval());
+				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+				registrationFromRepository.save(specificUserDetails);
+				progressBarRepository.save(progressBarReport);
+				sendEmail(specificUserDetails, progressBarReport);
+				return new ResponseEntity("Status updated", HttpStatus.OK);
 			}
 		} // if commitee not approved, prsident should send the email after approval
 		else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
@@ -526,11 +540,14 @@ public class RegistrationServiceImpl implements RegistrationService {
 				System.out.println(categoryOfMember);
 				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant()
 						.equalsIgnoreCase(RegistrationFormConstants.TRUSTEE)).collect(Collectors.toList());
+				System.out.println("turstee::"+allUsers.size());
 				break;
 
 			case RegistrationFormConstants.PATRON:
 				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant()
 						.equalsIgnoreCase(RegistrationFormConstants.PATRON)).collect(Collectors.toList());
+				System.out.println("patron::"+allUsers.size());
+
 				break;
 
 			case RegistrationFormConstants.LIFE_MEMBER:
