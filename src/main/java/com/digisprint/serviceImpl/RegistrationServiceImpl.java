@@ -513,6 +513,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
+	@Cacheable
 	public ResponseEntity getAllFilteredMembers(String categoryOfMember) {
 
 		List<RegistrationForm> allUsers = registrationFromRepository.findAll();
