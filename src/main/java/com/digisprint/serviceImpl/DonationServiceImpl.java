@@ -42,7 +42,6 @@ public class DonationServiceImpl implements DonationService {
 
 	@Override
 	public ResponseEntity<String> createDonation(DonationRequest donation) {
-		// this method not working check
 		Donation donationEntity = new Donation();
 		BeanUtils.copyProperties(donation, donationEntity);
 		donationEntity.setCreatedDate(LocalDateTime.now());
@@ -78,8 +77,6 @@ public class DonationServiceImpl implements DonationService {
 				return new ResponseEntity(donationResponses, HttpStatus.OK);
 			} else {
 				return new ResponseEntity("Data not found", HttpStatus.INTERNAL_SERVER_ERROR);
-//				check this statement
-//				return new ResponseEntity("Token cannot be null", HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} else {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);

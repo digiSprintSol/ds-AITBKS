@@ -257,7 +257,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllAnnouncement() {
-		List<CulturalEvents>announcements =culturalEventRepo.findByAnnouncement(true);
+		List<CulturalEvents> announcements =culturalEventRepo.findByAnnouncement(true);
 		if(announcements.size()==0) {
 			return new ResponseEntity("No Announcements found",HttpStatus.NOT_FOUND);
 		}
@@ -532,22 +532,22 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllCulturalEvents() {
+		List<CulturalEvents> culturalEventsList = culturalEventRepo.findAll();
+		if(culturalEventsList.size()>0) {
+			culturalEventsList = culturalEventsList.stream()
+					.filter(p-> p.isAnnouncement()==false && p.isQrCode()==false).collect(Collectors.toList());
 
-		List<CulturalEvents> getAllevents = culturalEventRepo.findAll();
-		
-		if(getAllevents.size()==0) {
-			return new ResponseEntity("No Events yet",HttpStatus.NO_CONTENT);
-		}
-
-		else {
-			List<CulturalEventsResponses> culturalEventsResponsesList=getAllevents.stream()
+			List<CulturalEventsResponses> culturalEventsResponsesList=culturalEventsList.stream()
 					.map(p->{
 						CulturalEventsResponses culturalEventsResponses = new CulturalEventsResponses();
 						BeanUtils.copyProperties(p, culturalEventsResponses);
 						return culturalEventsResponses;
 					}).collect(Collectors.toList());
 			return new ResponseEntity(culturalEventsResponsesList,HttpStatus.OK);
+		}else {
+			return new ResponseEntity("No Events yet",HttpStatus.NO_CONTENT);
 		}
+
 	}
 
 	@Override
@@ -562,6 +562,16 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	@Override
+	public ResponseEntity updateInternalUser(AccessBean accessBean, String userId) {
+		Optional<AccessBean> optionalAccessBean= accessBeanRepository.findById(userId);
+		if(optionalAccessBean.isPresent()) {
+			accessBean.setAccessId(userId);
+			AccessBean accessBeanResponse=	accessBeanRepository.save(accessBean);
+			return new ResponseEntity(accessBeanResponse,HttpStatus.OK);
+		}
+		return new ResponseEntity("User not found",HttpStatus.NOT_FOUND);
+	}
 
 }
 
