@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -112,9 +113,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 		newUser[0] = registrationForm.getEmailAddress();
 		newUser[0] = registrationForm.getEmailAddress();
 		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
+		
 		// Sending mail to committee members
 		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
-
+		body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFirstName());
 		List<AccessBean> committeList = accessBeanRepository.findByCommitee(true);
 		List<String> emailOfCommittee = committeList.stream().map(object -> object.getEmail())
 				.collect(Collectors.toList());
@@ -135,6 +137,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
+	@Cacheable(cacheNames = { "user" })
 	public ResponseEntity getAllRegisteredUsers(String token) {
 
 		if (token == null || token.isEmpty()) {
@@ -179,6 +182,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
+	@CachePut(key = "#userId", cacheNames = { "user" })
 	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
 			throws Exception {
 
@@ -647,9 +651,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 		user[0] = specificUserDetails.getEmailAddress();
 
 		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-				&& specificUserDetails.getCommitteeOneApproval() == RegistrationFormConstants.APPROVAL
-				&& specificUserDetails.getCommitteeTwoApproval() == RegistrationFormConstants.APPROVAL
-				&& specificUserDetails.getCommitteeThreeApproval() == RegistrationFormConstants.APPROVAL) {
+				&& specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
+				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
+				&& specificUserDetails.getCommitteeThreeApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
 			String body = null;
 			// Sending credentials to the Applicant as Committee approved.
