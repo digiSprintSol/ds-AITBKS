@@ -15,13 +15,12 @@ import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import com.digisprint.EmailUtils.EmailService;
 import com.digisprint.EmailUtils.EmailTemplates;
@@ -95,6 +94,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
+	@CachePut(value = "usercache", key = "#registrationForm.emailAddress")
+	@CacheEvict(value = "usercache", key = "'allUsers'")
 	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationForm> existingUser = registrationFromRepository
@@ -112,7 +113,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		newUser[0] = registrationForm.getEmailAddress();
 		newUser[0] = registrationForm.getEmailAddress();
 		email.MailSendingService(ADMIN_USERNAME, newUser, body, EmailConstants.REGISTRATOIN_1_EMAIL_SUBJECT);
-		
+
 		// Sending mail to committee members
 		body = htmlTemplates.loadTemplate(emailTemplates.getNewUserNotifyToCommittee());
 		body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, registrationForm.getFirstName());
@@ -136,6 +137,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
+    @Cacheable(value = "usercache", key = "'allUsers'")
 	public ResponseEntity getAllRegisteredUsers(String token) {
 
 		if (token == null || token.isEmpty()) {
@@ -180,6 +182,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
+	@CachePut(value = "usercache", key = "#userId")
+	@CacheEvict(value = "usercache", key = "'allUsers'")
 	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
 			throws Exception {
 
@@ -299,10 +303,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
 						specificUserDetails.getPhoneNumber());
 				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
-				body = body.replace("[UserName]", username).replace("[Password]", passcode);
+				body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
 
-				 email.MailSendingService(ADMIN_USERNAME, user, body,
-				 EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+				email.MailSendingService(ADMIN_USERNAME, user, body,
+						EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 
 				AccessBean accessBean = new AccessBean();
 				accessBean.setAccessId(specificUserDetails.getUserId());
@@ -329,8 +333,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
 
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
-				 email.MailSendingService(ADMIN_USERNAME, user, body,
-				 EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+				email.MailSendingService(ADMIN_USERNAME, user, body,
+						EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 
 			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
@@ -340,8 +344,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				// rejection mail from president
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
 				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
-				 email.MailSendingService(ADMIN_USERNAME, user, body,
-				 EmailConstants.PRESIDENT_REJECTED_SUBJECT);
+				email.MailSendingService(ADMIN_USERNAME, user, body,
+						EmailConstants.PRESIDENT_REJECTED_SUBJECT);
 			} else {
 				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
@@ -361,8 +365,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 				String body = null;
 				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
 				body = body.replace(EmailConstants.REPLACE_MEMEBER_ID, memberIdentityNumber);
-				 email.MailSendingService(ADMIN_USERNAME, user, body,
-				 EmailConstants.MEMBERSHIP_APPROVED);
+				email.MailSendingService(ADMIN_USERNAME, user, body,
+						EmailConstants.MEMBERSHIP_APPROVED);
 				specificUserDetails.setMembershipId(memberIdentityNumber);
 				specificUserDetails.setMember(RegistrationFormConstants.TRUE);
 
@@ -485,8 +489,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		sendEmail[0] = user.getEmailAddress();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getPaymentApprovalEmail());
 
-		 email.MailSendingService(ADMIN_USERNAME, sendEmail, body,
-		 EmailConstants.PAYMENT_RECIEVED_SUBJECT);
+		email.MailSendingService(ADMIN_USERNAME, sendEmail, body,
+				EmailConstants.PAYMENT_RECIEVED_SUBJECT);
 
 		return new ResponseEntity("Recepit Uploaded successfully", HttpStatus.OK);
 	}
@@ -519,7 +523,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	public List<String> referenceOneDropdown() {
 
 		List<RegistrationForm> trueMembers = registrationFromRepository.findByMemberTrue();
-		
+
 		List<String> memberNames = trueMembers.stream().map(RegistrationForm::getFirstName)
 				.collect(Collectors.toList());
 		System.out.println(memberNames);
@@ -582,8 +586,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		case EmailConstants.TRUSTEE:
 
 			List<RegistrationForm> filterByTrustee = allusers.stream()
-					.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-					.collect(Collectors.toList());
+			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
 			List<String> trusteeMails = filterByTrustee.stream().map((trustee) -> {
 				return trustee.getEmailAddress();
 			}).collect(Collectors.toList());
@@ -595,8 +599,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		case EmailConstants.PATRON:
 
 			List<RegistrationForm> filterByPatron = allusers.stream()
-					.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-					.collect(Collectors.toList());
+			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+			.collect(Collectors.toList());
 
 			List<String> patronMails = filterByPatron.stream().map((patron) -> {
 				return patron.getEmailAddress();
@@ -610,7 +614,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 			List<RegistrationForm> filterByLifeMember = allusers.stream().filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-					.collect(Collectors.toList());
+			.collect(Collectors.toList());
 
 			List<String> lifeMemberMails = filterByLifeMember.stream().map((lifeMember) -> {
 				return lifeMember.getEmailAddress();
@@ -622,12 +626,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 			break;
 		default:
 			allusers = allusers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant() != null)
-					.collect(Collectors.toList());
+			.collect(Collectors.toList());
 
 			List<RegistrationForm> filterByAll = allusers.stream().filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
-							|| EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
-							|| EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+					|| EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
+					|| EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 					.collect(Collectors.toList());
 			System.out.println(filterByAll.size());
 			List<String> allEmails = filterByAll.stream().map(RegistrationForm::getEmailAddress)
@@ -658,9 +662,9 @@ public class RegistrationServiceImpl implements RegistrationService {
 			String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
 					specificUserDetails.getPhoneNumber());
 			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
-			body = body.replace("[UserName]", username).replace("[Password]", passcode);
-			 email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-			 
+			body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
+			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+
 			AccessBean accessBean = new AccessBean();
 			accessBean.setAccessId(specificUserDetails.getUserId());
 			accessBean.setAccountant(false);
@@ -674,13 +678,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 		} else if (specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
 				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
 				&& specificUserDetails.getCommitteeThreeApproval()
-						.equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+				.equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
 			// specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
 			String body = null;
 			body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
-			 email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
+			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
 			return true;
 		} else {
 			return false;
