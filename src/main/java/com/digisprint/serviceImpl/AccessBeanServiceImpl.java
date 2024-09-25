@@ -91,6 +91,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity saveInternalUsers(AccessBean accessBean) {
+		System.out.println(accessBeanRepository.findByEmail(accessBean.getEmail()));
 
 		if(accessBeanRepository.findByEmail(accessBean.getEmail()).isPresent()) {
 			return new ResponseEntity(ErrorResponseConstants.EMAIL_ALREADY_EXISTS,HttpStatus.INTERNAL_SERVER_ERROR);

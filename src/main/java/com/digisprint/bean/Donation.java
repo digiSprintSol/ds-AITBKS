@@ -34,6 +34,8 @@ public class Donation {
 
 	private String transactionReceiptUploadUrl;
 	
+	private boolean acknowledge;
+	
 	@CreatedDate
 	private LocalDateTime modifiedDate;
 	

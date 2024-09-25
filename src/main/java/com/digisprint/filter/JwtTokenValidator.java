@@ -113,5 +113,24 @@ public class JwtTokenValidator implements Filter {
 			admin.setAdmin(true);
 			accessBeanRepository.save(admin);
 		}
+		if(!accessBeanRepository.findById("President").isPresent()) {
+			AccessBean president = new AccessBean();
+			president.setAccessId("President");
+			president.setEmail("president@gmail.com");
+			president.setName("President");
+			president.setPassword("President@123");
+			president.setPresident(true);
+			accessBeanRepository.save(president);
+		}
+		if(!accessBeanRepository.findById("CommitteExecutive").isPresent()) {
+			AccessBean committeExecutive = new AccessBean();
+			committeExecutive.setAccessId("CommitteExecutive");
+			committeExecutive.setEmail("committeeexecutive@gamil.com");
+			committeExecutive.setName("Committe Executive");
+			committeExecutive.setPassword("Executive@123");
+			committeExecutive.setCommiteeExecutive(true);
+			accessBeanRepository.save(committeExecutive);
+		}
+		
 	}
 }
