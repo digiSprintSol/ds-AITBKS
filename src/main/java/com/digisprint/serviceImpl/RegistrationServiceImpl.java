@@ -94,7 +94,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
-	@CachePut(value = "usercache", key = "#registrationForm.emailAddress")
+	@CachePut(value = "usercache", key = "#registrationForm.userId")
 	@CacheEvict(value = "usercache", key = "'allUsers'")
 	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
@@ -183,7 +183,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 	@Override
 	@CachePut(value = "usercache", key = "#userId")
-	@CacheEvict(value = "usercache", key = "'allUsers'")
+	@CacheEvict(value = "usercache", key = "#registrationForm.userId")
 	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
 			throws Exception {
 
