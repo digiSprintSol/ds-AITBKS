@@ -53,5 +53,10 @@ public class DonationController {
 	public ResponseEntity<String> getAllDonation() throws UserNotFoundException {
 		return donationService.getAllDonation(getToken());
 	}
+	
+	@PutMapping(value = "/donationAcknowledge/{donationId}")
+	public ResponseEntity donationAcknowledge(@PathVariable String donationId) {
+		return donationService.donationAcknowledge(donationId);
+	}
 
 }

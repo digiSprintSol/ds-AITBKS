@@ -44,6 +44,7 @@ public class DonationServiceImpl implements DonationService {
 	public ResponseEntity<String> createDonation(DonationRequest donation) {
 		Donation donationEntity = new Donation();
 		BeanUtils.copyProperties(donation, donationEntity);
+		donationEntity.setAcknowledge(false);
 		donationEntity.setCreatedDate(LocalDateTime.now());
 		Donation response = this.donationRepository.save(donationEntity);
 		DonationResponse donationResponse = new DonationResponse();
@@ -117,5 +118,18 @@ public class DonationServiceImpl implements DonationService {
 
 	public JSONObject decodeToken(String jwtToken) {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
+	}
+
+	@Override
+	public ResponseEntity donationAcknowledge(String donationId) {
+		
+	    Optional<Donation> optionalDonation=donationRepository.findById(donationId);
+	    if(optionalDonation.isPresent()) {
+	    Donation donation=	optionalDonation.get();
+	    donation.setAcknowledge(true);
+	    donationRepository.save(donation);
+	    return new ResponseEntity("Donation is Acknowledged",HttpStatus.OK);
+	    }
+	    return new ResponseEntity("Donation is not found",HttpStatus.NOT_FOUND);
 	}
 }
