@@ -94,8 +94,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
-//	@CachePut(value = "usercache", key = "#registrationForm.userId")
-//	@CacheEvict(value = "usercache", key = "'allUsers'")
+	@CachePut(value = "usercache", key = "#registrationForm.userId")
+	@CacheEvict(value = "usercache", key = "'allUsers'")
 	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationForm> existingUser = registrationFromRepository
@@ -137,7 +137,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-//    @Cacheable(value = "usercache", key = "'allUsers'")
+	@Cacheable(value = "usercache", key = "'allUsers'")
 	public ResponseEntity getAllRegisteredUsers(String token) {
 
 		if (token == null || token.isEmpty()) {
@@ -181,210 +181,210 @@ public class RegistrationServiceImpl implements RegistrationService {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
 	}
 
-	@Override
-//	@CachePut(value = "usercache", key = "#userId")
-//	@CacheEvict(value = "usercache", key = "#registrationForm.userId")
-	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
-			throws Exception {
-
-		if (token == null || token.isEmpty()) {
-			throw new IllegalArgumentException("Token cannot be null or empty");
-		}
-
-		JSONObject jsonObject = decodeToken(token);
-		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
-			throw new IllegalArgumentException("Token must contain userId and access fields");
-		}
-		String organisationUsers = jsonObject.getString("userId");
-
-		AccessBean accessBeanUser = accessBeanRepository.findById(organisationUsers).get();
-
-		String identityNumber = jsonObject.getString("userId");
-		List accessList = jwtTokenUtil.getAccessList(token);
-		String userType = null;
-
-		if (accessList.contains(ApplicationConstants.PRESIDENT)
-				|| accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
-			userType = ApplicationConstants.PRESIDENT;
-		}
-
-		else if (accessList.contains(ApplicationConstants.COMMITEE)) {
-			userType = ApplicationConstants.COMMITEE;
-		} else {
-			userType = ApplicationConstants.ACCOUNTANT;
-		}
-
-		RegistrationForm specificUserDetails = registrationFromRepository.findById(userId).get();
-		if (specificUserDetails == null) {
-			return new ResponseEntity("No user found with the user id", HttpStatus.NOT_FOUND);
-		}
-
-		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository
-				.findById(specificUserDetails.getUserId());
-		if (!optionalProgressBarReport.isPresent()) {
-			return new ResponseEntity("No progress bar report found for the user", HttpStatus.NOT_FOUND);
-		}
-		String[] user = new String[1];
-		user[0] = specificUserDetails.getEmailAddress();
-		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
-
-		String approvalStatus = "";
-
-		switch (from.getStatusOfApproval()) {
-
-		case RegistrationFormConstants.APPROVAL:
-			approvalStatus = "accepted";
-			break;
-
-		case RegistrationFormConstants.REJECTED:
-			approvalStatus = "rejected";
-			break;
-
-		default:
-			approvalStatus = "";
-		}
-		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
-			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeOneApproval() == null
-					&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEEONE)) {
-				specificUserDetails.setCommitteeOneApproval(approvalStatus);
-				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeMemberOneId(accessBeanUser.getAccessId());
-				specificUserDetails.setStatus(from.getStatusOfApproval());
-				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
-				registrationFromRepository.save(specificUserDetails);
-				progressBarRepository.save(progressBarReport);
-				sendEmail(specificUserDetails, progressBarReport);
-				return new ResponseEntity("Status updated", HttpStatus.OK);
-
-			} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeTwoApproval() == null
-					&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITEETWO)) {
-				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
-				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeMemberTwoId(accessBeanUser.getAccessId());
-				specificUserDetails.setStatus(from.getStatusOfApproval());
-				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
-				registrationFromRepository.save(specificUserDetails);
-				progressBarRepository.save(progressBarReport);
-				sendEmail(specificUserDetails, progressBarReport);
-				return new ResponseEntity("Status updated", HttpStatus.OK);
-			}
-			// best of 3 committee members should true
-			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& specificUserDetails.getCommitteeThreeApproval() == null
-					&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEETHREE)) {
-				specificUserDetails.setCommitteeThreeApproval(approvalStatus);
-				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
-				sendEmail(specificUserDetails, progressBarReport);
-				specificUserDetails.setStatus(from.getStatusOfApproval());
-				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
-				registrationFromRepository.save(specificUserDetails);
-				progressBarRepository.save(progressBarReport);
-				sendEmail(specificUserDetails, progressBarReport);
-				return new ResponseEntity("Status updated", HttpStatus.OK);
-			}
-		} // if commitee not approved, prsident should send the email after approval
-		else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
-
-			if (progressBarReport.isCommitteeApproval() == RegistrationFormConstants.FALSE
-					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
-
-				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
-				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
-				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
-				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
-				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
-				String body = null;
-				// Sending credentials to the Applicant as Committee approved.
-				String username = specificUserDetails.getEmailAddress();
-				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
-						specificUserDetails.getPhoneNumber());
-				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
-				body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
-
-				email.MailSendingService(ADMIN_USERNAME, user, body,
-						EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
-
-				AccessBean accessBean = new AccessBean();
-				accessBean.setAccessId(specificUserDetails.getUserId());
-				accessBean.setAccountant(false);
-				accessBean.setName(specificUserDetails.getFirstName() + " " + specificUserDetails.getLastName());
-				accessBean.setUser(true);
-				accessBean.setDeleted(false);
-				accessBean.setEmail(username);
-				accessBean.setPassword(passcode);
-				accessBeanRepository.save(accessBean);
-
-			}
-
-			else if (specificUserDetails != null && progressBarReport != null
-					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& progressBarReport.isCommitteeApproval() == RegistrationFormConstants.TRUE
-					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
-				String body = null;
-				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
-				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
-				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
-				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
-				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
-				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
-
-				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
-				email.MailSendingService(ADMIN_USERNAME, user, body,
-						EmailConstants.PRESIDENT_APPROVED_SUBJECT);
-
-			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
-				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
-				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
-				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
-				String body = null;
-				// rejection mail from president
-				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
-				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
-				email.MailSendingService(ADMIN_USERNAME, user, body,
-						EmailConstants.PRESIDENT_REJECTED_SUBJECT);
-			} else {
-				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
-				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
-				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
-				// waiting mail from president
-			}
-
-		} else if (userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
-			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-					&& progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
-					&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
-
-				progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
-				progressBarReport.setMember(RegistrationFormConstants.TRUE);
-				String memberIdentityNumber = generatingCredentials.generateMemberId(userId);
-				// send congratulations mail with generated memberID
-				String body = null;
-				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
-				body = body.replace(EmailConstants.REPLACE_MEMEBER_ID, memberIdentityNumber);
-				email.MailSendingService(ADMIN_USERNAME, user, body,
-						EmailConstants.MEMBERSHIP_APPROVED);
-				specificUserDetails.setMembershipId(memberIdentityNumber);
-				specificUserDetails.setMember(RegistrationFormConstants.TRUE);
-
-			} else {
-				return new ResponseEntity("All conditions for accountant approval are not met",
-						HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-
-		} else {
-			return new ResponseEntity("You don't have access !!", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		specificUserDetails.setStatus(from.getStatusOfApproval());
-		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
-		registrationFromRepository.save(specificUserDetails);
-		progressBarRepository.save(progressBarReport);
-		return new ResponseEntity("Status updated", HttpStatus.OK);
-
-	}
+	//	@Override
+	//	@CachePut(value = "usercache", key = "#registrationForm.userId")
+	//	@CacheEvict(value = "usercache", key = "#registrationForm.userId")
+	//	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
+	//			throws Exception {
+	//
+	//		if (token == null || token.isEmpty()) {
+	//			throw new IllegalArgumentException("Token cannot be null or empty");
+	//		}
+	//
+	//		JSONObject jsonObject = decodeToken(token);
+	//		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
+	//			throw new IllegalArgumentException("Token must contain userId and access fields");
+	//		}
+	//		String organisationUsers = jsonObject.getString("userId");
+	//
+	//		AccessBean accessBeanUser = accessBeanRepository.findById(organisationUsers).get();
+	//
+	//		String identityNumber = jsonObject.getString("userId");
+	//		List accessList = jwtTokenUtil.getAccessList(token);
+	//		String userType = null;
+	//
+	//		if (accessList.contains(ApplicationConstants.PRESIDENT)
+	//				|| accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
+	//			userType = ApplicationConstants.PRESIDENT;
+	//		}
+	//
+	//		else if (accessList.contains(ApplicationConstants.COMMITEE)) {
+	//			userType = ApplicationConstants.COMMITEE;
+	//		} else {
+	//			userType = ApplicationConstants.ACCOUNTANT;
+	//		}
+	//
+	//		RegistrationForm specificUserDetails = registrationFromRepository.findById(userId).get();
+	//		if (specificUserDetails == null) {
+	//			return new ResponseEntity("No user found with the user id", HttpStatus.NOT_FOUND);
+	//		}
+	//
+	//		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository
+	//				.findById(specificUserDetails.getUserId());
+	//		if (!optionalProgressBarReport.isPresent()) {
+	//			return new ResponseEntity("No progress bar report found for the user", HttpStatus.NOT_FOUND);
+	//		}
+	//		String[] user = new String[1];
+	//		user[0] = specificUserDetails.getEmailAddress();
+	//		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
+	//
+	//		String approvalStatus = "";
+	//
+	//		switch (from.getStatusOfApproval()) {
+	//
+	//		case RegistrationFormConstants.APPROVAL:
+	//			approvalStatus = "accepted";
+	//			break;
+	//
+	//		case RegistrationFormConstants.REJECTED:
+	//			approvalStatus = "rejected";
+	//			break;
+	//
+	//		default:
+	//			approvalStatus = "";
+	//		}
+	//		if (userType.equalsIgnoreCase(ApplicationConstants.COMMITEE)) {
+	//			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+	//					&& specificUserDetails.getCommitteeOneApproval() == null
+	//					&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEEONE)) {
+	//				specificUserDetails.setCommitteeOneApproval(approvalStatus);
+	//				specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
+	//				specificUserDetails.setCommitteeMemberOneId(accessBeanUser.getAccessId());
+	//				specificUserDetails.setStatus(from.getStatusOfApproval());
+	//				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+	//				registrationFromRepository.save(specificUserDetails);
+	//				progressBarRepository.save(progressBarReport);
+	//				sendEmail(specificUserDetails, progressBarReport);
+	//				return new ResponseEntity("Status updated", HttpStatus.OK);
+	//
+	//			} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+	//					&& specificUserDetails.getCommitteeTwoApproval() == null
+	//					&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITEETWO)) {
+	//				specificUserDetails.setCommitteeTwoApproval(approvalStatus);
+	//				specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
+	//				specificUserDetails.setCommitteeMemberTwoId(accessBeanUser.getAccessId());
+	//				specificUserDetails.setStatus(from.getStatusOfApproval());
+	//				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+	//				registrationFromRepository.save(specificUserDetails);
+	//				progressBarRepository.save(progressBarReport);
+	//				sendEmail(specificUserDetails, progressBarReport);
+	//				return new ResponseEntity("Status updated", HttpStatus.OK);
+	//			}
+	//			// best of 3 committee members should true
+	//			else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+	//					&& specificUserDetails.getCommitteeThreeApproval() == null
+	//					&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEETHREE)) {
+	//				specificUserDetails.setCommitteeThreeApproval(approvalStatus);
+	//				specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
+	//				specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
+	//				sendEmail(specificUserDetails, progressBarReport);
+	//				specificUserDetails.setStatus(from.getStatusOfApproval());
+	//				specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+	//				registrationFromRepository.save(specificUserDetails);
+	//				progressBarRepository.save(progressBarReport);
+	//				sendEmail(specificUserDetails, progressBarReport);
+	//				return new ResponseEntity("Status updated", HttpStatus.OK);
+	//			}
+	//		} // if commitee not approved, prsident should send the email after approval
+	//		else if (userType.equalsIgnoreCase(ApplicationConstants.PRESIDENT)) {
+	//
+	//			if (progressBarReport.isCommitteeApproval() == RegistrationFormConstants.FALSE
+	//					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
+	//
+	//				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+	//				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
+	//				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
+	//				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
+	//				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
+	//				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
+	//				String body = null;
+	//				// Sending credentials to the Applicant as Committee approved.
+	//				String username = specificUserDetails.getEmailAddress();
+	//				String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
+	//						specificUserDetails.getPhoneNumber());
+	//				body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
+	//				body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
+	//
+	//				email.MailSendingService(ADMIN_USERNAME, user, body,
+	//						EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+	//
+	//				AccessBean accessBean = new AccessBean();
+	//				accessBean.setAccessId(specificUserDetails.getUserId());
+	//				accessBean.setAccountant(false);
+	//				accessBean.setName(specificUserDetails.getFirstName() + " " + specificUserDetails.getLastName());
+	//				accessBean.setUser(true);
+	//				accessBean.setDeleted(false);
+	//				accessBean.setEmail(username);
+	//				accessBean.setPassword(passcode);
+	//				accessBeanRepository.save(accessBean);
+	//
+	//			}
+	//
+	//			else if (specificUserDetails != null && progressBarReport != null
+	//					&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+	//					&& progressBarReport.isCommitteeApproval() == RegistrationFormConstants.TRUE
+	//					&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
+	//				String body = null;
+	//				progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+	//				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
+	//				specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
+	//				specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
+	//				specificUserDetails.setPresidentApproval(RegistrationFormConstants.TRUE);
+	//				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
+	//
+	//				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
+	//				email.MailSendingService(ADMIN_USERNAME, user, body,
+	//						EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+	//
+	//			} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+	//				progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
+	//				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+	//				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
+	//				String body = null;
+	//				// rejection mail from president
+	//				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
+	//				body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
+	//				email.MailSendingService(ADMIN_USERNAME, user, body,
+	//						EmailConstants.PRESIDENT_REJECTED_SUBJECT);
+	//			} else {
+	//				progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+	//				specificUserDetails.setPresidentApproval(RegistrationFormConstants.FALSE);
+	//				specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
+	//				// waiting mail from president
+	//			}
+	//
+	//		} else if (userType.equalsIgnoreCase(ApplicationConstants.ACCOUNTANT)) {
+	//			if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+	//					&& progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
+	//					&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
+	//
+	//				progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
+	//				progressBarReport.setMember(RegistrationFormConstants.TRUE);
+	//				String memberIdentityNumber = generatingCredentials.generateMemberId(userId);
+	//				// send congratulations mail with generated memberID
+	//				String body = null;
+	//				body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
+	//				body = body.replace(EmailConstants.REPLACE_MEMEBER_ID, memberIdentityNumber);
+	//				email.MailSendingService(ADMIN_USERNAME, user, body,
+	//						EmailConstants.MEMBERSHIP_APPROVED);
+	//				specificUserDetails.setMembershipId(memberIdentityNumber);
+	//				specificUserDetails.setMember(RegistrationFormConstants.TRUE);
+	//
+	//			} else {
+	//				return new ResponseEntity("All conditions for accountant approval are not met",
+	//						HttpStatus.INTERNAL_SERVER_ERROR);
+	//			}
+	//
+	//		} else {
+	//			return new ResponseEntity("You don't have access !!", HttpStatus.INTERNAL_SERVER_ERROR);
+	//		}
+	//		specificUserDetails.setStatus(from.getStatusOfApproval());
+	//		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+	//		registrationFromRepository.save(specificUserDetails);
+	//		progressBarRepository.save(progressBarReport);
+	//		return new ResponseEntity("Status updated", HttpStatus.OK);
+	//
+	//	}
 
 	@Override
 	public ProgressBarReport progressBarForAUser(String token) {
@@ -652,9 +652,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 		user[0] = specificUserDetails.getEmailAddress();
 
 		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& specificUserDetails.getCommitteeOneApproval()!=null
+				&& specificUserDetails.getCommitteeTwoApproval()!=null
+				&& specificUserDetails.getCommitteeThreeApproval()!=null
+				&& specificUserDetails.getCommitteeThreeApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 				&& specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-				&& specificUserDetails.getCommitteeThreeApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
+				) {
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
 			String body = null;
 			// Sending credentials to the Applicant as Committee approved.
@@ -675,13 +679,15 @@ public class RegistrationServiceImpl implements RegistrationService {
 			accessBean.setPassword(passcode);
 			accessBeanRepository.save(accessBean);
 			return true;
-		} else if (specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
+		} else if (specificUserDetails.getCommitteeOneApproval()!=null
+				&& specificUserDetails.getCommitteeTwoApproval()!=null
+				&& specificUserDetails.getCommitteeThreeApproval()!=null
+				&& specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
 				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
 				&& specificUserDetails.getCommitteeThreeApproval()
-				.equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
-
+				.equalsIgnoreCase(RegistrationFormConstants.REJECTED)
+				) {
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
-			// specificUserDetails.setCommitteeThreeRemarksForApplicant(from.getRemarks());
 			String body = null;
 			body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
 			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.COMMITTEE_REJECTED_SUBJECT);
@@ -709,4 +715,209 @@ public class RegistrationServiceImpl implements RegistrationService {
 		}
 		return new ResponseEntity("User not found", HttpStatus.OK);
 	}
+
+
+	@Override
+	@CachePut(value = "usercache", key = "#userId")
+	@CacheEvict(value = "usercache", key = "'allUsers'")
+	public ResponseEntity committeePresidentAccountantApproval(String token, String userId, ApprovalFrom from)
+			throws Exception {
+
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty");
+		}
+
+		JSONObject jsonObject = decodeToken(token);
+		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
+			throw new IllegalArgumentException("Token must contain userId and access fields");
+		}
+
+		String organisationUsers = jsonObject.getString("userId");
+		Optional<AccessBean> optionalAccessBeanUser = accessBeanRepository.findById(organisationUsers);
+		if (!optionalAccessBeanUser.isPresent()) {
+			return new ResponseEntity<>("No access details found for user", HttpStatus.NOT_FOUND);
+		}
+		AccessBean accessBeanUser = optionalAccessBeanUser.get();
+
+		String identityNumber = jsonObject.getString("userId");
+		List accessList = jwtTokenUtil.getAccessList(token);
+		String userType = determineUserType(accessList);
+
+		Optional<RegistrationForm> optionalSpecificUserDetails = registrationFromRepository.findById(userId);
+		if (!optionalSpecificUserDetails.isPresent()) {
+			return new ResponseEntity<>("No user found with the user id", HttpStatus.NOT_FOUND);
+		}
+		RegistrationForm specificUserDetails = optionalSpecificUserDetails.get();
+
+		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
+		if (!optionalProgressBarReport.isPresent()) {
+			return new ResponseEntity<>("No progress bar report found for the user", HttpStatus.NOT_FOUND);
+		}
+
+		String approvalStatus = getApprovalStatus(from.getStatusOfApproval());
+		String[] user = new String[1];
+		user[0] = specificUserDetails.getEmailAddress();
+		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
+		switch (userType) {
+		case ApplicationConstants.COMMITEE:
+			return handleCommitteeApproval(accessBeanUser, specificUserDetails, progressBarReport, from, approvalStatus);
+		case ApplicationConstants.PRESIDENT:
+			return handlePresidentApproval(accessBeanUser, specificUserDetails, progressBarReport, from, approvalStatus,user);
+		case ApplicationConstants.ACCOUNTANT:
+			return handleAccountantApproval(accessBeanUser, specificUserDetails, progressBarReport, userId,user);
+		default:
+			return new ResponseEntity<>("You don't have access !!", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private String determineUserType(List<String> accessList) {
+		if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
+			return ApplicationConstants.PRESIDENT;
+		} else if (accessList.contains(ApplicationConstants.COMMITEE)) {
+			return ApplicationConstants.COMMITEE;
+		} else {
+			return ApplicationConstants.ACCOUNTANT;
+		}
+	}
+
+	private String getApprovalStatus(String statusOfApproval) {
+		switch (statusOfApproval) {
+		case RegistrationFormConstants.APPROVAL:
+			return "accepted";
+		case RegistrationFormConstants.REJECTED:
+			return "rejected";
+		case RegistrationFormConstants.WAITING:
+			return "waiting";
+		default:
+			return "";
+		}
+	}
+
+	private ResponseEntity handleCommitteeApproval(AccessBean accessBeanUser, RegistrationForm specificUserDetails,
+			ProgressBarReport progressBarReport, ApprovalFrom from, String approvalStatus) throws IOException, MessagingException {
+
+		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& specificUserDetails.getCommitteeOneApproval() == null
+				&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEEONE)) {
+			specificUserDetails.setCommitteeOneApproval(approvalStatus);
+			specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
+			specificUserDetails.setCommitteeMemberOneId(accessBeanUser.getAccessId());
+		}
+		else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& specificUserDetails.getCommitteeTwoApproval() == null
+				&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITEETWO)) {
+			specificUserDetails.setCommitteeTwoApproval(approvalStatus);
+			specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
+			specificUserDetails.setCommitteeMemberTwoId(accessBeanUser.getAccessId());
+		}
+		else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& specificUserDetails.getCommitteeThreeApproval() == null
+				&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEETHREE)) {
+			specificUserDetails.setCommitteeThreeApproval(approvalStatus);
+			specificUserDetails.setCommitteeThreeChoosenMembershipForApplicant(from.getMembership());
+			specificUserDetails.setCommitteeMemberThreeId(accessBeanUser.getAccessId());
+		}
+		specificUserDetails.setStatus(from.getStatusOfApproval());
+		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+		registrationFromRepository.save(specificUserDetails);
+		progressBarRepository.save(progressBarReport);
+		sendEmail(specificUserDetails, progressBarReport);
+		return new ResponseEntity<>("Status updated with userId"+specificUserDetails.getUserId(), HttpStatus.OK);
+	}
+
+	private ResponseEntity handlePresidentApproval(AccessBean accessBeanUser, RegistrationForm specificUserDetails,
+			ProgressBarReport progressBarReport, ApprovalFrom from, String approvalStatus,String[] user) throws IOException, MessagingException {
+
+		progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
+		specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
+		specificUserDetails.setPresidentChoosenMembershipForApplicant(from.getMembership());
+		specificUserDetails.setPresidentId(accessBeanUser.getAccessId());
+		specificUserDetails.setStatus(from.getStatusOfApproval());
+		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+		if (progressBarReport.isCommitteeApproval() == RegistrationFormConstants.FALSE
+				&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
+
+			progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+			specificUserDetails.setPresidentApproval(RegistrationFormConstants.APPROVAL);
+			progressBarReport.setCommitteeApproval(true);
+			String body = null;
+			// Sending credentials to the Applicant as President as committee rejected
+			String username = specificUserDetails.getEmailAddress();
+			String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
+					specificUserDetails.getPhoneNumber());
+			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
+			body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
+
+			email.MailSendingService(ADMIN_USERNAME, user, body,
+					EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+
+			AccessBean accessBean = new AccessBean();
+			accessBean.setAccessId(specificUserDetails.getUserId());
+			accessBean.setAccountant(false);
+			accessBean.setName(specificUserDetails.getFirstName() + " " + specificUserDetails.getLastName());
+			accessBean.setUser(true);
+			accessBean.setDeleted(false);
+			accessBean.setEmail(username);
+			accessBean.setPassword(passcode);
+			accessBeanRepository.save(accessBean);
+		}
+		else if (specificUserDetails != null && progressBarReport != null
+				&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& progressBarReport.isCommitteeApproval() == RegistrationFormConstants.TRUE
+				&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
+			String body = null;
+			progressBarReport.setPresidentApproval(RegistrationFormConstants.TRUE);
+			specificUserDetails.setPresidentApproval(RegistrationFormConstants.APPROVAL);
+
+			body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
+			email.MailSendingService(ADMIN_USERNAME, user, body,
+					EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+
+		} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
+			progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
+			progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+			String body = null;
+			// rejection mail from president
+			specificUserDetails.setPresidentApproval(RegistrationFormConstants.REJECTED);
+			body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
+			email.MailSendingService(ADMIN_USERNAME, user, body,
+					EmailConstants.PRESIDENT_REJECTED_SUBJECT);
+		} else {
+			progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
+			specificUserDetails.setPresidentApproval(RegistrationFormConstants.WAITING);
+			// waiting mail from president
+		}
+		registrationFromRepository.save(specificUserDetails);
+		progressBarRepository.save(progressBarReport);
+		return new ResponseEntity<>("Status updated", HttpStatus.OK);
+	}
+
+	private ResponseEntity handleAccountantApproval(AccessBean accessBeanUser, RegistrationForm specificUserDetails,
+			ProgressBarReport progressBarReport, String userId,String[] user) throws IOException, MessagingException {
+		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+				&& progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
+				&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
+
+			progressBarReport.setAccountantAcknowledgement(RegistrationFormConstants.TRUE);
+			progressBarReport.setMember(RegistrationFormConstants.TRUE);
+			String memberIdentityNumber = generatingCredentials.generateMemberId(userId);
+			// send congratulations mail with generated memberID
+			String body = null;
+			body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
+			body = body.replace(EmailConstants.REPLACE_MEMEBER_ID, memberIdentityNumber);
+			email.MailSendingService(ADMIN_USERNAME, user, body,
+					EmailConstants.MEMBERSHIP_APPROVED);
+			specificUserDetails.setMembershipId(memberIdentityNumber);
+			specificUserDetails.setMember(RegistrationFormConstants.TRUE);
+			specificUserDetails.setLastModifiedDate(LocalDateTime.now());
+			registrationFromRepository.save(specificUserDetails);
+			progressBarRepository.save(progressBarReport);
+
+		} else {
+			return new ResponseEntity("All conditions for accountant approval are not met",
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>("Status updated", HttpStatus.OK);
+	}
+
 }

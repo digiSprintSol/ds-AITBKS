@@ -164,7 +164,7 @@ public class RegistrationForm {
 
 	private String committeeThreeApproval;	
 	
-	private boolean presidentApproval;
+	private String presidentApproval;
 	
 	private String committeeMemberOneId;
 	
