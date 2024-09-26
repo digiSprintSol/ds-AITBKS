@@ -41,6 +41,7 @@ com\digisprint\requestBean\LoginPayload.class
 com\digisprint\serviceImpl\ScholarShipServiceImpl.class
 com\digisprint\controller\AccessBeanController.class
 com\digisprint\bean\Image.class
+META-INF\maven\com.digisprint\CommunityProject\pom.xml
 com\digisprint\controller\ImageController.class
 com\digisprint\requestBean\UploadBean.class
 com\digisprint\serviceImpl\CloudinaryServiceImpl.class
@@ -48,6 +49,7 @@ com\digisprint\repository\PaymentRepository.class
 com\digisprint\service\AccessBeanService.class
 com\digisprint\bean\AccessBean.class
 com\digisprint\requestBean\DonationRequest.class
+META-INF\maven\com.digisprint\CommunityProject\pom.properties
 com\digisprint\bean\ImageModel.class
 com\digisprint\responseBody\EventsResponse.class
 com\digisprint\responseBody\IdentityCard.class
@@ -58,6 +60,7 @@ com\digisprint\responseBody\LoginResponse.class
 com\digisprint\CloudinaryConfiguration.class
 com\digisprint\security\JwtAuthenticationEntryPoint.class
 com\digisprint\controller\RegistrationController.class
+META-INF\MANIFEST.MF
 com\digisprint\CommunityProjectApplication.class
 com\digisprint\bean\ProgressBarReport.class
 com\digisprint\serviceImpl\AccessBeanServiceImpl.class
