@@ -319,9 +319,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		List<RegistrationForm> trueMembers = registrationFromRepository.findByMemberTrue();
 
-		List<String> memberNames = trueMembers.stream().map(RegistrationForm::getFirstName)
-				.collect(Collectors.toList());
-		System.out.println(memberNames);
+		List<String> memberNames = trueMembers.stream().filter(p->p.getFirstName()!=null)
+				.map(p->{
+					String concat= p.getFirstName();
+					concat= concat + " "+p.getLastName();
+					return concat;
+				}).collect(Collectors.toList());
 		return memberNames;
 
 	}
