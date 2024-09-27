@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@CacheConfig(cacheNames = { "usercache" })
+//@CacheConfig(cacheNames = { "usercache" })
 public class RegistrationServiceImpl implements RegistrationService {
 
 	private RegistrationFromRepository registrationFromRepository;
@@ -330,7 +330,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	@Cacheable
+	@Cacheable("allmembers")
 	public ResponseEntity getAllFilteredMembers(String categoryOfMember) {
 
 		List<RegistrationForm> allUsers = registrationFromRepository.findAll();
