@@ -53,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@CacheConfig(cacheNames = { "user" })
+@CacheConfig(cacheNames = { "usercache" })
 public class RegistrationServiceImpl implements RegistrationService {
 
 	private RegistrationFromRepository registrationFromRepository;
