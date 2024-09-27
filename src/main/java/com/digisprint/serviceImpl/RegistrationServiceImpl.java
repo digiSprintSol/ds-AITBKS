@@ -151,6 +151,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 		List<RegistrationForm> allUsersList = registrationFromRepository.findAll();
+		allUsersList = allUsersList.stream().sorted((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate()))
+				 	.collect(Collectors.toList());
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else if (accessList.contains(ApplicationConstants.ADMIN)) {
