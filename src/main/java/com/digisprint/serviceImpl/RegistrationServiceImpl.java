@@ -151,8 +151,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 		List<RegistrationForm> allUsersList = registrationFromRepository.findAll();
-		allUsersList = allUsersList.stream().sorted((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate()))
-				 	.collect(Collectors.toList());
+		
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else if (accessList.contains(ApplicationConstants.ADMIN)) {
@@ -165,15 +164,16 @@ public class RegistrationServiceImpl implements RegistrationService {
 						.collect(Collectors.toList());
 
 				allUsersList = allUsersList
-						.stream().filter(p -> !p.getCommitteeOneApproval().isEmpty()
+						.stream().sorted((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate())).filter(p -> !p.getCommitteeOneApproval().isEmpty()
 								&& !p.getCommitteeTwoApproval().isEmpty() && !p.getCommitteeThreeApproval().isEmpty())
 						.collect(Collectors.toList());
-				if (allUsersList.size() == 0) {
-					return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
-				} else {
+				System.out.println("pre vieew::"+allUsersList.get(0).getFirstName());
 					return new ResponseEntity(allUsersList, HttpStatus.OK);
-				}
 			} else {
+				allUsersList = allUsersList.stream().sorted((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate()))
+					 	.collect(Collectors.toList());
+				System.out.println("comm view::"+allUsersList.get(0).getFirstName());
+
 				return new ResponseEntity(allUsersList, HttpStatus.OK);
 			}
 		}

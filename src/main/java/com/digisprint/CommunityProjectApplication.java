@@ -22,7 +22,6 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableCaching
 public class CommunityProjectApplication {
 
 	public static void main(String[] args) {
