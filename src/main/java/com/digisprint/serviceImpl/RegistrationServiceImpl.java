@@ -53,7 +53,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-//@CacheConfig(cacheNames = { "usercache" })
 public class RegistrationServiceImpl implements RegistrationService {
 
 	private RegistrationFromRepository registrationFromRepository;
@@ -94,8 +93,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	private String ADMIN_USERNAME;
 
 	@Override
-//	@CachePut(value = "usercache", key = "#registrationForm.userId")
-//	@CacheEvict(value = "usercache", key = "'allUsers'")
 	public RegistrationForm registerUser(RegistrationForm registrationForm) throws IOException, MessagingException {
 
 		Optional<RegistrationForm> existingUser = registrationFromRepository
@@ -137,7 +134,6 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-//	@Cacheable(value = "usercache", key = "'allUsers'")
 	public ResponseEntity getAllRegisteredUsers(String token) {
 
 		if (token == null || token.isEmpty()) {
@@ -163,21 +159,17 @@ public class RegistrationServiceImpl implements RegistrationService {
 						&& p.getCommitteeTwoApproval() != null && p.getCommitteeThreeApproval() != null)
 						.collect(Collectors.toList());
 
-				allUsersList = allUsersList
-						.stream().sorted((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate())).filter(p -> !p.getCommitteeOneApproval().isEmpty()
+				allUsersList = allUsersList.stream().filter(p -> !p.getCommitteeOneApproval().isEmpty()
 								&& !p.getCommitteeTwoApproval().isEmpty() && !p.getCommitteeThreeApproval().isEmpty())
 						.collect(Collectors.toList());
-				System.out.println("pre vieew::"+allUsersList.get(0).getFirstName());
 					return new ResponseEntity(allUsersList, HttpStatus.OK);
 			} else {
-				allUsersList = allUsersList.stream().sorted((w1, w2) -> w2.getCreatedDate().compareTo(w1.getCreatedDate()))
-					 	.collect(Collectors.toList());
-				System.out.println("comm view::"+allUsersList.get(0).getFirstName());
-
 				return new ResponseEntity(allUsersList, HttpStatus.OK);
 			}
 		}
 	}
+	
+
 
 	public JSONObject decodeToken(String jwtToken) {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
