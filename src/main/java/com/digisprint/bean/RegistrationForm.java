@@ -144,15 +144,9 @@ public class RegistrationForm {
 
 	private String committeeOneChoosenMembershipForApplicant;
 
-//	private String committeeOneRemarksForApplicant;
-
 	private String committeeTwoChoosenMembershipForApplicant;
 
-//	private String committeeTwoRemarksForApplicant;
-
 	private String committeeThreeChoosenMembershipForApplicant;
-
-//	private String committeeThreeRemarksForApplicant;
 
 	private String presidentChoosenMembershipForApplicant; //R2
 

@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class PaymentInfo {
 
-	private String trasactionId;
+	private String transactionId;
 	
 	private String amountPaid;
 		

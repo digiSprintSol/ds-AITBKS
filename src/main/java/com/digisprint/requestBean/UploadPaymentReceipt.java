@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class UploadPaymentReceipt {
 
-	private String trasactionId;
+	private String transactionId;
 
 	private String amountPaid;
 
