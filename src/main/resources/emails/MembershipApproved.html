@@ -3,189 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Membership Approved</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-	<style>
-		body {
-		    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-		    background-color: #f0f0f0;
-		    margin: 0;
-		    padding: 0;
-		}
-
-		.wrapper {
-		    display: flex;
-		    flex-direction: column;
-		    justify-content: center;
-		    align-items: center;
-		    min-height: 100vh;
-		}
-
-		.logo-header {
-		    display: flex;
-		    justify-content: center;
-		    align-items: center;
-		    margin-top: 20px;
-		}
-
-		.logo-header>:nth-child(2) {
-		    margin-left: -30px;
-		}
-
-		.logo img {
-		    width: 190px;
-		    height: auto;
-		}
-
-		.title img {
-		    width: 430px; 
-		    height: auto;
-		}
-
-		.container {
-		    max-width: 600px;
-		    margin: 20px auto;
-		    align-items: center;
-		    border: 1px solid #e0e0e0;
-		    border-radius: 6px;
-		    overflow: hidden;
-		    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		    transform: translate(0,-6%);
-		}
-
-		.header {
-		    position: relative;
-		}
-
-		.cover {
-		    position: relative;
-		    width: 100%;
-		    height: 280px;
-		    overflow: hidden;
-		}
-
-		.cover img {
-		    width: 100%;
-		    height: 100%;
-		    object-fit: cover;
-		}
-
-		.heading {
-		    font-size: large;
-		    position: absolute;
-		    top: 20%;
-		    left: 50%;
-		    align-items: center;
-		    justify-content: center;
-		    transform: translate(-50%, -50%);
-		    padding: 10px;
-		}
-		.message {
-		    font-size:medium;
-		    position: absolute;
-		    top: 33%;
-		    left: 50%;
-		    align-items: center;
-		    justify-content: center;
-		    transform: translate(-50%, -50%);
-		    padding: 10px;
-		}
-		.login-button {
-
-		    margin-top: 10px;
-		    margin-bottom: 30px;
-		    background-color: #1B7DA6;
-		    color: white;
-		    border: none;
-		    padding: 12px 24px; 
-		    font-size: 16px;
-		    cursor: pointer;
-		    border-radius: 6px;
-		    transition: background-color 1s ease;
-		}
-
-		.login-button:hover {
-		    background-color: #01A968;
-		    font-weight: bold;
-		}
-
-		.footer {
-		    text-align: center;
-		}
-
-		.divider {
-		    height: 1px;
-		    background-color: #e0e0e0;
-		    margin: 25px -250px;
-		}
-
-		.signature {
-		    text-align: center;
-		    margin-top: 20px;
-		}
-
-		.signature a img{
-		    display: inline-block;
-		    margin: 0 15px;
-		    color: black; /* Adjust icon color */
-		    font-size: 24px; /* Adjust icon size */
-		    width: 40px; /* Adjust width */
-		    height: 40px; /* Adjust height */
-		    line-height: 40px; /* Center the icon vertically */
-		    border-radius: 50%; /* Rounded shape */
-		    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
-		}
-
-		.signature a:hover {
-		    background-color: #e48272; /* Adjust hover background color */
-		    color: black; /* Adjust hover icon color */
-		}
-
-		.regards {
-		    color: grey;
-		    margin-top: 10px;
-		    line-height: 0.5;
-		}
-	</style>
+    <title>Memebrship Approved</title>
 </head>
-<body>
-    <div class="wrapper">
-        <div class="logo-header">
-            <div class="logo">
-                <img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/pykdymjrnvq6meaht4nn" alt="Logo">
+<body style="font-family: Proxima Nova; margin: 0; padding: 0;"></body>
+    <center>
+        <div style="padding: 20px;  background-color:#7671711b;width: 60%; margin: 30px auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 10px;">
+            <!-- Logo and Title Section -->
+            <div style="width: 80%; padding: 17px; margin: 0 auto; text-align: center;">
+                <img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/rniqfu6uczortlmqkbj6" width="24%" height="24%">
+                <img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/heltigkphqur2sd11vs8" width="67%" height="67%" style="margin-bottom: 9%;">
             </div>
-            <div class="title">
-                <img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/xfuc56mrbj98tjobu3s1" alt="Title">
-            </div>
-        </div>
-        <div class="container">
-            <div class="header">
-                <div class="cover">
-                    <img src= "https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/rivbyee9nwxeebymnvik" alt="Cover Image">
-                    <div class="heading">
-                        <h2>Congratulations!</h2>
-                    </div>
-                    <div class="message">
-                        <p>Your membership has been approved</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div>
-            <button class="login-button">Navigate to Profile</button>
-        </div>
-        <div class="footer">
-            <div class="signature">
-                <a href="https://www.facebook.com/yourpage" target="_blank"><img src= "https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/azyiqlusptgjwj41gqjl"></a>
-                <a href="https://www.instagram.com/yourpage" target="_blank"><img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/vfp5oqflukkage7rxxxs"></a>
-                <a href="https://twitter.com/yourhandle" target="_blank"><img src="https://res.cloudinary.com/dwkifht03/image/upload/v1/email-constants/xwwomfvdlrcffehxc0km"></a>
-            </div>
-            <div class="divider"></div>
-            <div class="regards">
-                <p>Thank you & Regards</p>
-                <p>All India Telega Balija Kapu Sangham Team</p>
-            </div>
-        </div>
+             <div class="container" style="background-color:#D4E9DA; max-width: 600px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+        <div class="cover" style="align-items: center;height: 200px; width: 100%;background-color: #D4E9DA;">
+            <img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/emailConstants/ywu3szvqrv1tjziag64i" alt="Cover Image" style="width: 550px; height: 250px;">
+    	       </div>
+    	        <div class="main-body" style="align-items: center; justify-content: center; padding: 20px 10px; text-align: center; max-width: 400px; margin: 0 ;">
+    	<p style = "font-size:18px;"> Your membership id - [member-id] </p>
+    
+    <a href='https://aitbks.org/auth/login'target="_blank" style="background-color:#23A380;; border-radius: 4px; border: none; color: white; cursor: pointer; display: inline-flex; font-family: 'JetBrains Mono', monospace; height: 48px; justify-content: center; line-height: 2.3; padding: 0 14px; font-size: 20px; transition: box-shadow 0.15s, transform 0.15s; margin-top: 30px; text-decoration: none;">Redirect To Profile</a>
     </div>
+  </div> 
+    <div style="text-align: center; margin-top: 60px;">
+        <a href="https://www.facebook.com/yourpage" target="_blank" style="display: inline-block; margin: 0 15px; width: 40px; height: 40px; border-radius: 50%;"><img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/htkmosmhs3wdtcsvozcw" style="width: 100%; height: 100%;"></a>
+        <a href="https://www.instagram.com/yourpage" target="_blank" style="display: inline-block; margin: 0 15px; width: 40px; height: 40px; border-radius: 50%;"><img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/if7qymzf2ecqm2sjktss" style="width: 100%; height: 100%;"></a>
+        <a href="https://twitter.com/yourhandle" target="_blank" style="display: inline-block; margin: 0 15px; width: 40px; height: 40px; border-radius: 50%;"><img src="https://res.cloudinary.com/dfsinyoux/image/upload/v1/email/user/fxyag3f0bbtvn2jnttnh" style="width: 100%; height: 100%;"></a>
+    </div>
+
+    <!-- Footer Section -->
+    <div style="margin-top: 20px;font-family: Proxima Nova ; color: #333">
+        <p>Thank you & Regards</p>
+        <p>All India Telega Balija Kapu Sangham Team</p>
+    </div>
+    </div>
+</center>
 </body>
 </html>

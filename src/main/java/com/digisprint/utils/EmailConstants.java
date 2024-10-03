@@ -21,7 +21,8 @@ public class EmailConstants {
 	public static final String MEMBERSHIP_APPROVED = "Membership Approved";
 
 	public static final String REPLACE_PLACEHOLDER_NAME = "[NAME]";
-
+	
+	public static final String REPLACE_MEMEBER_ID ="[member-id]";
 	public static final String TRUSTEE = "trustee";
 
 	public static final String PATRON = "patron";

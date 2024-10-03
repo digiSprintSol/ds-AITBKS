@@ -16,4 +16,6 @@ public interface DonationService {
 
 	ResponseEntity<String> updateDonation(Donation donation);
 
+	ResponseEntity donationAcknowledge(String donationId);
+
 }

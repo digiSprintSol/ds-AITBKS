@@ -42,9 +42,9 @@ public class DonationServiceImpl implements DonationService {
 
 	@Override
 	public ResponseEntity<String> createDonation(DonationRequest donation) {
-		// this method not working check
 		Donation donationEntity = new Donation();
 		BeanUtils.copyProperties(donation, donationEntity);
+		donationEntity.setAcknowledge(false);
 		donationEntity.setCreatedDate(LocalDateTime.now());
 		Donation response = this.donationRepository.save(donationEntity);
 		DonationResponse donationResponse = new DonationResponse();
@@ -78,8 +78,6 @@ public class DonationServiceImpl implements DonationService {
 				return new ResponseEntity(donationResponses, HttpStatus.OK);
 			} else {
 				return new ResponseEntity("Data not found", HttpStatus.INTERNAL_SERVER_ERROR);
-//				check this statement
-//				return new ResponseEntity("Token cannot be null", HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} else {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
@@ -120,5 +118,18 @@ public class DonationServiceImpl implements DonationService {
 
 	public JSONObject decodeToken(String jwtToken) {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
+	}
+
+	@Override
+	public ResponseEntity donationAcknowledge(String donationId) {
+		
+	    Optional<Donation> optionalDonation=donationRepository.findById(donationId);
+	    if(optionalDonation.isPresent()) {
+	    Donation donation=	optionalDonation.get();
+	    donation.setAcknowledge(true);
+	    donationRepository.save(donation);
+	    return new ResponseEntity("Donation is Acknowledged",HttpStatus.OK);
+	    }
+	    return new ResponseEntity("Donation is not found",HttpStatus.NOT_FOUND);
 	}
 }

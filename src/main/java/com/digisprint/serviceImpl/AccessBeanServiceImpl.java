@@ -91,6 +91,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity saveInternalUsers(AccessBean accessBean) {
+		System.out.println(accessBeanRepository.findByEmail(accessBean.getEmail()));
 
 		if(accessBeanRepository.findByEmail(accessBean.getEmail()).isPresent()) {
 			return new ResponseEntity(ErrorResponseConstants.EMAIL_ALREADY_EXISTS,HttpStatus.INTERNAL_SERVER_ERROR);
@@ -175,8 +176,9 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity  login(String userName, String password) {
+
 		AccessBean accessBean = accessBeanRepository.findByEmailAndPassword(userName, password);
-		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), password);
+		String cookie = jwtTokenUtil.generateToken(userName, accessBean.getAccessId(), getAccessList(accessBean), "");
 		Cookie cookie1 = new Cookie("token",cookie);
 		cookie1.setHttpOnly(true); // Make the coo kie HTTP-only
 		cookie1.setSecure(false); // Secure flag ensures cookie is sent over HTTPS
@@ -212,7 +214,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 				throw new UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND);
 			}
 
-			String userName = String.valueOf(claims.get(ApplicationConstants.USERNAME)).replace(ApplicationConstants.REPLACE_WITH_FORWARDSLASH, ApplicationConstants.EMPTY_QUOTATION_MARK).trim().toLowerCase();
+			String userName = String.valueOf(claims.get(ApplicationConstants.USERNAME));
 			internalUsers = accessBeanRepository.findByEmail(userName).orElseThrow(()-> new  UserNotFoundException(ErrorResponseConstants.USER_NOT_FOUND));
 			userresponse.setAccessId(internalUsers.getAccessId());
 			userresponse.setName(internalUsers.getName());
@@ -256,7 +258,7 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllAnnouncement() {
-		List<CulturalEvents>announcements =culturalEventRepo.findByAnnouncement(true);
+		List<CulturalEvents> announcements =culturalEventRepo.findByAnnouncement(true);
 		if(announcements.size()==0) {
 			return new ResponseEntity("No Announcements found",HttpStatus.NOT_FOUND);
 		}
@@ -531,22 +533,22 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 
 	@Override
 	public ResponseEntity getAllCulturalEvents() {
+		List<CulturalEvents> culturalEventsList = culturalEventRepo.findAll();
+		if(culturalEventsList.size()>0) {
+			culturalEventsList = culturalEventsList.stream()
+					.filter(p-> p.isAnnouncement()==false && p.isQrCode()==false).collect(Collectors.toList());
 
-		List<CulturalEvents> getAllevents = culturalEventRepo.findAll();
-
-		if(getAllevents.size()==0) {
-			return new ResponseEntity("No Events yet",HttpStatus.NO_CONTENT);
-		}
-
-		else {
-			List<CulturalEventsResponses> culturalEventsResponsesList=getAllevents.stream()
+			List<CulturalEventsResponses> culturalEventsResponsesList=culturalEventsList.stream()
 					.map(p->{
 						CulturalEventsResponses culturalEventsResponses = new CulturalEventsResponses();
 						BeanUtils.copyProperties(p, culturalEventsResponses);
 						return culturalEventsResponses;
 					}).collect(Collectors.toList());
 			return new ResponseEntity(culturalEventsResponsesList,HttpStatus.OK);
+		}else {
+			return new ResponseEntity("No Events yet",HttpStatus.NO_CONTENT);
 		}
+
 	}
 
 	@Override
@@ -561,6 +563,16 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	@Override
+	public ResponseEntity updateInternalUser(AccessBean accessBean, String userId) {
+		Optional<AccessBean> optionalAccessBean= accessBeanRepository.findById(userId);
+		if(optionalAccessBean.isPresent()) {
+			accessBean.setAccessId(userId);
+			AccessBean accessBeanResponse=	accessBeanRepository.save(accessBean);
+			return new ResponseEntity(accessBeanResponse,HttpStatus.OK);
+		}
+		return new ResponseEntity("User not found",HttpStatus.NOT_FOUND);
+	}
 
 }
 

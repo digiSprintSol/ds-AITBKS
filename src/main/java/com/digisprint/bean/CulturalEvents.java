@@ -5,12 +5,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 
 @Data
 @Document(collection = "cultural_events")
+@CompoundIndexes({
+    @CompoundIndex(name = "eventType_eventDate", def = "{'eventType': 1, 'eventDate': -1}")
+})
 public class CulturalEvents {
 
 	@Id
@@ -24,12 +30,14 @@ public class CulturalEvents {
 	
 	private String qrCodeImageUrl;
 	
+	@Indexed
 	private String eventType;  // gallery schloarship awards and events
 	
 	private boolean announcement;
 	
 	private boolean qrCode;
 	
+	@Indexed
 	private LocalDateTime eventDate;
 	
 	private LocalDateTime createdDate;

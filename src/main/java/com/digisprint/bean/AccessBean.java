@@ -46,8 +46,4 @@ public class AccessBean {
 
 	private boolean deleted;
 	
-	public String getEmail() {
-		return email.toLowerCase();
-	}
-	
 }
