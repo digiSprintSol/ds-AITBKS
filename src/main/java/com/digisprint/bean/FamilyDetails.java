@@ -20,6 +20,12 @@ public class FamilyDetails {
 	
 	private String spouseName;
 	
+	private String spouseGender;
+	
+	private String spouseAge;
+	
+	private String spouseEducation;
+	
 	private String spouseOccupation;
 	
 	private boolean isMarried;

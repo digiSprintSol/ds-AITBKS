@@ -43,7 +43,6 @@ com\digisprint\controller\AccessBeanController.class
 com\digisprint\bean\Image.class
 com\digisprint\controller\ImageController.class
 com\digisprint\requestBean\UploadBean.class
-com\digisprint\serviceImpl\CloudinaryServiceImpl.class
 com\digisprint\repository\PaymentRepository.class
 com\digisprint\service\AccessBeanService.class
 com\digisprint\bean\AccessBean.class
@@ -51,6 +50,7 @@ com\digisprint\requestBean\DonationRequest.class
 com\digisprint\bean\ImageModel.class
 com\digisprint\responseBody\EventsResponse.class
 com\digisprint\responseBody\IdentityCard.class
+com\digisprint\serviceImpl\GCPServiceImpl.class
 com\digisprint\bean\CulturalEvents.class
 com\digisprint\requestBean\UserRequest.class
 com\digisprint\bean\Donation.class

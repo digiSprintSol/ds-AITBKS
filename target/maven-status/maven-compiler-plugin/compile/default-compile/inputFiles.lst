@@ -20,6 +20,7 @@ D:\test\ds-AITBKS\src\main\java\com\digisprint\bean\EmailUpload.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\bean\ProgressBarReport.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\controller\FeedBackController.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\service\CloudinaryService.java
+D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\GCPServiceImpl.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\RegistrationServiceImpl.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\repository\CulturalEventRepo.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\AccessBeanServiceImpl.java
@@ -37,7 +38,6 @@ D:\test\ds-AITBKS\src\main\java\com\digisprint\EmailUtils\LoadHtmlTemplates.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\service\ImageService.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\repository\ScholarShipRepository.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\filter\JwtTokenValidator.java
-D:\test\ds-AITBKS\src\main\java\com\digisprint\serviceImpl\CloudinaryServiceImpl.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\responseBody\EventsResponse.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\service\FeedBackService.java
 D:\test\ds-AITBKS\src\main\java\com\digisprint\service\RegistrationService.java
