@@ -33,7 +33,7 @@ public class ImageController {
     @PostMapping(value="/upload",consumes = { "multipart/form-data" })
     public ResponseEntity<Map> upload(@RequestParam(name="file",required =false) MultipartFile file,
     		@RequestParam(name="folderName",required =false) String folderName,
-    		@RequestParam(name="folderPath",required =false) String folderPath) {
+    		@RequestParam(name="folderPath",required =false) String folderPath) { 
         try {
            return imageService.uploadImage(file, folderName,folderPath);
         } catch (Exception e) {
@@ -43,8 +43,8 @@ public class ImageController {
     }
     
     @DeleteMapping(value="/deleteImage/{id}")
-    public ResponseEntity<?> deleteImage(@PathVariable("id") String id) {
-    	return imageService.deleteImage(id);
+    public ResponseEntity<?> deleteImage(@PathVariable("id") String id , @RequestParam String filePath) {
+    	return imageService.deleteImage(id, filePath);
     }
     
     @Operation(summary = "Upload multiple images", description = "Upload multiple images to Cloudinary and save metadata in the database.")
