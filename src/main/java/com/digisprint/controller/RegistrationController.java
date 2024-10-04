@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,7 +68,7 @@ public class RegistrationController {
 	}
 
 	@Operation(summary = "This method is used to edit the existing user information")
-	@PutMapping("/update/{userId}")
+	@PutMapping("/update")
 	public ResponseEntity updateUser(@RequestBody UserRequest user) throws IOException, MessagingException {
 
 		return this.registrationService.updateUser(user, getToken());
@@ -149,5 +150,10 @@ public class RegistrationController {
 	@PostMapping("/bulkEmailUpload")
 	public ResponseEntity bulkEmailUpload(@RequestBody EmailUpload emailUpload) throws IOException, MessagingException {
 		return registrationService.bulkEmailUpload(emailUpload);
+	}
+	
+	@DeleteMapping
+	public String deleteByUserId(String userId) {
+		return registrationService.deleteUser(userId);
 	}
 }

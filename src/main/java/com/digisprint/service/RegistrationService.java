@@ -51,4 +51,6 @@ public interface RegistrationService {
 
 	ResponseEntity updateUser(UserRequest user, String token);
 
+	String deleteUser(String userId);
+
 }
