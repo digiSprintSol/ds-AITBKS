@@ -67,7 +67,7 @@ public class RegistrationController {
 	}
 
 	@Operation(summary = "This method is used to edit the existing user information")
-	@PutMapping("/update/{userId}")
+	@PutMapping("/update")
 	public ResponseEntity updateUser(@RequestBody UserRequest user) throws IOException, MessagingException {
 
 		return this.registrationService.updateUser(user, getToken());

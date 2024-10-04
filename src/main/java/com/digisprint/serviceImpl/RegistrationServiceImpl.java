@@ -490,7 +490,18 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public ResponseEntity updateUser(UserRequest user, String userId) {
+	public ResponseEntity updateUser(UserRequest user, String token) {
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty");
+		}
+
+		JSONObject jsonObject = decodeToken(token);
+		if (!jsonObject.has("userId") || !jsonObject.has("access")) {
+			throw new IllegalArgumentException("Token must contain userId and access fields");
+		}
+		
+	    String userId=	jsonObject.getString("userId");
+		
 		Optional<AccessBean> OptionalAccessBean = accessBeanRepository.findById(userId);
 		if (OptionalAccessBean.isPresent()) {
 			RegistrationForm registrationForm = new RegistrationForm();
