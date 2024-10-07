@@ -74,7 +74,7 @@ public class FeedBackServiceImpl implements FeedBackService {
 				BeanUtils.copyProperties(response, feedbackResponse);
 				return new ResponseEntity(feedbackResponse, HttpStatus.OK);
 			}
-			return new ResponseEntity("Feedback not found", HttpStatus.OK);
+			return new ResponseEntity("Feedback not found", HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
 	}
@@ -87,7 +87,7 @@ public class FeedBackServiceImpl implements FeedBackService {
 			BeanUtils.copyProperties(optionalFeedBack.get(), feedbackResponse);
 			return new ResponseEntity(feedbackResponse, HttpStatus.OK);
 		}
-		return new ResponseEntity("FeedBack not found", HttpStatus.OK);
+		return new ResponseEntity("FeedBack not found", HttpStatus.NOT_FOUND);
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class FeedBackServiceImpl implements FeedBackService {
 				feedbackRepository.save(feedback);
 				return new ResponseEntity("Feedback is deleted", HttpStatus.OK);
 			} else {
-				return new ResponseEntity("FeedBack not found", HttpStatus.OK);
+				return new ResponseEntity("FeedBack not found", HttpStatus.NOT_FOUND);
 			}
 		} else {
 			return new ResponseEntity(ErrorResponseConstants.ERROR_RESPONSE_FOR_WRONG_TOKEN, HttpStatus.BAD_REQUEST);
@@ -124,7 +124,7 @@ public class FeedBackServiceImpl implements FeedBackService {
 			});
 			return new ResponseEntity(feedbackResponses, HttpStatus.OK);
 		}
-		return new ResponseEntity("No Data Found", HttpStatus.OK);
+		return new ResponseEntity("No Data Found", HttpStatus.NOT_FOUND);
 	}
 
 	public JSONObject decodeToken(String jwtToken) {

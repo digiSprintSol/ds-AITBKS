@@ -63,7 +63,7 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 			BeanUtils.copyProperties(scholarShipBean, scholarShipResponse);
 			return new ResponseEntity(scholarShipResponse, HttpStatus.OK);
 		}
-		return new ResponseEntity("No Data Found", HttpStatus.OK);
+		return new ResponseEntity("No Data Found", HttpStatus.NOT_FOUND);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 			BeanUtils.copyProperties(scholarShipBean, scholarShipResponse);
 			return new ResponseEntity(scholarShipResponse, HttpStatus.OK);
 		}
-		return new ResponseEntity("No Data Found", HttpStatus.OK);
+		return new ResponseEntity("No Data Found", HttpStatus.NOT_FOUND);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class ScholarShipServiceImpl implements ScholarShipService {
 			});
 			return new ResponseEntity(scholarShipResponses, HttpStatus.OK);
 		}
-		return new ResponseEntity("No Data Found", HttpStatus.OK);
+		return new ResponseEntity("No Data Found", HttpStatus.NOT_FOUND);
 	}
 
 	private AccessBean getTokenVerified(String token) throws UserNotFoundException {

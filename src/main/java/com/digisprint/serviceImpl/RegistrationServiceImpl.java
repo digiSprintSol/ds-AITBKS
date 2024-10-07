@@ -504,7 +504,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			RegistrationForm registrationFormresponse = registrationFromRepository.save(user);
 			return new ResponseEntity(registrationFormresponse, HttpStatus.OK);
 		}
-		return new ResponseEntity("User not found", HttpStatus.OK);
+		return new ResponseEntity("User not found", HttpStatus.NOT_FOUND);
 	}
 
 	@Override
