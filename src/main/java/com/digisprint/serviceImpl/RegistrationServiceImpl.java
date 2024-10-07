@@ -14,9 +14,6 @@ import javax.mail.MessagingException;
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +36,6 @@ import com.digisprint.repository.RegistrationFromRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
-import com.digisprint.requestBean.UserRequest;
 import com.digisprint.responseBody.FilterMemberResponse;
 import com.digisprint.responseBody.IdentityCard;
 import com.digisprint.service.RegistrationService;
@@ -147,7 +143,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		String identityNumber = jsonObject.getString("userId");
 		List accessList = jwtTokenUtil.getAccessList(token);
 		List<RegistrationForm> allUsersList = registrationFromRepository.findAll();
-		
+
 		if (allUsersList.size() == 0) {
 			return new ResponseEntity("No data present", HttpStatus.NOT_FOUND);
 		} else if (accessList.contains(ApplicationConstants.ADMIN)) {
@@ -159,17 +155,16 @@ public class RegistrationServiceImpl implements RegistrationService {
 						&& p.getCommitteeTwoApproval() != null && p.getCommitteeThreeApproval() != null)
 						.collect(Collectors.toList());
 
-				allUsersList = allUsersList.stream().filter(p -> !p.getCommitteeOneApproval().isEmpty()
+				allUsersList = allUsersList
+						.stream().filter(p -> !p.getCommitteeOneApproval().isEmpty()
 								&& !p.getCommitteeTwoApproval().isEmpty() && !p.getCommitteeThreeApproval().isEmpty())
 						.collect(Collectors.toList());
-					return new ResponseEntity(allUsersList, HttpStatus.OK);
+				return new ResponseEntity(allUsersList, HttpStatus.OK);
 			} else {
 				return new ResponseEntity(allUsersList, HttpStatus.OK);
 			}
 		}
 	}
-	
-
 
 	public JSONObject decodeToken(String jwtToken) {
 		return JwtTokenUtil.decodeUserToken(jwtToken);
@@ -278,8 +273,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 		sendEmail[0] = user.getEmailAddress();
 		String body = htmlTemplates.loadTemplate(emailTemplates.getPaymentApprovalEmail());
 
-		email.MailSendingService(ADMIN_USERNAME, sendEmail, body,
-				EmailConstants.PAYMENT_RECIEVED_SUBJECT);
+		email.MailSendingService(ADMIN_USERNAME, sendEmail, body, EmailConstants.PAYMENT_RECIEVED_SUBJECT);
 
 		return new ResponseEntity("Recepit Uploaded successfully", HttpStatus.OK);
 	}
@@ -313,12 +307,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		List<RegistrationForm> trueMembers = registrationFromRepository.findByMemberTrue();
 
-		List<String> memberNames = trueMembers.stream().filter(p->p.getFirstName()!=null)
-				.map(p->{
-					String concat= p.getFirstName();
-					concat= concat + " "+p.getLastName();
-					return concat;
-				}).collect(Collectors.toList());
+		List<String> memberNames = trueMembers.stream().filter(p -> p.getFirstName() != null).map(p -> {
+			String concat = p.getFirstName();
+			concat = concat + " " + p.getLastName();
+			return concat;
+		}).collect(Collectors.toList());
 		return memberNames;
 
 	}
@@ -337,13 +330,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 				System.out.println(categoryOfMember);
 				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant()
 						.equalsIgnoreCase(RegistrationFormConstants.TRUSTEE)).collect(Collectors.toList());
-				System.out.println("turstee::"+allUsers.size());
+				System.out.println("turstee::" + allUsers.size());
 				break;
 
 			case RegistrationFormConstants.PATRON:
 				allUsers = allUsers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant()
 						.equalsIgnoreCase(RegistrationFormConstants.PATRON)).collect(Collectors.toList());
-				System.out.println("patron::"+allUsers.size());
+				System.out.println("patron::" + allUsers.size());
 
 				break;
 
@@ -378,8 +371,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		case EmailConstants.TRUSTEE:
 
 			List<RegistrationForm> filterByTrustee = allusers.stream()
-			.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-			.collect(Collectors.toList());
+					.filter(r -> EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+					.collect(Collectors.toList());
 			List<String> trusteeMails = filterByTrustee.stream().map((trustee) -> {
 				return trustee.getEmailAddress();
 			}).collect(Collectors.toList());
@@ -391,8 +384,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		case EmailConstants.PATRON:
 
 			List<RegistrationForm> filterByPatron = allusers.stream()
-			.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-			.collect(Collectors.toList());
+					.filter(r -> EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+					.collect(Collectors.toList());
 
 			List<String> patronMails = filterByPatron.stream().map((patron) -> {
 				return patron.getEmailAddress();
@@ -406,7 +399,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 			List<RegistrationForm> filterByLifeMember = allusers.stream().filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
-			.collect(Collectors.toList());
+					.collect(Collectors.toList());
 
 			List<String> lifeMemberMails = filterByLifeMember.stream().map((lifeMember) -> {
 				return lifeMember.getEmailAddress();
@@ -418,12 +411,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 			break;
 		default:
 			allusers = allusers.stream().filter(p -> p.getPresidentChoosenMembershipForApplicant() != null)
-			.collect(Collectors.toList());
+					.collect(Collectors.toList());
 
 			List<RegistrationForm> filterByAll = allusers.stream().filter(
 					r -> EmailConstants.LIFE_MEMBER.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
-					|| EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
-					|| EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
+							|| EmailConstants.PATRON.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant())
+							|| EmailConstants.TRUSTEE.equalsIgnoreCase(r.getPresidentChoosenMembershipForApplicant()))
 					.collect(Collectors.toList());
 			System.out.println(filterByAll.size());
 			List<String> allEmails = filterByAll.stream().map(RegistrationForm::getEmailAddress)
@@ -444,13 +437,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 		user[0] = specificUserDetails.getEmailAddress();
 
 		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
-				&& specificUserDetails.getCommitteeOneApproval()!=null
-				&& specificUserDetails.getCommitteeTwoApproval()!=null
-				&& specificUserDetails.getCommitteeThreeApproval()!=null
+				&& specificUserDetails.getCommitteeOneApproval() != null
+				&& specificUserDetails.getCommitteeTwoApproval() != null
+				&& specificUserDetails.getCommitteeThreeApproval() != null
 				&& specificUserDetails.getCommitteeThreeApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
 				&& specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)
-				) {
+				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.TRUE);
 			String body = null;
 			// Sending credentials to the Applicant as Committee approved.
@@ -458,7 +450,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 			String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
 					specificUserDetails.getPhoneNumber());
 			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
-			body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
+			body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName())
+					.replace("[UserName]", username).replace("[Password]", passcode);
 			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 
 			AccessBean accessBean = new AccessBean();
@@ -471,14 +464,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 			accessBean.setPassword(passcode);
 			accessBeanRepository.save(accessBean);
 			return true;
-		} else if (specificUserDetails.getCommitteeOneApproval()!=null
-				&& specificUserDetails.getCommitteeTwoApproval()!=null
-				&& specificUserDetails.getCommitteeThreeApproval()!=null
+		} else if (specificUserDetails.getCommitteeOneApproval() != null
+				&& specificUserDetails.getCommitteeTwoApproval() != null
+				&& specificUserDetails.getCommitteeThreeApproval() != null
 				&& specificUserDetails.getCommitteeOneApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
 				&& specificUserDetails.getCommitteeTwoApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)
 				&& specificUserDetails.getCommitteeThreeApproval()
-				.equalsIgnoreCase(RegistrationFormConstants.REJECTED)
-				) {
+						.equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 			progressBarReport.setCommitteeApproval(RegistrationFormConstants.FALSE);
 			String body = null;
 			body = htmlTemplates.loadTemplate(emailTemplates.getCommitteeRejectEmail());
@@ -490,7 +482,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	@Override
-	public ResponseEntity updateUser(UserRequest user, String token) {
+	public ResponseEntity updateUser(RegistrationForm user, String token) {
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("Token cannot be null or empty");
 		}
@@ -500,24 +492,20 @@ public class RegistrationServiceImpl implements RegistrationService {
 			throw new IllegalArgumentException("Token must contain userId and access fields");
 		}
 
-	    String userId=	jsonObject.getString("userId");
+		String userId = jsonObject.getString("userId");
 		Optional<AccessBean> OptionalAccessBean = accessBeanRepository.findById(userId);
 		if (OptionalAccessBean.isPresent()) {
-			RegistrationForm registrationForm = new RegistrationForm();
-			AccessBean accessBean= OptionalAccessBean.get();
-			if(!user.getEmailAddress().isBlank())
-			{
-				accessBean.setEmail(user.getEmailAddress());	
+			AccessBean accessBean = OptionalAccessBean.get();
+			if (!user.getEmailAddress().isBlank()) {
+				accessBean.setEmail(user.getEmailAddress());
 				accessBeanRepository.save(accessBean);
 			}
-			BeanUtils.copyProperties(user, registrationForm);
-			registrationForm.setUserId(userId);
-			RegistrationForm registrationFormresponse = registrationFromRepository.save(registrationForm);
+			user.setUserId(userId);
+			RegistrationForm registrationFormresponse = registrationFromRepository.save(user);
 			return new ResponseEntity(registrationFormresponse, HttpStatus.OK);
 		}
 		return new ResponseEntity("User not found", HttpStatus.OK);
 	}
-
 
 	@Override
 //	@CachePut(value = "usercache", key = "#userId")
@@ -551,7 +539,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 		}
 		RegistrationForm specificUserDetails = optionalSpecificUserDetails.get();
 
-		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository.findById(specificUserDetails.getUserId());
+		Optional<ProgressBarReport> optionalProgressBarReport = progressBarRepository
+				.findById(specificUserDetails.getUserId());
 		if (!optionalProgressBarReport.isPresent()) {
 			return new ResponseEntity<>("No progress bar report found for the user", HttpStatus.NOT_FOUND);
 		}
@@ -562,18 +551,21 @@ public class RegistrationServiceImpl implements RegistrationService {
 		ProgressBarReport progressBarReport = optionalProgressBarReport.get();
 		switch (userType) {
 		case ApplicationConstants.COMMITEE:
-			return handleCommitteeApproval(accessBeanUser, specificUserDetails, progressBarReport, from, approvalStatus);
+			return handleCommitteeApproval(accessBeanUser, specificUserDetails, progressBarReport, from,
+					approvalStatus);
 		case ApplicationConstants.PRESIDENT:
-			return handlePresidentApproval(accessBeanUser, specificUserDetails, progressBarReport, from, approvalStatus,user);
+			return handlePresidentApproval(accessBeanUser, specificUserDetails, progressBarReport, from, approvalStatus,
+					user);
 		case ApplicationConstants.ACCOUNTANT:
-			return handleAccountantApproval(accessBeanUser, specificUserDetails, progressBarReport, userId,user);
+			return handleAccountantApproval(accessBeanUser, specificUserDetails, progressBarReport, userId, user);
 		default:
 			return new ResponseEntity<>("You don't have access !!", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	private String determineUserType(List<String> accessList) {
-		if (accessList.contains(ApplicationConstants.PRESIDENT) || accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
+		if (accessList.contains(ApplicationConstants.PRESIDENT)
+				|| accessList.contains(ApplicationConstants.COMMITTEE_EXECUTIVE)) {
 			return ApplicationConstants.PRESIDENT;
 		} else if (accessList.contains(ApplicationConstants.COMMITEE)) {
 			return ApplicationConstants.COMMITEE;
@@ -596,7 +588,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	private ResponseEntity handleCommitteeApproval(AccessBean accessBeanUser, RegistrationForm specificUserDetails,
-			ProgressBarReport progressBarReport, ApprovalFrom from, String approvalStatus) throws IOException, MessagingException {
+			ProgressBarReport progressBarReport, ApprovalFrom from, String approvalStatus)
+			throws IOException, MessagingException {
 
 		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 				&& specificUserDetails.getCommitteeOneApproval() == null
@@ -604,15 +597,13 @@ public class RegistrationServiceImpl implements RegistrationService {
 			specificUserDetails.setCommitteeOneApproval(approvalStatus);
 			specificUserDetails.setCommitteeOneChoosenMembershipForApplicant(from.getMembership());
 			specificUserDetails.setCommitteeMemberOneId(accessBeanUser.getAccessId());
-		}
-		else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+		} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 				&& specificUserDetails.getCommitteeTwoApproval() == null
 				&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITEETWO)) {
 			specificUserDetails.setCommitteeTwoApproval(approvalStatus);
 			specificUserDetails.setCommitteeTwoChoosenMembershipForApplicant(from.getMembership());
 			specificUserDetails.setCommitteeMemberTwoId(accessBeanUser.getAccessId());
-		}
-		else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
+		} else if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 				&& specificUserDetails.getCommitteeThreeApproval() == null
 				&& accessBeanUser.getAccessId().equalsIgnoreCase(RegistrationFormConstants.COMMITTEETHREE)) {
 			specificUserDetails.setCommitteeThreeApproval(approvalStatus);
@@ -624,11 +615,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 		registrationFromRepository.save(specificUserDetails);
 		progressBarRepository.save(progressBarReport);
 		sendEmail(specificUserDetails, progressBarReport);
-		return new ResponseEntity<>("Status updated with userId"+specificUserDetails.getUserId(), HttpStatus.OK);
+		return new ResponseEntity<>("Status updated with userId" + specificUserDetails.getUserId(), HttpStatus.OK);
 	}
 
 	private ResponseEntity handlePresidentApproval(AccessBean accessBeanUser, RegistrationForm specificUserDetails,
-			ProgressBarReport progressBarReport, ApprovalFrom from, String approvalStatus,String[] user) throws IOException, MessagingException {
+			ProgressBarReport progressBarReport, ApprovalFrom from, String approvalStatus, String[] user)
+			throws IOException, MessagingException {
 
 		progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
 		specificUserDetails.setPresidentRemarksForApplicant(from.getRemarks());
@@ -648,10 +640,10 @@ public class RegistrationServiceImpl implements RegistrationService {
 			String passcode = generatingCredentials.generatePasscode(specificUserDetails.getCategory(),
 					specificUserDetails.getPhoneNumber());
 			body = htmlTemplates.loadTemplate(emailTemplates.getLoginCredentialsEmail());
-			body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName()).replace("[UserName]", username).replace("[Password]", passcode);
+			body = body.replace(EmailConstants.REPLACE_PLACEHOLDER_NAME, specificUserDetails.getFirstName())
+					.replace("[UserName]", username).replace("[Password]", passcode);
 
-			email.MailSendingService(ADMIN_USERNAME, user, body,
-					EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
+			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.LOGIN_CREDENTIALS_SUBJECT);
 
 			AccessBean accessBean = new AccessBean();
 			accessBean.setAccessId(specificUserDetails.getUserId());
@@ -662,8 +654,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			accessBean.setEmail(username);
 			accessBean.setPassword(passcode);
 			accessBeanRepository.save(accessBean);
-		}
-		else if (specificUserDetails != null && progressBarReport != null
+		} else if (specificUserDetails != null && progressBarReport != null
 				&& progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 				&& progressBarReport.isCommitteeApproval() == RegistrationFormConstants.TRUE
 				&& from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.APPROVAL)) {
@@ -672,8 +663,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			specificUserDetails.setPresidentApproval(RegistrationFormConstants.APPROVAL);
 
 			body = htmlTemplates.loadTemplate(emailTemplates.getPresidentApprovalEmail());
-			email.MailSendingService(ADMIN_USERNAME, user, body,
-					EmailConstants.PRESIDENT_APPROVED_SUBJECT);
+			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_APPROVED_SUBJECT);
 
 		} else if (from.getStatusOfApproval().equalsIgnoreCase(RegistrationFormConstants.REJECTED)) {
 			progressBarReport.setPresidentFillingRegistrationTwoForm(RegistrationFormConstants.TRUE);
@@ -682,8 +672,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			// rejection mail from president
 			specificUserDetails.setPresidentApproval(RegistrationFormConstants.REJECTED);
 			body = htmlTemplates.loadTemplate(emailTemplates.getPresidentRejectionEmail());
-			email.MailSendingService(ADMIN_USERNAME, user, body,
-					EmailConstants.PRESIDENT_REJECTED_SUBJECT);
+			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.PRESIDENT_REJECTED_SUBJECT);
 		} else {
 			progressBarReport.setPresidentApproval(RegistrationFormConstants.FALSE);
 			specificUserDetails.setPresidentApproval(RegistrationFormConstants.WAITING);
@@ -695,7 +684,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 	}
 
 	private ResponseEntity handleAccountantApproval(AccessBean accessBeanUser, RegistrationForm specificUserDetails,
-			ProgressBarReport progressBarReport, String userId,String[] user) throws IOException, MessagingException {
+			ProgressBarReport progressBarReport, String userId, String[] user) throws IOException, MessagingException {
 		if (progressBarReport.isRegistrationOneFormCompleted() == RegistrationFormConstants.TRUE
 				&& progressBarReport.isPayment() && progressBarReport.isPresidentApproval()
 				&& progressBarReport.isRegistrationThreeFormCompleted() == RegistrationFormConstants.TRUE) {
@@ -707,8 +696,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 			String body = null;
 			body = htmlTemplates.loadTemplate(emailTemplates.getMembershipApproved());
 			body = body.replace(EmailConstants.REPLACE_MEMEBER_ID, memberIdentityNumber);
-			email.MailSendingService(ADMIN_USERNAME, user, body,
-					EmailConstants.MEMBERSHIP_APPROVED);
+			email.MailSendingService(ADMIN_USERNAME, user, body, EmailConstants.MEMBERSHIP_APPROVED);
 			specificUserDetails.setMembershipId(memberIdentityNumber);
 			specificUserDetails.setMember(RegistrationFormConstants.TRUE);
 			specificUserDetails.setLastModifiedDate(LocalDateTime.now());
