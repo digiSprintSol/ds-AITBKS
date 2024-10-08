@@ -56,7 +56,7 @@ public class ImageServiceImpl implements ImageService {
 			}
 
 			image.setName(file.getOriginalFilename() + "_" + formattedDateTime);
-			image.setUrl(gcpServiceImpl.uploadFile(file, folderPath));
+			image.setUrl(gcpServiceImpl.uploadSingleFile(file, folderName));
 			image.setFolderName(folderName);
 			image.setFolderPath(folderPath);
 			image.setCreatedDate(LocalDate.now());
@@ -121,7 +121,7 @@ public class ImageServiceImpl implements ImageService {
 					continue;
 				}
 
-				String imageUrl = gcpServiceImpl.uploadFile(file, folderPath);
+				String imageUrl = gcpServiceImpl.uploadMultipleFiles(file, folderPath);
 
 				if (imageUrl == null) {
 					uploadedImages.add(Map.of("file", file.getOriginalFilename(), "status", "failed", "message",
