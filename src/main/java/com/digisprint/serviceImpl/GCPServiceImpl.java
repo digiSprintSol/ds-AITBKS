@@ -35,8 +35,20 @@ public class GCPServiceImpl {
 				.build().getService();
 		return storage;
 	}
+	
+	public String uploadSingleFile(MultipartFile image, String folderName) throws IOException {
+		Storage storage = getCloudStorageService();
 
-	public String uploadFile(MultipartFile culturalEventImage, String folderpath) throws IOException {
+		String fileName = null;
+		fileName = folderName + "/" + image.getOriginalFilename();
+		BlobId blobId = BlobId.of(bucketName, fileName);
+		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(image.getContentType())
+				.setAcl(Collections.singletonList(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER))).build();
+		Blob blob = storage.create(blobInfo, image.getBytes());
+		return "https://storage.googleapis.com/aitbksimages" + "/" + fileName;
+	}
+
+	public String uploadMultipleFiles(MultipartFile culturalEventImage, String folderpath) throws IOException {
 		Storage storage = getCloudStorageService();
 
 		String fileName = null;
@@ -61,18 +73,4 @@ public class GCPServiceImpl {
 		return deleted;
 	}
 
-//	public String uploadImages(List<MultipartFile> culturalEventImages, String folderName) throws IOException {
-//		Storage storage = getCloudStorageService();
-//
-//		String fileName = null;
-//
-//		for (MultipartFile cutularEventImage : culturalEventImages) {
-//			fileName = folderName + "/" + cutularEventImage.getOriginalFilename();
-//			BlobId blobId = BlobId.of(bucketName, fileName);
-//			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("image/jfif")
-//					.setAcl(Collections.singletonList(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER))).build();
-//			storage.create(blobInfo, cutularEventImage.getBytes());
-//		}
-//		return "Files uploaded successfully";
-//	}
 }
