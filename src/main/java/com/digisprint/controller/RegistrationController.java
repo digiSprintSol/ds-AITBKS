@@ -29,7 +29,6 @@ import com.digisprint.repository.ProgressBarRepository;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
-import com.digisprint.requestBean.UserRequest;
 import com.digisprint.service.RegistrationService;
 import com.digisprint.utils.ApplicationConstants;
 
@@ -69,7 +68,7 @@ public class RegistrationController {
 
 	@Operation(summary = "This method is used to edit the existing user information")
 	@PutMapping("/update")
-	public ResponseEntity updateUser(@RequestBody UserRequest user) throws IOException, MessagingException {
+	public ResponseEntity updateUser(@RequestBody RegistrationForm user) throws IOException, MessagingException {
 
 		return this.registrationService.updateUser(user, getToken());
 	}
@@ -151,7 +150,7 @@ public class RegistrationController {
 	public ResponseEntity bulkEmailUpload(@RequestBody EmailUpload emailUpload) throws IOException, MessagingException {
 		return registrationService.bulkEmailUpload(emailUpload);
 	}
-	
+
 	@DeleteMapping
 	public String deleteByUserId(String userId) {
 		return registrationService.deleteUser(userId);

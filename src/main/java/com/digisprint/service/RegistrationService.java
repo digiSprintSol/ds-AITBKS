@@ -1,6 +1,7 @@
 package com.digisprint.service;
 
 import java.io.IOException;
+
 import java.net.MalformedURLException;
 import java.util.List;
 
@@ -15,7 +16,6 @@ import com.digisprint.exception.UserNotFoundException;
 import com.digisprint.requestBean.ApprovalFrom;
 import com.digisprint.requestBean.RegistrationFrom2;
 import com.digisprint.requestBean.UploadPaymentReceipt;
-import com.digisprint.requestBean.UserRequest;
 
 public interface RegistrationService {
 
@@ -49,7 +49,7 @@ public interface RegistrationService {
 	ResponseEntity uploadTranscationRecepit(String token, UploadPaymentReceipt uploadPaymentReceipt)
 			throws IOException, MessagingException;
 
-	ResponseEntity updateUser(UserRequest user, String token);
+	ResponseEntity updateUser(RegistrationForm user, String token);
 
 	String deleteUser(String userId);
 

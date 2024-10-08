@@ -60,7 +60,7 @@ public class DonationServiceImpl implements DonationService {
 			BeanUtils.copyProperties(optionalDonation.get(), donationResponse);
 			return new ResponseEntity(donationResponse, HttpStatus.OK);
 		}
-		return new ResponseEntity("Donation not found", HttpStatus.OK);
+		return new ResponseEntity("Donation not found", HttpStatus.NOT_FOUND);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class DonationServiceImpl implements DonationService {
 			BeanUtils.copyProperties(donationEntity, donationResponse);
 			return new ResponseEntity(donationResponse, HttpStatus.OK);
 		}
-		return new ResponseEntity("Donation not found", HttpStatus.OK);
+		return new ResponseEntity("Donation not found", HttpStatus.NOT_FOUND);
 	}
 
 	private AccessBean getTokenVerified(String token) throws UserNotFoundException {
