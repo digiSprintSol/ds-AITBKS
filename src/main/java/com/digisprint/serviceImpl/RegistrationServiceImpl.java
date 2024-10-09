@@ -496,9 +496,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 		Optional<AccessBean> OptionalAccessBean = accessBeanRepository.findById(userId);
 		if (OptionalAccessBean.isPresent()) {
 			AccessBean accessBean = OptionalAccessBean.get();
-			if (!user.getEmailAddress().isBlank()) {
-				accessBean.setEmail(user.getEmailAddress());
-				accessBeanRepository.save(accessBean);
+			if (!user.getEmailAddress().isBlank() && !user.getEmailAddress().equals("Enter your Email Address")) {
+				if (accessBean.getEmail().equals(user.getFirstName() + " " + user.getLastName()) || !accessBean.getEmail().equals(user.getEmailAddress())) {
+					accessBean.setEmail(user.getEmailAddress());
+					accessBeanRepository.save(accessBean);
+				}
 			}
 			user.setUserId(userId);
 			RegistrationForm registrationFormresponse = registrationFromRepository.save(user);
