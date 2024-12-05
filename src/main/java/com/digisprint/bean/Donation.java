@@ -17,6 +17,8 @@ public class Donation {
 	private String id;
 
 	private String fullName;
+	
+	private String donorPicUrl;
 
 	private LocalDateTime dob;
 

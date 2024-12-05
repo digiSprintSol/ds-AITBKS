@@ -132,4 +132,16 @@ public class DonationServiceImpl implements DonationService {
 	    }
 	    return new ResponseEntity("Donation is not found",HttpStatus.NOT_FOUND);
 	}
+
+	@Override
+	public ResponseEntity<List<Donation>> getDonationsAcknowledged() {
+
+		List<Donation> acknowledgeDonations = donationRepository.findByAcknowledgeTrue();
+		if(acknowledgeDonations.size() != 0) {
+			return new ResponseEntity(acknowledgeDonations,HttpStatus.OK);
+		}
+		else {
+		return new ResponseEntity("No Acknowledged Donations found",HttpStatus.NOT_FOUND);
+		}
+	}
 }

@@ -574,5 +574,18 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		return new ResponseEntity("User not found",HttpStatus.NOT_FOUND);
 	}
 
+	@Override
+	public ResponseEntity<CulturalEvents> getTitleDescription(String folderPath) {
+		List<Image> image = imageRepository.findByFolderPath(folderPath);
+	List<String> imageUrls= image.stream().map(Image :: getUrl).collect(Collectors.toList());
+	List<CulturalEvents> culturalEvents= culturalEventRepo.findByImageURLsIn(imageUrls);
+		if(culturalEvents != null) {
+			return new ResponseEntity(culturalEvents.get(0),HttpStatus.OK);
+		}	
+		else {
+			return new ResponseEntity("Folder path not proper",HttpStatus.NOT_FOUND);
+		}
+	}
+
 }
 

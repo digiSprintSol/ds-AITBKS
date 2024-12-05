@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.AccessBean;
@@ -203,5 +204,15 @@ public class AccessBeanController {
 		return accessBeanService.updateInternalUser(accessBean, userId);
 	}
 	
+	@Operation(summary = "This method used to get title description based on folder path")
+	@GetMapping("/getTitleDescription/{folderPath}")
+	ResponseEntity<CulturalEvents> getTitleDescription(@RequestParam("folderPath") String folderPath){
+		return accessBeanService.getTitleDescription(folderPath);
+	}
+	
+	@GetMapping("/hello")
+	String hello() {
+		return "hello";
+	}
 	
 }

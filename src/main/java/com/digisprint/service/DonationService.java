@@ -1,5 +1,7 @@
 package com.digisprint.service;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 
 import com.digisprint.bean.Donation;
@@ -17,5 +19,7 @@ public interface DonationService {
 	ResponseEntity<String> updateDonation(Donation donation);
 
 	ResponseEntity donationAcknowledge(String donationId);
+
+	ResponseEntity<List<Donation>> getDonationsAcknowledged();
 
 }

@@ -43,5 +43,6 @@ public interface AccessBeanService {
 	ResponseEntity<List<CulturalEvents>> getAllCulturalEvents();
 	ResponseEntity getAllFolderName();
 	ResponseEntity updateInternalUser(AccessBean accessBean, String userId);
+	ResponseEntity<CulturalEvents> getTitleDescription(String folderPath);
 	 
 }
