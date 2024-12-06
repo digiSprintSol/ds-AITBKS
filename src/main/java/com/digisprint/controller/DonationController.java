@@ -1,5 +1,7 @@
 package com.digisprint.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,4 +61,8 @@ public class DonationController {
 		return donationService.donationAcknowledge(donationId);
 	}
 
+	@GetMapping(value = "/getDonationsAcknowledged")
+	public ResponseEntity<List<Donation>> getDonationsAcknowledged(){
+		return donationService.getDonationsAcknowledged();
+	}
 }

@@ -135,7 +135,6 @@ public class DonationServiceImpl implements DonationService {
 
 	@Override
 	public ResponseEntity<List<Donation>> getDonationsAcknowledged() {
-
 		List<Donation> acknowledgeDonations = donationRepository.findByAcknowledgeTrue();
 		if(acknowledgeDonations.size() != 0) {
 			return new ResponseEntity(acknowledgeDonations,HttpStatus.OK);

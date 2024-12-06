@@ -26,6 +26,8 @@ public class Donation {
 
 	private String status;
 	
+	private String profession;
+	
 	private String emailId;
 
 	private String transactionId;

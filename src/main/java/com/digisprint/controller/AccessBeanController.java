@@ -210,9 +210,4 @@ public class AccessBeanController {
 		return accessBeanService.getTitleDescription(folderPath);
 	}
 	
-	@GetMapping("/hello")
-	String hello() {
-		return "hello";
-	}
-	
 }
