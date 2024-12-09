@@ -168,7 +168,7 @@ public class RegistrationForm {
 	
 	private String presidentId;
 	
-	private String casteStatus; //oc/bc
+
 
 	/**
 	 * Membership id

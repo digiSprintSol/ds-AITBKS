@@ -10,6 +10,8 @@ public class DonationRequest {
 
 	private String fullName;
 
+	private String donorPicUrl;
+	
 	private LocalDateTime dob;
 
 	private String phoneNumber;
