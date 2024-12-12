@@ -156,7 +156,7 @@ public class AccessBeanController {
 	}
 	
 	@PutMapping("/updateEventsAnnouncementsGalleryAwardsQRCodeImages/{id}")
-    public ResponseEntity<String> updateEventsAnnouncementsGalleryAwardsQRCodeImages(@RequestBody UploadBean uploadBean,String id) throws MalformedURLException {
+    public ResponseEntity<String> updateEventsAnnouncementsGalleryAwardsQRCodeImages(@RequestBody UploadBean uploadBean,@PathVariable String id) throws MalformedURLException {
 		return accessBeanService.updateEventsAnnouncementsGalleryAwardsQRCodeImages(uploadBean,id);
 	}
 	
