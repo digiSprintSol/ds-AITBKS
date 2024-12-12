@@ -209,8 +209,8 @@ public class AccessBeanController {
 	}
 	
 	@Operation(summary = "This method used to get title description based on folder path")
-	@GetMapping("/getTitleDescription/{folderPath}")
-	ResponseEntity<CulturalEvents> getTitleDescription(@RequestParam("folderPath") String folderPath){
+	@GetMapping("/getTitleDescription")
+	ResponseEntity<CulturalEvents> getTitleDescription(@RequestParam String folderPath){
 		return accessBeanService.getTitleDescription(folderPath);
 	}
 	
