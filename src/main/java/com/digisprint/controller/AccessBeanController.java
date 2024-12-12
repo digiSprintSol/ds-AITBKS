@@ -155,6 +155,10 @@ public class AccessBeanController {
 		return accessBeanService.uploadEventsAnnouncementsGalleryAwardsQRCodeImages(uploadBean);
 	}
 	
+	@PutMapping("/updateEventsAnnouncementsGalleryAwardsQRCodeImages/{id}")
+    public ResponseEntity<String> updateEventsAnnouncementsGalleryAwardsQRCodeImages(@RequestBody UploadBean uploadBean,String id) throws MalformedURLException {
+		return accessBeanService.updateEventsAnnouncementsGalleryAwardsQRCodeImages(uploadBean,id);
+	}
 	
 	@GetMapping("/getCulturalEvents")
 	public ResponseEntity<List<CulturalEvents>> getAllCulturalEvents(){

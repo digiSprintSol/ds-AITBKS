@@ -587,5 +587,21 @@ public class AccessBeanServiceImpl implements AccessBeanService{
 		}
 	}
 
+	@Override
+	public ResponseEntity<String> updateEventsAnnouncementsGalleryAwardsQRCodeImages(UploadBean uploadBean, String id) {
+
+		 CulturalEvents culturalEvents= culturalEventRepo.findById(id).get();
+		 if(culturalEvents!=null) {
+		 List<String> updatedImageUrls= uploadBean.getImageURLs();
+		 culturalEvents.setImageURLs(updatedImageUrls);
+		 BeanUtils.copyProperties(uploadBean, culturalEvents);
+		 culturalEventRepo.save(culturalEvents);
+		return new ResponseEntity(culturalEvents,HttpStatus.OK);
+		}
+		 else {
+			 return new ResponseEntity("event id not found",HttpStatus.NOT_FOUND);
+		 }
+	}
+
 }
 

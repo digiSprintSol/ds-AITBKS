@@ -44,5 +44,6 @@ public interface AccessBeanService {
 	ResponseEntity getAllFolderName();
 	ResponseEntity updateInternalUser(AccessBean accessBean, String userId);
 	ResponseEntity<CulturalEvents> getTitleDescription(String folderPath);
+	ResponseEntity<String> updateEventsAnnouncementsGalleryAwardsQRCodeImages(UploadBean uploadBean, String id);
 	 
 }
