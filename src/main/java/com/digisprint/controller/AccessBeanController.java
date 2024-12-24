@@ -23,8 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.digisprint.bean.AccessBean;
 import com.digisprint.bean.CulturalEvents;
+import com.digisprint.bean.Image;
 import com.digisprint.bean.MarketPlaces;
 import com.digisprint.exception.UserNotFoundException;
+import com.digisprint.repository.ImageRepository;
 import com.digisprint.requestBean.LoginPayload;
 import com.digisprint.requestBean.UploadAnnouncement;
 import com.digisprint.requestBean.UploadBean;
@@ -46,6 +48,9 @@ public class AccessBeanController {
 		super();
 		this.accessBeanService = accessBeanService;
 	}
+	
+	@Autowired
+	ImageRepository imageRepository;
 
 	@Autowired
 	private HttpServletRequest request;
@@ -212,6 +217,15 @@ public class AccessBeanController {
 	@GetMapping("/getTitleDescription")
 	ResponseEntity<CulturalEvents> getTitleDescription(@RequestParam String folderPath){
 		return accessBeanService.getTitleDescription(folderPath);
+	}
+	
+	@GetMapping("/delete")
+	String deletefolder(@RequestParam String folderPath){
+		 List<Image> images= imageRepository.findByFolderPath(folderPath);
+		 imageRepository.deleteByFolderPath(folderPath);
+		 System.out.println(images+",,,,,,,,,,,");
+		return "done";
+		 
 	}
 	
 }

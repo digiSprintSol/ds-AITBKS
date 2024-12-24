@@ -15,4 +15,6 @@ public interface ImageRepository extends MongoRepository<Image, String> {
 	Image findByUrl(String imageUrl);
 	
 	List<Image> findByFolderPath(String folderPath);
+
+	void deleteByFolderPath(String folderPath);
 }

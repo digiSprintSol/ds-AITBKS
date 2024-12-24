@@ -614,7 +614,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 		}
 		specificUserDetails.setStatus(from.getStatusOfApproval());
 		specificUserDetails.setLastModifiedDate(LocalDateTime.now());
-		registrationFromRepository.save(specificUserDetails);
+		RegistrationForm savedCandidate= registrationFromRepository.save(specificUserDetails);
+		if(savedCandidate.getCommitteeOneApproval().equalsIgnoreCase("accepted") && savedCandidate.getCommitteeTwoApproval().equalsIgnoreCase("accepted")
+			&& savedCandidate.getCommitteeThreeApproval().equalsIgnoreCase("accepted")) {
+			progressBarReport.setCommitteeApproval(true);;
+		}
 		progressBarRepository.save(progressBarReport);
 		sendEmail(specificUserDetails, progressBarReport);
 		return new ResponseEntity<>("Status updated with userId" + specificUserDetails.getUserId(), HttpStatus.OK);
