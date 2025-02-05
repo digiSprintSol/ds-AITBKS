@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 public class DonationResponse {
 	
+	private String id;
+	
 	private String fullName;
 
 	private LocalDateTime dob;
