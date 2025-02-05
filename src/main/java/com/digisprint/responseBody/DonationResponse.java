@@ -23,6 +23,8 @@ public class DonationResponse {
 	private String amountPaid;
 	
 	private LocalDate transactionDate;
+	
+	private boolean acknowledge; 
 
 	private String transactionReceiptUploadUrl;
 
