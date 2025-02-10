@@ -16,6 +16,8 @@ public class DonationRequest {
 
 	private String phoneNumber;
 
+	private String profession;
+	
 	private String emailId;
 
 	private String transactionId;
